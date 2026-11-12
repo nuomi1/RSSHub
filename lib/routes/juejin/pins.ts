@@ -1,14 +1,28 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getShortMsgDescription } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'recommend', label: '推荐' },
+    { value: 'hot', label: '热门' },
+    { value: '6824710203301167112', label: '上班摸鱼' },
+    { value: '6819970850532360206', label: '内推招聘' },
+    { value: '6824710202487472141', label: '一图胜千言' },
+    { value: '6824710202562969614', label: '今天学到了' },
+    { value: '6824710202378436621', label: '每天一道算法题' },
+    { value: '6824710202000932877', label: '开发工具推荐' },
+    { value: '6824710203112423437', label: '树洞一下' },
+];
+const TYPE_OPTIONS_DEFAULT = 'recommend';
 
 export const route: Route = {
     path: '/pins/:type?',
     categories: ['programming'],
     example: '/juejin/pins/6824710202487472141',
-    parameters: { type: '默认为 recommend，见下表' },
+    parameters: { type: { description: '默认为 recommend，见下表', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -20,13 +34,15 @@ export const route: Route = {
     name: '沸点',
     maintainers: ['xyqfer', 'laampui'],
     handler,
-    description: `| 推荐      | 热门 | 上班摸鱼            | 内推招聘            | 一图胜千言          | 今天学到了          | 每天一道算法题      | 开发工具推荐        | 树洞一下            |
-| --------- | ---- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- | ------------------- |
-| recommend | hot  | 6824710203301167112 | 6819970850532360206 | 6824710202487472141 | 6824710202562969614 | 6824710202378436621 | 6824710202000932877 | 6824710203112423437 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'recommend';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const title = {
         recommend: '推荐',
         hot: '热门',

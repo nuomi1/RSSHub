@@ -5,14 +5,24 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getPageItemAndDate } from './utils/index';
+
+const TYPES_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xkjs', label: '学科竞赛公告' },
+    { value: 'cxtz', label: '创新项目公告' },
+    { value: 'jsxw', label: '竞赛新闻' },
+    { value: 'jstz', label: '竞赛通知' },
+];
+const TYPES_OPTIONS_DEFAULT = 'xkjs';
 
 export const route: Route = {
     path: '/cxzx/:types?',
     categories: ['university'],
     example: '/jsu/cxzx/xkjs',
-    parameters: { types: '通知分类 默认为`xkjs`' },
+    parameters: { types: { description: '通知分类 默认为`xkjs`', options: TYPES_OPTIONS, default: TYPES_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,13 +34,15 @@ export const route: Route = {
     name: '创新中心',
     maintainers: ['wenjia03'],
     handler,
-    description: `| 通知公告 | 学科竞赛公告 | 创新项目公告 | 竞赛新闻 | 竞赛通知 |
-| -------- | ------------ | ------------ | -------- | -------- |
-| tzgg     | xkjs         | cxtz         | jsxw     | jstz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'types',
+        description: '通知分类',
+        options: TYPES_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { types = 'xkjs' } = ctx.req.param();
+    const { types = TYPES_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://cxzx.jsu.edu.cn/';
     const urls = {
         tzgg: {

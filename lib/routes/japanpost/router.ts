@@ -1,6 +1,12 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { track } from './track';
+
+const LOCALE_OPTIONS = [
+    { value: 'ja', label: 'Japanese' },
+    { value: 'en', label: 'English' },
+];
 
 export const route: Route = {
     name: 'Track & Trace Service',
@@ -12,7 +18,7 @@ export const route: Route = {
     maintainers: ['tuzi3040'],
     parameters: {
         reqCode: 'Package Number',
-        locale: 'Language, default to japanese `ja`',
+        locale: { description: 'Language, default to japanese `ja`', options: LOCALE_OPTIONS },
     },
     features: {
         requireConfig: false,
@@ -23,19 +29,15 @@ export const route: Route = {
         supportPodcast: false,
         supportScihub: false,
     },
-    description: `| Japanese | English |
-| -------- | ------- |
-| ja       | en      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'locale',
+        description: 'Language',
+        options: LOCALE_OPTIONS,
+    }),
     zh: {
         name: '邮件追踪查询',
-        description: `| 日语 | 英语 |
-| ---- | ---- |
-| ja   | en   |`,
     },
     ja: {
         name: '郵便追跡サービス',
-        description: `| 日本語 | 英語 |
-| ------ | ---- |
-| ja     | en   |`,
     },
 };

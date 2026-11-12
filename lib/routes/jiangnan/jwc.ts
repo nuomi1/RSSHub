@@ -7,6 +7,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'ksap', label: '考试安排' },
+    { value: 'wjgg', label: '违纪公告' },
+    { value: 'tmgz', label: '推免工作' },
+    { value: 'djks', label: '等级考试' },
+    { value: 'xjgl', label: '学籍管理' },
+    { value: 'bysj', label: '毕业设计' },
+    { value: 'syjx', label: '实验教学' },
+    { value: 'sjcx', label: '实践创新' },
+    { value: 'xkjs', label: '学科竞赛' },
+    { value: 'yjszj', label: '研究生助教' },
+    { value: 'jxgg', label: '教学改革' },
+    { value: 'zyjs', label: '专业建设' },
+    { value: 'kcjs', label: '课程建设' },
+    { value: 'jcjs', label: '教材建设' },
+    { value: 'jxcg', label: '教学成果' },
+    { value: 'xsbg', label: '学术报告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 async function getOptionalPublicationDate(link: string): Promise<Date | undefined> {
     try {
@@ -44,17 +67,11 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/jiangnan/jwc/all',
-    parameters: { type: '默认为 `all`' },
+    parameters: { type: { description: '默认为 `all`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '教务处通知',
     maintainers: ['fuzy112'],
     features: { antiCrawler: true },
-    description: `| all  | tzgg     | ksap     | wjgg     | tmgz     | djks     | xjgl     | bysj     | syjx     |
-| ---- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 全部 | 通知公告 | 考试安排 | 违纪公告 | 推免工作 | 等级考试 | 学籍管理 | 毕业设计 | 实验教学 |
-
-| sjcx     | xkjs     | yjszj      | jxgg     | zyjs     | kcjs     | jcjs     | jxcg     | xsbg     |
-| -------- | -------- | ---------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 实践创新 | 学科竞赛 | 研究生助教 | 教学改革 | 专业建设 | 课程建设 | 教材建设 | 教学成果 | 学术报告 |`,
+    description: renderOptionsMarkdownTable({ parameter: 'type', description: '类型', options: TYPE_OPTIONS }),
     handler,
 };
 
@@ -69,7 +86,7 @@ const getPublicationDate = (link: string) =>
     });
 
 async function handler(ctx: Context) {
-    const { type = 'all' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError(`Unknown notice category: ${type}. Choose ${Object.keys(map).join(', ')}.`);
     }

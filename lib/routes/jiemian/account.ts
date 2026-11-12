@@ -4,6 +4,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Data, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { fetchArticle } from './common';
@@ -14,16 +15,20 @@ const categoryMap = new Map([
     ['3', { ckey: 'media_config_index', name: '媒体号' }],
 ]);
 
+const ID_OPTIONS = [...categoryMap].map(([value, item]) => ({ value, label: item.name }));
+
 export const route: Route = {
     path: '/account/main/:id',
-    parameters: { id: '分类 id，见下表，可在对应分类页 URL 中找到' },
+    parameters: { id: { description: '分类 id，见下表，可在对应分类页 URL 中找到', options: ID_OPTIONS } },
     name: '界面号',
     example: '/jiemian/account/main/1',
     maintainers: ['nczitzk', 'pseudoyu'],
     handler,
-    description: `| [财经号](https://www.jiemian.com/account/main/1.html) | [城市号](https://www.jiemian.com/account/main/2.html) | [媒体号](https://www.jiemian.com/account/main/3.html) |
-| ----------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
-| 1                                                     | 2                                                     | 3                                                     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context): Promise<Data> {

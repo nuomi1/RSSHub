@@ -5,9 +5,24 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/description';
+
+const CATEGORY_OPTIONS = [
+    { value: 'zhengce', label: '政策' },
+    { value: 'fenxishishuo', label: '行情' },
+    { value: 'defi', label: 'DeFi' },
+    { value: 'kuang', label: '矿业' },
+    { value: '以太坊 2.0', label: '以太坊 2.0' },
+    { value: 'industry', label: '产业' },
+    { value: 'IPFS', label: 'IPFS' },
+    { value: 'tech', label: '技术' },
+    { value: 'baike', label: '百科' },
+    { value: 'capitalmarket', label: '研报' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zhengce';
 
 const categories = {
     zhengce: '政策',
@@ -26,7 +41,7 @@ export const route: Route = {
     path: '/:category?',
     categories: ['finance'],
     example: '/jinse/zhengce',
-    parameters: { category: '分类，见下表，默认为政策' },
+    parameters: { category: { description: '分类，见下表，默认为政策', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,17 +53,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk', 'pseudoyu'],
     handler,
-    description: `| 政策    | 行情         | DeFi | 矿业  | 以太坊 2.0 |
-| ------- | ------------ | ---- | ----- | ---------- |
-| zhengce | fenxishishuo | defi | kuang | 以太坊 2.0 |
-
-| 产业     | IPFS | 技术 | 百科  | 研报          |
-| -------- | ---- | ---- | ----- | ------------- |
-| industry | IPFS | tech | baike | capitalmarket |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'zhengce' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 50);
 
     const rootUrl = 'https://www.jinse.com.cn';

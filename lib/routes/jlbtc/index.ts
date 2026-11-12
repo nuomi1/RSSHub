@@ -6,23 +6,35 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'gstt', label: '工商要闻' },
+    { value: 'gsdt', label: '工商动态' },
+    { value: 'gsxs', label: '学术动态' },
+    { value: 'tzggnew', label: '通知公告' },
+    { value: 'gsfc', label: '工商融媒' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzggnew';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['university'],
     example: '/jlbtc',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '主页',
     maintainers: ['nczitzk'],
-    description: `| 工商要闻 | 工商动态 | 学术动态 | 通知公告 | 工商融媒 |
-| -------- | -------- | -------- | -------- | -------- |
-| gstt     | gsdt     | gsxs     | tzggnew  | gsfc     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { category = 'tzggnew' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const currentUrl = `https://www.jlbtc.edu.cn/sylm/${category}.htm`;
     const response = await ofetch(currentUrl);

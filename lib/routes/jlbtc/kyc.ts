@@ -6,23 +6,32 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwdt', label: '新闻动态' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg';
 
 export const route: Route = {
     path: '/kyc/:category?',
     categories: ['university'],
     example: '/jlbtc/kyc',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '科研处',
     maintainers: ['nczitzk'],
-    description: `| 通知公告 | 新闻动态 |
-| -------- | -------- |
-| tzgg     | xwdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { category = 'tzgg' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://kyc.jlbtc.edu.cn';
     const currentUrl = `${rootUrl}/${category}.htm`;

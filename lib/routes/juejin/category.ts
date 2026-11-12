@@ -1,13 +1,25 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getCategoryBrief, parseList, ProcessFeed } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'backend', label: '后端' },
+    { value: 'frontend', label: '前端' },
+    { value: 'android', label: 'Android' },
+    { value: 'ios', label: 'iOS' },
+    { value: 'ai', label: '人工智能' },
+    { value: 'freebie', label: '开发工具' },
+    { value: 'career', label: '代码人生' },
+    { value: 'article', label: '阅读' },
+];
 
 export const route: Route = {
     path: '/category/:category',
     categories: ['programming'],
     example: '/juejin/category/frontend',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +36,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['DIYgod'],
     handler,
-    description: `| 后端    | 前端     | Android | iOS | 人工智能 | 开发工具 | 代码人生 | 阅读    |
-| ------- | -------- | ------- | --- | -------- | -------- | -------- | ------- |
-| backend | frontend | android | ios | ai       | freebie  | career   | article |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
