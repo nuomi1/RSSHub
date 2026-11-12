@@ -7,15 +7,29 @@ import cache from '@/utils/cache';
 import { getSubPath } from '@/utils/common-utils';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/description';
+
+const ID_OPTIONS = [
+    { value: '10-16', label: '供应链' },
+    { value: '11', label: '快递' },
+    { value: '30', label: '快运 / 运输' },
+    { value: '9', label: '仓储 / 地产' },
+    { value: '32', label: '物流综合' },
+    { value: '114', label: '国际与跨境物流' },
+    { value: '107', label: '科技创新' },
+    { value: '213', label: '绿色供应链' },
+    { value: '214', label: '低碳物流' },
+    { value: '215', label: '碳中和碳达峰' },
+];
 
 export const route: Route = {
     path: '/news/:id?',
     categories: ['new-media'],
     example: '/logclub/news',
-    parameters: { id: '资讯 id，见下表，可在对应资讯页 URL 中找到，默认为全部' },
+    parameters: { id: { description: '资讯 id，见下表，可在对应资讯页 URL 中找到，默认为全部', options: ID_OPTIONS } },
     radar: [
         {
             source: ['logclub.com/news'],
@@ -29,13 +43,11 @@ export const route: Route = {
     name: '资讯',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 供应链 | 快递 | 快运 / 运输 | 仓储 / 地产 | 物流综合 | 国际与跨境物流 | 科技创新 |
-| ------ | ---- | ----------- | ----------- | -------- | -------------- | -------- |
-| 10-16  | 11   | 30          | 9           | 32       | 114            | 107      |
-
-| 绿色供应链 | 低碳物流 | 碳中和碳达峰 |
-| ---------- | -------- | ------------ |
-| 213        | 214      | 215          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '资讯 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 export async function handler(ctx) {

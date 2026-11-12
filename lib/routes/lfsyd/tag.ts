@@ -2,21 +2,36 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { ProcessFeed, ProcessForm } from './utils';
+
+const TAG_ID_OPTIONS = [
+    { value: '17', label: '炉石传说' },
+    { value: '18', label: '万智牌' },
+    { value: '16', label: '游戏王' },
+    { value: '19', label: '昆特牌' },
+    { value: '20', label: '影之诗' },
+    { value: '329', label: '符文之地传奇' },
+    { value: '221', label: '阴阳师百闻牌' },
+    { value: '112', label: '英雄联盟' },
+    { value: '389', label: '电子游戏' },
+    { value: '24', label: '桌面游戏' },
+    { value: '102', label: '卡牌游戏' },
+    { value: '23', label: '玩家杂谈' },
+    { value: '117', label: '二次元' },
+];
 
 export const route: Route = {
     path: '/tag/:tagId?',
     categories: ['game'],
     example: '/lfsyd/tag/17',
-    parameters: { tagId: '订阅分区类型' },
-    description: `| 炉石传说 | 万智牌 | 游戏王 | 昆特牌 | 影之诗 | 符文之地传奇 | 阴阳师百闻牌 |
-| :------: | :----: | :----: | :----: | :----: | :----------: | :----------: |
-|    17    |   18   |   16   |   19   |   20   |      329     |      221     |
-
-| 英雄联盟 | 电子游戏 | 桌面游戏 | 卡牌游戏 | 玩家杂谈 | 二次元 |
-| :------: | :------: | :------: | :------: | :------: | :----: |
-|    112   |    389   |    24    |    102   |    23    |   117  |`,
+    parameters: { tagId: { description: '订阅分区类型', options: TAG_ID_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'tagId',
+        description: '订阅分区类型',
+        options: TAG_ID_OPTIONS,
+    }),
     radar: [
         {
             source: ['mob.iyingdi.com/fine/:tagId'],

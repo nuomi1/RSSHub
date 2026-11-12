@@ -7,12 +7,20 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'jobs', label: '招聘' },
+    { value: 'translations', label: '翻译' },
+    { value: 'qa', label: '问答' },
+    { value: 'links', label: '链接' },
+];
 
 export const route: Route = {
     path: '/:community/:category?',
     categories: ['bbs'],
     example: '/learnku/laravel/qa',
-    parameters: { community: '社区 标识，可在 <https://learnku.com/communities> 找到', category: '分类，如果不传 `category` 则获取全部分类' },
+    parameters: { community: '社区 标识，可在 <https://learnku.com/communities> 找到', category: { description: '分类，如果不传 `category` 则获取全部分类', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +38,11 @@ export const route: Route = {
     name: '社区',
     maintainers: ['kayw-geek'],
     handler,
-    description: `| 招聘 | 翻译         | 问答 | 链接  |
-| ---- | ------------ | ---- | ----- |
-| jobs | translations | qa   | links |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

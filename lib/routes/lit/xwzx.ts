@@ -7,19 +7,31 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { isValidHost } from '@/utils/valid-host';
+
+const NAME_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'ggtz', label: '公告通知' },
+    { value: 'xwkx', label: '新闻快讯' },
+    { value: 'xsxx', label: '学术信息' },
+    { value: 'mtxw', label: '媒体新闻' },
+];
+const NAME_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/xwzx/:name?',
     categories: ['university'],
     example: '/lit/xwzx',
-    parameters: { name: '默认为 `all`' },
+    parameters: { name: { description: '默认为 `all`', options: NAME_OPTIONS, default: NAME_OPTIONS_DEFAULT } },
     name: '新闻中心',
     maintainers: ['vhxubo'],
-    description: `| 全部 | 公告通知 | 新闻快讯 | 学术信息 | 媒体新闻 |
-| ---- | -------- | -------- | -------- | -------- |
-| all  | ggtz     | xwkx     | xsxx     | mtxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'name',
+        description: '名称',
+        options: NAME_OPTIONS,
+    }),
     handler,
 };
 
@@ -33,7 +45,7 @@ const nameProps = {
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { name = 'all' } = ctx.req.param();
+    const { name = NAME_OPTIONS_DEFAULT } = ctx.req.param();
     if (!isValidHost(name)) {
         throw new InvalidParameterError('Invalid name');
     }

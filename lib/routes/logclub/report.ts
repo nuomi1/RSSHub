@@ -5,9 +5,17 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/description';
+
+const ID_OPTIONS = [
+    { value: 'Report', label: '罗戈研究出品' },
+    { value: 'IndustryReport', label: '物流报告' },
+    { value: 'GreenDualCarbonReport', label: '绿色双碳报告' },
+];
+const ID_OPTIONS_DEFAULT = 'Report';
 
 interface SourceReport {
     id: number;
@@ -22,7 +30,7 @@ export const route: Route = {
     path: '/lc_report/:id?',
     categories: ['new-media'],
     example: '/logclub/lc_report',
-    parameters: { id: '报告 id，见下表，默认为罗戈研究出品' },
+    parameters: { id: { description: '报告 id，见下表，默认为罗戈研究出品', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -55,13 +63,15 @@ export const route: Route = {
     name: '报告',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 罗戈研究出品 | 物流报告       | 绿色双碳报告          |
-| ------------ | -------------- | --------------------- |
-| Report       | IndustryReport | GreenDualCarbonReport |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '报告 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { id = 'Report' } = ctx.req.param();
+    const { id = ID_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 11);
 
     const rootUrl = 'https://www.logclub.com';

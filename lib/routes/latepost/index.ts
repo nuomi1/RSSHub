@@ -7,8 +7,17 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate, parseRelativeDate } from '@/utils/parse-date';
 import { getPlaywrightPage, type Page } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const PROMA_OPTIONS = [
+    { value: '', label: '最新报道' },
+    { value: '1', label: '晚点独家' },
+    { value: '2', label: '人物访谈' },
+    { value: '3', label: '晚点早知道' },
+    { value: '4', label: '长报道' },
+];
 
 /**
  * Convert an array into a dictionary object.
@@ -52,7 +61,7 @@ export const route: Route = {
     path: '/:proma?',
     categories: ['new-media'],
     example: '/latepost',
-    parameters: { proma: '栏目 id，见下表，默认为最新报道' },
+    parameters: { proma: { description: '栏目 id，见下表，默认为最新报道', options: PROMA_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -64,9 +73,11 @@ export const route: Route = {
     name: '报道',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 最新报道 | 晚点独家 | 人物访谈 | 晚点早知道 | 长报道 |
-| -------- | -------- | -------- | ---------- | ------ |
-|          | 1        | 2        | 3          | 4      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'proma',
+        description: '栏目 id',
+        options: PROMA_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

@@ -5,12 +5,22 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'event', label: '活动' },
+    { value: 'info', label: '资讯' },
+    { value: 'system', label: '系统' },
+    { value: 'esport', label: '电竞' },
+    { value: 'patch', label: '版本资讯' },
+    { value: 'TFTpatch', label: '战棋资讯' },
+];
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['game'],
     example: '/loltw/news',
-    parameters: { category: '新闻分类，置空为全部新闻' },
+    parameters: { category: { description: '新闻分类，置空为全部新闻', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +32,11 @@ export const route: Route = {
     name: '台服新闻',
     maintainers: ['hoilc'],
     handler,
-    description: `| 活动  | 资讯 | 系统   | 电竞   | 版本资讯 | 战棋资讯 |
-| ----- | ---- | ------ | ------ | -------- | -------- |
-| event | info | system | esport | patch    | TFTpatch |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '新闻分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

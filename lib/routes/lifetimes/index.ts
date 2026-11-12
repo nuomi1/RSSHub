@@ -6,17 +6,34 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '新闻' },
+    { value: 'medicine', label: '医药' },
+    { value: 'healthpromotion', label: '养生' },
+    { value: 'life', label: '生活' },
+    { value: 'mothers', label: '母亲行动' },
+    { value: 'longevity', label: '长寿' },
+    { value: 'video', label: '视频' },
+    { value: 'news-comment', label: '时评' },
+    { value: 'hotspot', label: '调查' },
+    { value: 'industry', label: '产业经济' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/lifetimes',
-    parameters: { category: '栏目，见下表，默认为新闻' },
+    parameters: { category: { description: '栏目，见下表，默认为新闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '栏目',
     maintainers: ['nczitzk'],
-    description: `| 新闻 | 医药     | 养生            | 生活 | 母亲行动 | 长寿      | 视频  | 时评         | 调查    | 产业经济 |
-| ---- | -------- | --------------- | ---- | -------- | --------- | ----- | ------------ | ------- | -------- |
-| news | medicine | healthpromotion | life | mothers  | longevity | video | news-comment | hotspot | industry |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
@@ -27,7 +44,7 @@ const nodes = {
 };
 
 async function handler(ctx: Context) {
-    const { category = 'news' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://www.lifetimes.cn';
     const currentUrl = `${rootUrl}/${category.replace('-', '/')}`;

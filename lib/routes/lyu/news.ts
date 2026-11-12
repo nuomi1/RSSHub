@@ -7,7 +7,13 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'ldyw', label: '临大要闻' },
+    { value: 'xxgg', label: '信息公告' },
+];
 
 const baseUrl = 'https://www.lyu.edu.cn/';
 
@@ -15,13 +21,15 @@ export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/lyu/news/ldyw',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     name: '新闻',
     maintainers: ['ueiu'],
     handler,
-    description: `| 临大要闻 | 信息公告 |
-| -------- | -------- |
-| ldyw     | xxgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

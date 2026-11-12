@@ -5,12 +5,22 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'sjjxk', label: '实践教学科' },
+    { value: 'jxyxk', label: '教育运行科' },
+    { value: 'jyjgk', label: '教研教改科' },
+    { value: 'xjglk', label: '学籍管理科' },
+    { value: 'ksk', label: '考试科' },
+    { value: 'jcjsglk', label: '教材建设管理科' },
+];
 
 export const route: Route = {
     path: '/jiaowc/tzgg/:category?',
     categories: ['university'],
     example: '/lsnu/jiaowc/tzgg',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +39,11 @@ export const route: Route = {
     maintainers: ['nyaShine'],
     handler,
     url: 'lsnu.edu.cn/',
-    description: `| 实践教学科 | 教育运行科 | 教研教改科 | 学籍管理科 | 考试科 | 教材建设管理科 |
-| ---------- | ---------- | ---------- | ---------- | ------ | -------------- |
-| sjjxk      | jxyxk      | jyjgk      | xjglk      | ksk    | jcjsglk        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

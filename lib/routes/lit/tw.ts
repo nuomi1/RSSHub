@@ -6,18 +6,28 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const NAME_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'gsgg', label: '公示公告' },
+];
+const NAME_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/tw/:name?',
     categories: ['university'],
     example: '/lit/tw',
-    parameters: { name: '默认为 `all`' },
+    parameters: { name: { description: '默认为 `all`', options: NAME_OPTIONS, default: NAME_OPTIONS_DEFAULT } },
     name: '团委',
     maintainers: ['vhxubo'],
-    description: `| 全部 | 新闻动态 | 公示公告 |
-| ---- | -------- | -------- |
-| all  | xwdt     | gsgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'name',
+        description: '名称',
+        options: NAME_OPTIONS,
+    }),
     handler,
 };
 
@@ -28,7 +38,7 @@ const nameProps = {
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { name = 'all' } = ctx.req.param();
+    const { name = NAME_OPTIONS_DEFAULT } = ctx.req.param();
     const urla = new URL(name === 'all' ? 'xb2024.htm' : `xb2024/syxw/${name}.htm`, baseUrl).href;
     const response = await ofetch(urla);
     const $ = load(response);

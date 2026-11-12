@@ -6,13 +6,45 @@ import cache from '@/utils/cache';
 import { getSubPath } from '@/utils/common-utils';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CHANNEL_OPTIONS = [
+    { value: '', label: '最新' },
+    { value: 'kuaixun', label: '60 秒读懂世界' },
+    { value: 'ziyuan', label: '精品资源' },
+    { value: 'video', label: '视频资源' },
+    { value: 'yinpin', label: '音频资源' },
+    { value: 'jueban', label: '绝版资源' },
+    { value: 'wendang', label: '实用文档' },
+    { value: 'ppt-sucai', label: 'PPT 素材' },
+    { value: 'sucai', label: '后期素材' },
+    { value: 'jiaocheng', label: '技能教程' },
+    { value: 'money', label: '创业副业' },
+    { value: 'game', label: '单机游戏' },
+    { value: 'mxjm', label: '冒险解谜' },
+    { value: 'jingjigedou', label: '竞技格斗' },
+    { value: 'saiche', label: '赛车竞技' },
+    { value: 'moni', label: '模拟经营' },
+    { value: 'jiaose', label: '角色扮演' },
+    { value: 'feixing', label: '飞行游戏' },
+    { value: 'tafang', label: '塔防策略' },
+    { value: 'sheji', label: '射击游戏' },
+    { value: 'kongbu', label: '恐怖冒险' },
+    { value: 'celve', label: '策略生存' },
+    { value: 'dongzuo', label: '动作冒险' },
+    { value: 'dianshang', label: '电商运营' },
+    { value: 'internet', label: '互联网早报' },
+    { value: 'seo', label: '站长圈' },
+    { value: 'zimeiti', label: '自媒体运营' },
+    { value: 'duan-shipin', label: '短视频' },
+];
 
 export const route: Route = {
     path: '/:channel?',
     categories: ['new-media'],
     example: '/liulinblog',
-    parameters: { channel: '频道 id，可在对应频道页 URL 中找到，见下表，默认为最新' },
+    parameters: { channel: { description: '频道 id，可在对应频道页 URL 中找到，见下表，默认为最新', options: CHANNEL_OPTIONS } },
     radar: [
         {
             source: ['liulinblog.com/:channel', 'liulinblog.com/'],
@@ -22,29 +54,11 @@ export const route: Route = {
     name: '频道',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 最新 | 60 秒读懂世界 | 精品资源 | 视频资源 | 音频资源 |
-| ---- | ------------- | -------- | -------- | -------- |
-|      | kuaixun       | ziyuan   | video    | yinpin   |
-
-| 绝版资源 | 实用文档 | PPT 素材  | 后期素材 | 技能教程  |
-| -------- | -------- | --------- | -------- | --------- |
-| jueban   | wendang  | ppt-sucai | sucai    | jiaocheng |
-
-| 创业副业 | 单机游戏 | 冒险解谜 | 竞技格斗    | 赛车竞技 |
-| -------- | -------- | -------- | ----------- | -------- |
-| money    | game     | mxjm     | jingjigedou | saiche   |
-
-| 模拟经营 | 角色扮演 | 飞行游戏 | 塔防策略 | 射击游戏 |
-| -------- | -------- | -------- | -------- | -------- |
-| moni     | jiaose   | feixing  | tafang   | sheji    |
-
-| 恐怖冒险 | 策略生存 | 动作冒险 | 电商运营  | 互联网早报 |
-| -------- | -------- | -------- | --------- | ---------- |
-| kongbu   | celve    | dongzuo  | dianshang | internet   |
-
-| 站长圈 | 自媒体运营 | 短视频      |
-| ------ | ---------- | ----------- |
-| seo    | zimeiti    | duan-shipin |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '频道 id',
+        options: CHANNEL_OPTIONS,
+    }),
 };
 
 export async function handler(ctx) {
