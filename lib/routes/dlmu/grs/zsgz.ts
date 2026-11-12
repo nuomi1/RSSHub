@@ -5,19 +5,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'bsyjs', label: '博士研究生' },
+    { value: 'ssyjs', label: '硕士研究生' },
+    { value: 'tdxlgdssxw', label: '同等学力攻读硕士学位' },
+    { value: 'gatdqzs', label: '港澳台地区招生' },
+];
 
 export const route: Route = {
     path: '/grs/zsgz/:type',
     categories: ['university'],
     example: '/dlmu/grs/zsgz/ssyjs',
-    parameters: { type: '招生类别' },
+    parameters: { type: { description: '招生类别', options: TYPE_OPTIONS } },
     name: '研究生院 - 招生工作',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 博士研究生 | 硕士研究生 | 同等学力攻读硕士学位 | 港澳台地区招生 |
-| :--------: | :--------: | :------------------: | :------------: |
-|    bsyjs   |    ssyjs   |      tdxlgdssxw      |     gatdqzs    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '招生类别',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

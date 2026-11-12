@@ -7,9 +7,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { selectItems } from '../utils';
+
+const TYPE_OPTIONS = [
+    { value: 'doctor', label: '博士招生' },
+    { value: 'master', label: '硕士招生' },
+];
+const TYPE_OPTIONS_DEFAULT = 'master';
 
 const baseUrl = 'https://yjszs.dhu.edu.cn';
 
@@ -21,7 +28,7 @@ export const route: Route = {
     path: '/yjs/zs/:type?',
     categories: ['university'],
     example: '/dhu/yjs/zs/master',
-    parameters: { type: '默认为 `master`' },
+    parameters: { type: { description: '默认为 `master`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,13 +40,15 @@ export const route: Route = {
     name: '研究生招生信息',
     maintainers: ['fox2049'],
     handler,
-    description: `| 博士招生 | 硕士招生 |
-| -------- | -------- |
-| doctor   | master   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const type = ctx.req.param('type') || 'master';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid notification type. Use doctor or master.');
     }

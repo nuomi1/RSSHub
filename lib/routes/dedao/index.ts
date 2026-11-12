@@ -4,6 +4,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '新闻' },
+    { value: 'figure', label: '人物故事' },
+    { value: 'video', label: '视频' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/:category?',
@@ -11,15 +19,17 @@ export const route: Route = {
     maintainers: ['nczitzk', 'pseudoyu'],
     categories: ['new-media'],
     example: '/dedao',
-    parameters: { category: '分类，见下表，默认为`news`' },
-    description: `| 新闻 | 人物故事 | 视频  |
-| ---- | -------- | ----- |
-| news | figure   | video |`,
+    parameters: { category: { description: '分类，见下表，默认为`news`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'news';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = `https://www.igetget.com/${category === 'video' ? 'video' : 'news'}`;
 

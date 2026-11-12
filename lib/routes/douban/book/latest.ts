@@ -1,5 +1,18 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'prose_poetry', label: '文学' },
+    { value: 'fiction', label: '小说' },
+    { value: 'history', label: '历史文化' },
+    { value: 'biography', label: '社会纪实' },
+    { value: 'science', label: '科学新知' },
+    { value: 'art', label: '艺术设计' },
+    { value: 'business', label: '商业经管' },
+    { value: 'comics', label: '绘本漫画' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 const linkUrl = 'https://book.douban.com/latest';
 const baseUrl = 'https://m.douban.com/rexxar/api/v2/subject_collection';
@@ -9,7 +22,7 @@ export const route: Route = {
     path: '/book/latest/:type?',
     categories: ['social-media'],
     example: '/douban/book/latest/fiction',
-    parameters: { type: '专题分类，可选，默认为 `all`' },
+    parameters: { type: { description: '专题分类，可选，默认为 `all`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -20,9 +33,11 @@ export const route: Route = {
     },
     name: '新书速递',
     maintainers: ['fengkx', 'lyqluis'],
-    description: `| 文学          | 小说    | 历史文化 | 社会纪实  | 科学新知 | 艺术设计 | 商业经管 | 绘本漫画 |
-| ------------- | ------- | -------- | --------- | -------- | -------- | -------- | -------- |
-| prose\\_poetry | fiction | history  | biography | science  | art      | business | comics   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '专题分类',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -39,7 +54,7 @@ const SUBCATS = {
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'all';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const subUrl = `new_book_${type}`;
     const url = `${baseUrl}/${subUrl}/${params}`;
 
@@ -47,8 +62,8 @@ async function handler(ctx) {
     const items = res.data.items;
 
     return {
-        title: `豆瓣新书速递${type === 'all' ? '' : '-' + SUBCATS[type]}`,
-        link: `${linkUrl}${type === 'all' ? '' : '?subcat=' + SUBCATS[type]}`,
+        title: `豆瓣新书速递${type === TYPE_OPTIONS_DEFAULT ? '' : '-' + SUBCATS[type]}`,
+        link: `${linkUrl}${type === TYPE_OPTIONS_DEFAULT ? '' : '?subcat=' + SUBCATS[type]}`,
         item: items.map(({ title, url, card_subtitle, cards, pic, rating, null_rating_reason }) => {
             const rate = rating.value ? `${rating.value}分` : null_rating_reason;
             const img = `<img src="${pic.normal}">`;

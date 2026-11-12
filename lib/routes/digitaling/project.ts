@@ -7,7 +7,17 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'weekly', label: '每周项目精选' },
+    { value: 'monthly', label: '每月项目精选' },
+    { value: 'international', label: '海外项目精选' },
+    { value: 'hot', label: '近期热门项目' },
+    { value: 'favorite', label: '近期最多收藏' },
+];
 
 const categoryTitle = new Map([
     ['all', { name: '全部' }],
@@ -23,13 +33,15 @@ export const route: Route = {
     categories: ['new-media'],
     example: '/digitaling/projects/all',
     parameters: {
-        category: '项目专题分类',
+        category: { description: '项目专题分类', options: CATEGORY_OPTIONS },
     },
     name: '项目专题',
     maintainers: ['occupy5'],
-    description: `| 全部 | 每周项目精选 | 每月项目精选 | 海外项目精选  | 近期热门项目 | 近期最多收藏 |
-| ---- | ------------ | ------------ | ------------- | ------------ | ------------ |
-| all  | weekly       | monthly      | international | hot          | favorite     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '项目专题分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

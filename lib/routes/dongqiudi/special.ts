@@ -5,15 +5,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { processFeedType2 } from './utils';
+
+const ID_OPTIONS = [
+    { value: '41', label: '新闻大爆炸' },
+    { value: '52', label: '懂球帝十佳球' },
+    { value: '53', label: '懂球帝本周 MVP' },
+];
 
 export const route: Route = {
     path: '/special/:id',
     categories: ['sport'],
     example: '/dongqiudi/special/41',
     parameters: {
-        id: '专题 id, 可自行通过 https://www.dongqiudi.com/special/+数字匹配',
+        id: { description: '专题 id, 可自行通过 https://www.dongqiudi.com/special/+数字匹配', options: ID_OPTIONS },
     },
     radar: [
         {
@@ -23,9 +30,11 @@ export const route: Route = {
     name: '专题',
     maintainers: ['dxmpalb'],
     handler,
-    description: `| 新闻大爆炸 | 懂球帝十佳球 | 懂球帝本周 MVP |
-| ---------- | ------------ | -------------- |
-| 41         | 52           | 53             |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '专题 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

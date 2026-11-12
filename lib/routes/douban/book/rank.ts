@@ -1,13 +1,20 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '', label: '全部' },
+    { value: 'fiction', label: '虚构' },
+    { value: 'nonfiction', label: '非虚构' },
+];
 
 export const route: Route = {
     path: '/book/rank/:type?',
     categories: ['social-media'],
     example: '/douban/book/rank/fiction',
-    parameters: { type: '图书类型，默认合并列表' },
+    parameters: { type: { description: '图书类型，默认合并列表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,9 +26,11 @@ export const route: Route = {
     name: '热门图书排行',
     maintainers: ['xyqfer', 'queensferryme'],
     handler,
-    description: `| 全部 | 虚构    | 非虚构     |
-| ---- | ------- | ---------- |
-|      | fiction | nonfiction |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '图书类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const getPubDate = (year?: string[]): Date | undefined => {

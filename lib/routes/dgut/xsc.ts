@@ -7,19 +7,29 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '学工动态' },
+    { value: '2', label: '通知公告' },
+    { value: '4', label: '网上公示' },
+];
+const TYPE_OPTIONS_DEFAULT = '2';
 
 export const route: Route = {
     path: '/xsc/:type?',
     categories: ['university'],
     example: '/dgut/xsc',
-    parameters: { type: '默认为 `2`' },
+    parameters: { type: { description: '默认为 `2`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '学工部动态',
     maintainers: ['korokor0'],
-    description: `| 学工动态 | 通知公告 | 网上公示 |
-| -------- | -------- | -------- |
-| 1        | 2        | 4        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -32,7 +42,7 @@ const map = {
 };
 
 async function handler(ctx: Context) {
-    const { type = '2' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid notification type. Use 1, 2, or 4.');
     }

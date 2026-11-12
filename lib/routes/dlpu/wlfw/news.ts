@@ -7,20 +7,29 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '22', label: '新闻动态' },
+    { value: '23', label: '通知公告' },
+];
+const TYPE_OPTIONS_DEFAULT = '22';
 
 export const route: Route = {
     path: '/wlfw/news/:type?',
     categories: ['university'],
     example: '/dlpu/wlfw/news/22',
-    parameters: { type: '默认为 `22`' },
+    parameters: { type: { description: '默认为 `22`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '网络服务新闻',
     maintainers: ['xu42'],
     handler,
-    description: `| 新闻动态 | 通知公告 |
-| -------- | -------- |
-| 22       | 23       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const baseUrl = 'https://wlfw.dlpu.edu.cn';
@@ -31,7 +40,7 @@ const map = {
 };
 
 async function handler(ctx: Context) {
-    const { type = '22' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Unsupported category. Use 22 for news or 23 for notices.');
     }

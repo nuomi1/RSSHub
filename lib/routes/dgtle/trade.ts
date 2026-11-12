@@ -3,19 +3,7 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
-
-export const route: Route = {
-    path: '/trade/:typeId?',
-    categories: ['social-media'],
-    example: '/dgtle/trade/111',
-    parameters: { typeId: '分类 id，默认为全部' },
-    name: '闲置（分类）',
-    maintainers: ['xyqfer', 'hoilc'],
-    description: `| 全部 | 电脑 | 手机 | 平板 | 相机 | 影音 | 外设 | 生活 | 公告 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| 0    | 111  | 109  | 110  | 113  | 114  | 115  | 112  | 116  |`,
-    handler,
-};
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const typeNames = {
     0: '全部',
@@ -29,8 +17,26 @@ const typeNames = {
     116: '公告',
 };
 
+const TYPE_ID_OPTIONS = Object.entries(typeNames).map(([value, label]) => ({ value, label }));
+const TYPE_ID_OPTIONS_DEFAULT = '0';
+
+export const route: Route = {
+    path: '/trade/:typeId?',
+    categories: ['social-media'],
+    example: '/dgtle/trade/111',
+    parameters: { typeId: { description: '分类 id，默认为全部', options: TYPE_ID_OPTIONS, default: TYPE_ID_OPTIONS_DEFAULT } },
+    name: '闲置（分类）',
+    maintainers: ['xyqfer', 'hoilc'],
+    description: renderOptionsMarkdownTable({
+        parameter: 'typeId',
+        description: '分类 id',
+        options: TYPE_ID_OPTIONS,
+    }),
+    handler,
+};
+
 async function handler(ctx: Context) {
-    const { typeId = '0' } = ctx.req.param();
+    const { typeId = TYPE_ID_OPTIONS_DEFAULT } = ctx.req.param();
 
     const url = 'https://www.dgtle.com/sale';
 

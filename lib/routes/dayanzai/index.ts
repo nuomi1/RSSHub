@@ -5,7 +5,15 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate, parseRelativeDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'windows', label: '微软应用' },
+    { value: 'android', label: '安卓应用' },
+    { value: 'tutorial', label: '教程资源' },
+    { value: 'other', label: '其他资源' },
+];
 
 const rootUrl = 'https://www.dayanzai.me/';
 const sourceHostname = new URL(rootUrl).hostname.replace(/^www\./, '');
@@ -21,7 +29,7 @@ export const route: Route = {
     path: '/:category/:fulltext?',
     categories: ['blog'],
     example: '/dayanzai/windows',
-    parameters: { category: '分类', fulltext: '是否获取全文，需要获取则传入参数`y`' },
+    parameters: { category: { description: '分类', options: CATEGORY_OPTIONS }, fulltext: '是否获取全文，需要获取则传入参数`y`' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -51,9 +59,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['gl0zzy'],
     handler,
-    description: `| 微软应用 | 安卓应用 | 教程资源 | 其他资源 |
-| -------- | -------- | -------- | -------- |
-| windows  | android  | tutorial | other    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

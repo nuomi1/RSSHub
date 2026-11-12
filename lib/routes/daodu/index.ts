@@ -5,22 +5,32 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATY_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'article', label: '文章' },
+    { value: 'podcast', label: 'Podcast' },
+];
+const CATY_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/:caty?',
     categories: ['new-media'],
     example: '/daodu',
-    parameters: { caty: '分類，默認為全部' },
+    parameters: { caty: { description: '分類，默認為全部', options: CATY_OPTIONS, default: CATY_OPTIONS_DEFAULT } },
     name: '分類',
     maintainers: ['nczitzk'],
-    description: `| 全部 | 文章    | Podcast |
-| ---- | ------- | ------- |
-| all  | article | podcast |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分類',
+        options: CATY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { caty = 'all' } = ctx.req.param();
+    const { caty = CATY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://daodu.tech';
     const currentUrl = `${rootUrl}${caty === 'all' ? '' : `/archive_${caty}`}`;

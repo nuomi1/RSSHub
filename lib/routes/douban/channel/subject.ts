@@ -1,11 +1,19 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const NAV_OPTIONS = [
+    { value: '0', label: '电影' },
+    { value: '1', label: '电视剧' },
+    { value: '2', label: '图书' },
+    { value: '3', label: '唱片' },
+];
 
 export const route: Route = {
     path: '/channel/:id/subject/:nav',
     categories: ['social-media'],
     example: '/douban/channel/30168934/subject/0',
-    parameters: { id: '频道id', nav: '书影音分类' },
+    parameters: { id: '频道id', nav: { description: '书影音分类', options: NAV_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -17,9 +25,11 @@ export const route: Route = {
     name: '频道书影音',
     maintainers: ['umm233'],
     handler,
-    description: `| 电影 | 电视剧 | 图书 | 唱片 |
-| ---- | ------ | ---- | ---- |
-| 0    | 1      | 2    | 3    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'nav',
+        description: '书影音分类',
+        options: NAV_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

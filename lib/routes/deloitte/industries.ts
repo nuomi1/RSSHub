@@ -7,23 +7,36 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'consumer', label: '消费行业' },
+    { value: 'energy', label: '能源、资源及工业行业' },
+    { value: 'financial-services', label: '金融服务行业' },
+    { value: 'government-public', label: '政府及公共服务' },
+    { value: 'life-sciences-health-care', label: '生命科学与医疗' },
+    { value: 'tmt', label: '科技、传媒及电信行业' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'energy';
 
 export const route: Route = {
     path: '/industries/:category?',
     categories: ['journal'],
     example: '/deloitte/industries/consumer',
-    parameters: { category: '默认为 energy' },
+    parameters: { category: { description: '默认为 energy', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: 'Articles',
     maintainers: ['laampui'],
-    description: `| 消费行业 | 能源、资源及工业行业 | 金融服务行业       | 政府及公共服务    | 生命科学与医疗            | 科技、传媒及电信行业 |
-| -------- | -------------------- | ------------------ | ----------------- | ------------------------- | -------------------- |
-| consumer | energy               | financial-services | government-public | life-sciences-health-care | tmt                  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { category = 'energy' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const rootUrl = 'https://www.deloitte.com';
     const currentUrl = `${rootUrl}/cn/zh/Industries/${category}/about.html`;
     const response = await ofetch(currentUrl);

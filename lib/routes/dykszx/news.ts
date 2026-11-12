@@ -5,7 +5,17 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const NEWS_TYPE_OPTIONS = [
+    { value: 'all', label: '新闻中心' },
+    { value: 'gwy', label: '公务员考试' },
+    { value: 'sydw', label: '事业单位' },
+    { value: 'zyzc', label: '（职）业资格、职称考试' },
+    { value: 'other', label: '其他' },
+];
+const NEWS_TYPE_OPTIONS_DEFAULT = 'all';
 
 const HOST = 'https://www.dykszx.cn';
 
@@ -33,7 +43,7 @@ const newsTypeObj = {
 };
 
 async function handler(ctx) {
-    const newsType = ctx.req.param('newsType') || 'all';
+    const newsType = ctx.req.param('newsType') || NEWS_TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(newsTypeObj, newsType)) {
         throw new InvalidParameterError(`Invalid news type: ${newsType}. Use all, gwy, sydw, zyzc, or other.`);
     }
@@ -68,7 +78,7 @@ export const route: Route = {
     path: '/news/:newsType?',
     categories: ['government'],
     example: '/dykszx/news',
-    parameters: { newsType: '考试类型。默认新闻中心(all)' },
+    parameters: { newsType: { description: '考试类型。默认新闻中心(all)', options: NEWS_TYPE_OPTIONS, default: NEWS_TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -87,7 +97,9 @@ export const route: Route = {
     maintainers: ['zytomorrow'],
     handler,
     url: 'www.dykszx.cn',
-    description: `| 新闻中心 | 公务员考试 | 事业单位 | （职）业资格、职称考试 |  其他 |
-| :------: | :--------: | :------: | :--------------------: | :---: |
-|    all   |     gwy    |   sydw   |          zyzc          | other |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'newsType',
+        description: '考试类型',
+        options: NEWS_TYPE_OPTIONS,
+    }),
 };

@@ -4,19 +4,34 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'hdyw', label: '海大要闻' },
+    { value: 'mthd', label: '媒体海大' },
+    { value: 'zhxw', label: '综合新闻' },
+    { value: 'yxfc', label: '院系风采' },
+    { value: 'hdxb', label: '海大校报' },
+    { value: 'llyd', label: '理论园地' },
+    { value: 'hdjt', label: '海大讲坛' },
+    { value: 'ywhc', label: '艺文荟萃' },
+];
+const TYPE_OPTIONS_DEFAULT = 'hdyw';
 
 export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/dlmu/news/hdyw',
-    parameters: { type: '默认为 `hdyw`' },
+    parameters: { type: { description: '默认为 `hdyw`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '新闻网',
     maintainers: ['arjenzhou'],
     handler,
-    description: `| 海大要闻 | 媒体海大 | 综合新闻 | 院系风采 | 海大校报 | 理论园地 | 海大讲坛 | 艺文荟萃 |
-| :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
-|   hdyw   |   mthd   |   zhxw   |   yxfc   |   hdxb   |   llyd   |   hdjt   |   ywhc   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const baseUrl = 'https://news.dlmu.edu.cn';

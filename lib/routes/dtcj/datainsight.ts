@@ -5,12 +5,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [
+    { value: '3', label: '城数' },
+    { value: '1', label: 'NEXT 情报局' },
+    { value: '4', label: '专业精选' },
+];
 
 export const route: Route = {
     path: '/datainsight/:id?',
     categories: ['finance'],
     example: '/dtcj/datainsight',
-    parameters: { id: '分类，见下表，默认为全部' },
+    parameters: { id: { description: '分类，见下表，默认为全部', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +36,11 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'dtcj.com/datainsight',
-    description: `| 城数 | NEXT 情报局 | 专业精选 |
-| ---- | ----------- | -------- |
-| 3    | 1           | 4        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

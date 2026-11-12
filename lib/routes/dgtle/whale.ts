@@ -4,19 +4,37 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { renderDescription } from './templates/description';
+
+const CATEGORY_OPTIONS = [
+    { value: '0', label: '精选' },
+    { value: '1', label: '人物' },
+    { value: '2', label: '静物' },
+    { value: '3', label: '二次元' },
+    { value: '4', label: '黑白' },
+    { value: '5', label: '自然' },
+    { value: '6', label: '美食' },
+    { value: '7', label: '电影与游戏' },
+    { value: '8', label: '科技与艺术' },
+    { value: '9', label: '城市与建筑' },
+    { value: '10', label: '萌物' },
+    { value: '11', label: '美女' },
+];
 
 export const route: Route = {
     path: '/whale/category/:category',
     categories: ['social-media'],
     example: '/dgtle/whale/category/0',
-    parameters: { category: '分类 id' },
+    parameters: { category: { description: '分类 id', options: CATEGORY_OPTIONS } },
     name: '鲸图（分类）',
     maintainers: ['Erriy'],
-    description: `| 精选 | 人物 | 静物 | 二次元 | 黑白 | 自然 | 美食 | 电影与游戏 | 科技与艺术 | 城市与建筑 | 萌物 | 美女 |
-| ---- | ---- | ---- | ------ | ---- | ---- | ---- | ---------- | ---------- | ---------- | ---- | ---- |
-| 0    | 1    | 2    | 3      | 4    | 5    | 6    | 7          | 8          | 9          | 10   | 11   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类 id',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

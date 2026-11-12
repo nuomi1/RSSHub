@@ -2,6 +2,7 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const rootUrl = 'https://jobs.douban.com';
 
@@ -10,12 +11,13 @@ const titleMap = {
     campus: '校园招聘',
     intern: '实习生招聘',
 };
+const TYPE_OPTIONS = Object.entries(titleMap).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/jobs/:type',
     categories: ['social-media'],
     example: '/douban/jobs/campus',
-    parameters: { type: '招聘类型，见下表' },
+    parameters: { type: { description: '招聘类型，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +29,11 @@ export const route: Route = {
     name: '招聘',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 社会招聘 | 校园招聘 | 实习生招聘 |
-| :------: | :------: | :--------: |
-|  social  |  campus  |   intern   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '招聘类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

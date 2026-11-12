@@ -2,12 +2,19 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'movie_weekly_best', label: '一周口碑电影榜' },
+    { value: 'tv_chinese_best_weekly', label: '华语口碑剧集榜' },
+];
+const TYPE_OPTIONS_DEFAULT = 'movie_weekly_best';
 
 export const route: Route = {
     path: '/movie/weekly/:type?',
     categories: ['social-media'],
     example: '/douban/movie/weekly',
-    parameters: { type: '分类，可在榜单页 URL 中找到，默认为一周口碑电影榜' },
+    parameters: { type: { description: '分类，可在榜单页 URL 中找到，默认为一周口碑电影榜', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,13 +26,15 @@ export const route: Route = {
     name: '一周口碑榜',
     maintainers: ['umm233', 'nczitzk'],
     handler,
-    description: `| 一周口碑电影榜      | 华语口碑剧集榜            |
-| ------------------- | ------------------------- |
-| movie\\_weekly\\_best | tv\\_chinese\\_best\\_weekly |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'movie_weekly_best';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
 
     const link = 'https://m.douban.com/movie';
     const apiUrl = `https://m.douban.com/rexxar/api/v2/subject_collection/${type}`;

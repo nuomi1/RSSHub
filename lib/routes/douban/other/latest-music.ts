@@ -3,13 +3,20 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const AREA_OPTIONS = [
+    { value: 'chinese', label: '华语' },
+    { value: 'western', label: '欧美' },
+    { value: 'japankorean', label: '日韩' },
+];
 
 export const route: Route = {
     path: '/music/latest/:area?',
     categories: ['social-media'],
     example: '/douban/music/latest/chinese',
-    parameters: { area: '区域类型，默认全部' },
+    parameters: { area: { description: '区域类型，默认全部', options: AREA_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,9 +28,11 @@ export const route: Route = {
     name: '最新增加的音乐',
     maintainers: ['fengkx', 'xyqfer'],
     handler,
-    description: `| 华语    | 欧美    | 日韩        |
-| ------- | ------- | ----------- |
-| chinese | western | japankorean |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'area',
+        description: '区域类型',
+        options: AREA_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

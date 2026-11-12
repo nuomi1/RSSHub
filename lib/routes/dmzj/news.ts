@@ -3,13 +3,26 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'manhuaqingbao', label: '漫画情报' },
+    { value: 'qingxiaoshuoqingbao', label: '轻小说情报' },
+    { value: 'manhuazhoubian', label: '动漫周边' },
+    { value: 'shengyouqingbao', label: '声优情报' },
+    { value: 'yinyuezixun', label: '音乐资讯' },
+    { value: 'youxizixun', label: '游戏资讯' },
+    { value: 'meituxinshang', label: '美图欣赏' },
+    { value: 'manzhanqingbao', label: '漫展情报' },
+    { value: 'dazahui', label: '大杂烩' },
+];
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['anime'],
     example: '/dmzj/news/donghuaqingbao',
-    parameters: { category: '类别' },
+    parameters: { category: { description: '类别', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +41,11 @@ export const route: Route = {
     maintainers: ['vzz64'],
     handler,
     url: 'news.dmzj.com/',
-    description: `| 漫画情报      | 轻小说情报          | 动漫周边       | 声优情报        | 音乐资讯    | 游戏资讯   | 美图欣赏      | 漫展情报       | 大杂烩  |
-| ------------- | ------------------- | -------------- | --------------- | ----------- | ---------- | ------------- | -------------- | ------- |
-| manhuaqingbao | qingxiaoshuoqingbao | manhuazhoubian | shengyouqingbao | yinyuezixun | youxizixun | meituxinshang | manzhanqingbao | dazahui |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

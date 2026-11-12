@@ -5,6 +5,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '5', label: '侠创' },
+    { value: '6', label: '纽约数据科学学院' },
+    { value: '9', label: 'RS 实验所' },
+    { value: '10', label: '阿里云天池' },
+];
 
 const titles = {
     5: '侠创',
@@ -17,7 +25,7 @@ export const route: Route = {
     path: '/datahero/:category?',
     categories: ['finance'],
     example: '/dtcj/datahero',
-    parameters: { category: '分类，见下表，默认为全部' },
+    parameters: { category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +37,11 @@ export const route: Route = {
     name: '数据侠专栏',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 侠创 | 纽约数据科学学院 | RS 实验所 | 阿里云天池 |
-| ---- | ---------------- | --------- | ---------- |
-| 5    | 6                | 9         | 10         |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

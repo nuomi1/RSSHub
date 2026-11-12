@@ -7,20 +7,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '2', label: '新闻资讯' },
+    { value: '3', label: '通知公告' },
+];
+const TYPE_OPTIONS_DEFAULT = '2';
 
 export const route: Route = {
     path: '/jiaowu/news/:type?',
     categories: ['university'],
     example: '/dlpu/jiaowu/news/2',
-    parameters: { type: '默认为 `2`' },
+    parameters: { type: { description: '默认为 `2`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '教务处新闻',
     maintainers: ['xu42'],
     handler,
-    description: `| 新闻资讯 | 通知公告 |
-| -------- | -------- |
-| 2        | 3        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const baseUrl = 'https://jwc.dlpu.edu.cn';
@@ -43,7 +52,7 @@ const map = {
 };
 
 async function handler(ctx: Context) {
-    const { type = '2' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Unsupported category. Use 2 for news or 3 for notices.');
     }

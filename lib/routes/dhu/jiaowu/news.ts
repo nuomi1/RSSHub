@@ -7,9 +7,18 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { selectItems } from '../utils';
+
+const TYPE_OPTIONS = [
+    { value: 'student', label: '学生专栏' },
+    { value: 'teacher', label: '教师专栏' },
+    { value: 'class', label: '选课专栏（仅选课期间开放）' },
+    { value: 'fxzy', label: '辅修专业' },
+];
+const TYPE_OPTIONS_DEFAULT = 'student';
 
 const baseUrl = 'https://jw.dhu.edu.cn';
 
@@ -23,7 +32,7 @@ export const route: Route = {
     path: '/jiaowu/news/:type?',
     categories: ['university'],
     example: '/dhu/jiaowu/news/student',
-    parameters: { type: '默认为 `student`' },
+    parameters: { type: { description: '默认为 `student`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,13 +44,15 @@ export const route: Route = {
     name: '教务处通知',
     maintainers: ['KiraKiseki'],
     handler,
-    description: `| 学生专栏 | 教师专栏 | 选课专栏（仅选课期间开放） | 辅修专业 |
-| -------- | -------- | -------------------------- | -------- |
-| student  | teacher  | class                      | fxzy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const type = ctx.req.param('type') || 'student';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid notification type. Use student, teacher, class, or fxzy.');
     }

@@ -7,9 +7,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { selectItems } from '../utils';
+
+const TYPE_OPTIONS = [
+    { value: 'trend', label: '新闻动态' },
+    { value: 'notice', label: '通知公告' },
+    { value: 'class', label: '选课考试' },
+];
+const TYPE_OPTIONS_DEFAULT = 'class';
 
 const baseUrl = 'https://gs.dhu.edu.cn';
 
@@ -22,7 +30,7 @@ export const route: Route = {
     path: '/yjs/news/:type?',
     categories: ['university'],
     example: '/dhu/yjs/news/class',
-    parameters: { type: '默认为 `class`' },
+    parameters: { type: { description: '默认为 `class`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -34,13 +42,15 @@ export const route: Route = {
     name: '研究生院通知',
     maintainers: ['fox2049'],
     handler,
-    description: `| 新闻动态 | 通知公告 | 选课考试 |
-| -------- | -------- | -------- |
-| trend    | notice   | class    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const type = ctx.req.param('type') || 'class';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid notification type. Use trend, notice, or class.');
     }

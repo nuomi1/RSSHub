@@ -3,13 +3,21 @@ import { html } from 'hono/html';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const NAV_OPTIONS = [
+    { value: 'default', label: '默认' },
+    { value: 'hot', label: '热门' },
+    { value: 'new', label: '最新' },
+];
+const NAV_OPTIONS_DEFAULT = 'default';
 
 export const route: Route = {
     path: '/channel/:id/:nav?',
     categories: ['social-media'],
     example: '/douban/channel/30168934/hot',
-    parameters: { id: '频道id', nav: '专题分类，可选，默认为 default' },
+    parameters: { id: '频道id', nav: { description: '专题分类，可选，默认为 default', options: NAV_OPTIONS, default: NAV_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,14 +29,16 @@ export const route: Route = {
     name: '频道专题',
     maintainers: ['umm233'],
     handler,
-    description: `| 默认    | 热门 | 最新 |
-| ------- | ---- | ---- |
-| default | hot  | new  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'nav',
+        description: '专题分类',
+        options: NAV_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const id = ctx.req.param('id');
-    const nav = ctx.req.param('nav') || 'default';
+    const nav = ctx.req.param('nav') || NAV_OPTIONS_DEFAULT;
     const link = `https://www.douban.com/channel/${id}`;
 
     const channel_info_response = await got({

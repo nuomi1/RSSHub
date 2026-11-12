@@ -7,13 +7,27 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'jxdt', label: '教学动态' },
+    { value: 'jwtz', label: '教务通知' },
+    { value: 'jytz', label: '教研通知' },
+    { value: 'sjtz', label: '实践通知' },
+    { value: 'cyxy', label: '产业学院' },
+    { value: 'tsjy', label: '通识教育' },
+    { value: 'yznb', label: '"杨振宁" 班' },
+    { value: 'zsxx', label: '招生信息' },
+    { value: 'cggg', label: '采购公告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'jwtz';
 
 export const route: Route = {
     path: '/jwb/:type?',
     categories: ['university'],
     example: '/dgut/jwb/jwtz',
-    parameters: { type: '哪种通知，默认为教务通知' },
+    parameters: { type: { description: '哪种通知，默认为教务通知', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,14 +44,16 @@ export const route: Route = {
         },
     ],
     name: '教务部通知公告',
-    description: `| 教学动态 | 教务通知 | 教研通知 | 实践通知 | 产业学院 | 通识教育 | "杨振宁" 班 | 招生信息 | 采购公告 |
-| -------- | -------- | -------- | -------- | -------- | -------- | ----------- | -------- | -------- |
-| jxdt     | jwtz     | jytz     | sjtz     | cyxy     | tsjy     | yznb        | zsxx     | cggg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '哪种通知',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { type = 'jwtz' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!['jxdt', 'jwtz', 'jytz', 'sjtz', 'cyxy', 'tsjy', 'yznb', 'zsxx', 'cggg'].includes(type)) {
         throw new InvalidParameterError('Invalid notification type. Use one of the types documented for this route.');
     }

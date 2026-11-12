@@ -2,14 +2,27 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl, parseItem } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: '', label: '所有新聞' },
+    { value: 'camera', label: '攝影器材' },
+    { value: 'mobile', label: '手機通訊' },
+    { value: 'auto', label: '汽車熱話' },
+    { value: 'photography', label: '攝影文化' },
+    { value: 'videography', label: '影片攝錄' },
+    { value: 'reviews', label: '測試報告' },
+    { value: 'gadget', label: '生活科技' },
+    { value: 'technique', label: '攝影技巧' },
+];
 
 export const route: Route = {
     path: '/news/:type?',
     categories: ['new-media'],
     example: '/dcfever/news',
-    parameters: { type: '分類，預設為所有新聞' },
+    parameters: { type: { description: '分類，預設為所有新聞', options: TYPE_OPTIONS } },
     name: '新聞中心',
     maintainers: ['TonyRL'],
     handler,
@@ -19,9 +32,11 @@ export const route: Route = {
             target: '/news',
         },
     ],
-    description: `| 所有新聞 | 攝影器材 | 手機通訊 | 汽車熱話 | 攝影文化    | 影片攝錄    | 測試報告 | 生活科技 | 攝影技巧  |
-| -------- | -------- | -------- | -------- | ----------- | ----------- | -------- | -------- | --------- |
-|          | camera   | mobile   | auto     | photography | videography | reviews  | gadget   | technique |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分類',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

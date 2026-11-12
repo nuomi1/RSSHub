@@ -2,14 +2,22 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl, parseItem } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'cameras', label: '相機及鏡頭' },
+    { value: 'phones', label: '手機平板' },
+    { value: 'cars', label: '試車報告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'cameras';
 
 export const route: Route = {
     path: '/reviews/:type?',
     categories: ['new-media'],
     example: '/dcfever/reviews/cameras',
-    parameters: { type: '分類，預設為 `cameras`' },
+    parameters: { type: { description: '分類，預設為 `cameras`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['dcfever.com/:type/reviews.php'],
@@ -19,13 +27,15 @@ export const route: Route = {
     name: '測試報告',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 相機及鏡頭 | 手機平板 | 試車報告 |
-| ---------- | -------- | -------- |
-| cameras    | phones   | cars     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分類',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { type = 'cameras' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
 
     const link = `${baseUrl}/${type}/reviews.php`;
     const response = await ofetch(link);

@@ -3,10 +3,24 @@ import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
 import utils from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'recommend', label: '推荐' },
+    { value: 'history', label: '党史' },
+    { value: 'stock', label: '豫股' },
+    { value: 'business', label: '财经' },
+    { value: 'education', label: '投教' },
+    { value: 'finance', label: '金融' },
+    { value: 'science', label: '科创' },
+    { value: 'invest', label: '投融' },
+    { value: 'column', label: '专栏' },
+];
+const TYPE_OPTIONS_DEFAULT = 'recommend';
 
 const { TYPE, parseUrl } = utils;
 
@@ -14,7 +28,7 @@ export const route: Route = {
     path: '/:type?',
     categories: ['new-media'],
     example: '/dahecube',
-    parameters: { type: '板块，见下表，默认为推荐' },
+    parameters: { type: { description: '板块，见下表，默认为推荐', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +40,15 @@ export const route: Route = {
     name: '新闻',
     maintainers: ['linbuxiao'],
     handler,
-    description: `| 推荐      | 党史    | 豫股  | 财经     | 投教      | 金融    | 科创    | 投融   | 专栏   |
-| --------- | ------- | ----- | -------- | --------- | ------- | ------- | ------ | ------ |
-| recommend | history | stock | business | education | finance | science | invest | column |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '板块',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'recommend';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(TYPE, type)) {
         throw new InvalidParameterError(`Invalid type. Supported types: ${Object.keys(TYPE).join(', ')}`);
     }
