@@ -2,12 +2,24 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TAG_OPTIONS = [
+    { value: 'json', label: 'JSON' },
+    { value: 'javascript', label: 'Javascript' },
+    { value: 'java', label: 'Java' },
+    { value: 'apache', label: 'Apache' },
+    { value: 'aws', label: 'AWS' },
+    { value: 'sql', label: 'SQL' },
+    { value: 'react', label: 'React' },
+    { value: 'golang', label: 'Golang' },
+];
 
 export const route: Route = {
     path: '/tag/:tag',
     categories: ['programming'],
     example: '/engineering/tag/javascript',
-    parameters: { tag: 'Browse programming languages, frameworks, and technologies' },
+    parameters: { tag: { description: 'Browse programming languages, frameworks, and technologies', options: TAG_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +36,11 @@ export const route: Route = {
     name: 'Tag',
     maintainers: ['suhang-only'],
     handler,
-    description: `| JSON | Javascript | Java | Apache | AWS | SQL | React | Golang |
-| ---- | ---------- | ---- | ------ | --- | --- | ----- | ------ |
-| json | javascript | java | apache | aws | sql | react | golang |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'tag',
+        description: '说明',
+        options: TAG_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

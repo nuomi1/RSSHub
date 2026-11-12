@@ -6,13 +6,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'announcement', label: '通知公告' },
+    { value: 'news', label: '新闻动态' },
+    { value: 'contest', label: '学科竞赛' },
+    { value: 'resources', label: '常用资源' },
+];
+const TYPE_OPTIONS_DEFAULT = 'announcement';
 
 export const route: Route = {
     path: '/cxcy/:type?',
     categories: ['university'],
     example: '/ecnu/cxcy',
-    parameters: { type: '默认为 announcement' },
+    parameters: { type: { description: '默认为 announcement', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['cxcy.ecnu.edu.cn'],
@@ -25,9 +34,11 @@ export const route: Route = {
     ],
     name: '本科创新创业教育网',
     maintainers: ['FrozenStarrrr', 'ChiyoYuki', 'ECNU-minus'],
-    description: `| 通知公告     | 新闻动态 | 学科竞赛 | 常用资源  |
-| ------------ | -------- | -------- | --------- |
-| announcement | news     | contest  | resources |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler: async (ctx) => {
         const fragList = {
             announcement: {
@@ -47,7 +58,7 @@ export const route: Route = {
                 frag: '窗口125',
             },
         };
-        const type = ctx.req.param('type') ?? 'announcement';
+        const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
         if (!Object.hasOwn(fragList, type)) {
             throw new InvalidParameterError(`Invalid category: ${type}. Expected announcement, news, contest, or resources.`);
         }

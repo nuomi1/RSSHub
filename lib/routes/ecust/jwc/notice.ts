@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const baseUrl = 'https://jwc.ecust.edu.cn';
@@ -15,6 +16,10 @@ const categoryMap = {
     mpt: { link: '/3940', name: '实践教学管理' },
     fai: { link: '/3941', name: '学院教务信息' },
 };
+
+const CATEGORY_OPTIONS = [{ value: 'all', label: '全部订阅' }, ...Object.entries(categoryMap).map(([value, item]) => ({ value, label: item.name }))];
+const CATEGORY_OPTIONS_DEFAULT = 'all';
+
 const getFromLink = async (link) => {
     const { data: response } = await got(link);
     const $ = load(response);
@@ -46,7 +51,7 @@ export const route: Route = {
     path: '/jwc/:category?',
     categories: ['university'],
     example: '/ecust/jwc/mto',
-    parameters: { category: '订阅板块，默认为全部订阅' },
+    parameters: { category: { description: '订阅板块，默认为全部订阅', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -58,13 +63,15 @@ export const route: Route = {
     name: '本科教务处信息网',
     maintainers: ['lxl66566'],
     handler,
-    description: `| 其他任意值 | mto          | mttb               | gi       | mpt          | fai          |
-| ---------- | ------------ | ------------------ | -------- | ------------ | ------------ |
-| 全部订阅   | 教学运行管理 | 培养与教学建设管理 | 综合信息 | 实践教学管理 | 学院教务信息 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '订阅板块',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'all' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const categoryItem = Object.hasOwn(categoryMap, category) ? categoryMap[category] : undefined;
     const pageUrl = categoryItem ? [`${baseUrl}${categoryItem.link}/list.htm`] : Object.values(categoryMap).map((item) => `${baseUrl}${item.link}/list.htm`);
     const items = (await pMap(pageUrl, getFromLink, { concurrency: 3 })).flat();
