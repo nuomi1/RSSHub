@@ -7,14 +7,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: 'Latest' },
+    { value: 'editorspicks', label: "Editor's Picks" },
+    { value: 'photos', label: 'Photos of the Day' },
+    { value: 'politics', label: 'Politics' },
+    { value: 'cross-strait', label: 'Cross-strait' },
+    { value: 'business', label: 'Business' },
+    { value: 'society', label: 'Society' },
+    { value: 'sci-tech', label: 'Science & Tech' },
+    { value: 'culture', label: 'Culture' },
+    { value: 'sports', label: 'Sports' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/focustaiwan',
-    parameters: { category: '分类，见下表，默认为 news' },
+    parameters: { category: { description: '分类，见下表，默认为 news', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,17 +41,15 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['nczitzk'],
     handler,
-    description: `| Latest | Editor's Picks | Photos of the Day |
-| ------ | -------------- | ----------------- |
-| news   | editorspicks   | photos            |
-
-| Politics | Cross-strait | Business | Society | Science & Tech | Culture | Sports |
-| -------- | ------------ | -------- | ------- | -------------- | ------- | ------ |
-| politics | cross-strait | business | society | sci-tech       | culture | sports |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'news';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://focustaiwan.tw';
     const currentUrl = `${rootUrl}/cna2019api/cna/FTNewsList`;

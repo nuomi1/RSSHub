@@ -6,27 +6,31 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const descriptionMap = {
+    jxtz: '教学通知',
+    zjjz: '嘉锡讲坛/信息素养讲座通知',
+};
+const TYPE_OPTIONS = Object.entries(descriptionMap).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/:type',
     categories: ['university'],
     example: '/fzu/jxtz',
-    parameters: { type: '分类见下表' },
+    parameters: { type: { description: '分类见下表', options: TYPE_OPTIONS } },
     features: {
         antiCrawler: true,
     },
     name: '教务处通知',
     maintainers: ['Kare-Udon'],
     handler,
-    description: `| 教学通知 | 专家讲座 |
-| -------- | -------- |
-| jxtz     | zjjz     |`,
-};
-
-const descriptionMap = {
-    jxtz: '教学通知',
-    zjjz: '嘉锡讲坛/信息素养讲座通知',
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const urlHead = 'https://jwch.fzu.edu.cn/';

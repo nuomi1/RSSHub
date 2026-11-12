@@ -5,12 +5,20 @@ import cache from '@/utils/cache';
 import { PRESETS } from '@/utils/header-generator';
 import ofetch from '@/utils/ofetch';
 import { parseDate, parseRelativeDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'shangye', label: '商业' },
+    { value: 'lingdaoli', label: '领导力' },
+    { value: 'keji', label: '科技' },
+    { value: 'report', label: '研究' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/fortunechina',
-    parameters: { category: '分类，见下表，默认为首页' },
+    parameters: { category: { description: '分类，见下表，默认为首页', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +35,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 商业    | 领导力    | 科技 | 研究   |
-| ------- | --------- | ---- | ------ |
-| shangye | lingdaoli | keji | report |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

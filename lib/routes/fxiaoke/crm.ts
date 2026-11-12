@@ -4,6 +4,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '全部文章' },
+    { value: 'blog', label: '文章干货' },
+    { value: 'articles', label: 'CRM 知识' },
+    { value: 'about-influence', label: '纷享动态' },
+    { value: 'customers', label: '签约喜报' },
+];
 
 const baseUrl = 'https://www.fxiaoke.com/crm';
 const baseTitle = '纷享销客 CRM';
@@ -19,7 +28,7 @@ export const route: Route = {
     path: '/crm/:type',
     categories: ['blog'],
     example: '/fxiaoke/crm/news',
-    parameters: { type: '文章类型, 见下表' },
+    parameters: { type: { description: '文章类型, 见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +40,11 @@ export const route: Route = {
     name: '文章',
     maintainers: ['akynazh'],
     handler,
-    description: `| 全部文章 | 文章干货 | CRM 知识 | 纷享动态        | 签约喜报  |
-| -------- | -------- | -------- | --------------- | --------- |
-| news     | blog     | articles | about-influence | customers |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '文章类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -4,13 +4,26 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '0', label: '已发布公告 (方案)，即将开始' },
+    { value: '1', label: '网络报名进行中' },
+    { value: '2', label: '网络报名结束等待打印准考证' },
+    { value: '3', label: '正在打印准考证' },
+    { value: '4', label: '考试结束，等待发布成绩' },
+    { value: '5', label: '已发布成绩' },
+    { value: 'news', label: '新闻动态' },
+    { value: 'policy', label: '政策法规' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '0';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['study'],
     example: '/fjksbm/news',
-    parameters: { category: '分类，见下表，默认为 0（已发布公告，方案即将开始）' },
+    parameters: { category: { description: '分类，见下表，默认为 0（已发布公告，方案即将开始）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,15 +40,17 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 已发布公告 (方案)，即将开始 | 网络报名进行中 | 网络报名结束等待打印准考证 | 正在打印准考证 | 考试结束，等待发布成绩 | 已发布成绩 | 新闻动态 | 政策法规 |
-| --------------------------- | -------------- | -------------------------- | -------------- | ---------------------- | ---------- | -------- | -------- |
-| 0                           | 1              | 2                          | 3              | 4                      | 5          | news     | policy   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const categoryNames = ['已发布公告(方案)，即将开始', '网络报名进行中', '网络报名结束等待打印准考证', '正在打印准考证', '考试结束，等待发布成绩', '已发布成绩'];
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? '0';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const id = Number.parseInt(category);
     const isNumber = !Number.isNaN(id);
     const rootUrl = 'https://fjksbm.com';

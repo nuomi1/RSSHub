@@ -8,8 +8,25 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import type { ArticleDetail, Category, CategoryArticle } from './types';
+
+const CATEGORY_OPTIONS = [
+    { value: 'new-article', label: '新着' },
+    { value: 'switch', label: 'Switch' },
+    { value: 'ps5', label: 'PS5' },
+    { value: 'ps4', label: 'PS4' },
+    { value: 'pc-game', label: 'PC ゲーム' },
+    { value: 'news', label: 'ニュース' },
+    { value: 'videos', label: '動画' },
+    { value: 'special-article', label: '特集・企画記事' },
+    { value: 'interview', label: 'インタビュー' },
+    { value: 'event-report', label: '取材・リポート' },
+    { value: 'review', label: 'レビュー' },
+    { value: 'indie-game', label: 'インディーゲーム' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'new-article';
 
 const baseUrl = 'https://www.famitsu.com';
 
@@ -30,7 +47,7 @@ export const route: Route = {
     path: '/category/:category?',
     categories: ['game'],
     example: '/famitsu/category/new-article',
-    parameters: { category: 'Category, see table below, `new-article` by default' },
+    parameters: { category: { description: 'Category, see table below, `new-article` by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['www.famitsu.com/category/:category/page/1'],
@@ -39,9 +56,11 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 新着        | Switch | PS5 | PS4 | PC ゲーム | ニュース | 動画   | 特集・企画記事  | インタビュー | 取材・リポート | レビュー | インディーゲーム |
-| ----------- | ------ | --- | --- | --------- | -------- | ------ | --------------- | ------------ | -------------- | -------- | ---------------- |
-| new-article | switch | ps5 | ps4 | pc-game   | news     | videos | special-article | interview    | event-report   | review   | indie-game       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 function getBuildId() {
@@ -113,7 +132,7 @@ function renderJSON(c) {
 }
 
 async function handler(ctx) {
-    const { category = 'new-article' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const url = `${baseUrl}/category/${category}/page/1`;
 
     const buildId = await getBuildId();

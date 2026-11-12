@@ -3,24 +3,35 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'allnews', label: 'All News' },
+    { value: '269', label: 'Fermilab features' },
+    { value: '55', label: 'Press releases' },
+    { value: '12580', label: 'Symmetry features' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'allnews';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['new-media'],
     example: '/fnal/news',
     parameters: {
-        category: 'Category, see below, All News by default',
+        category: { description: 'Category, see below, All News by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT },
     },
     name: 'News',
     maintainers: ['nczitzk'],
     handler,
-    description: `| All News | Fermilab features | Press releases | Symmetry features |
-| -------- | ----------------- | -------------- | ----------------- |
-| allnews  | 269               | 55             | 12580             |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const { category = 'allnews' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://news.fnal.gov';
     const posts = await ofetch(`${rootUrl}/wp-json/wp/v2/posts`, {

@@ -4,12 +4,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CHANNEL_OPTIONS = [
+    { value: 'trading', label: 'Trading' },
+    { value: 'infrastructure', label: 'Infrastructure' },
+    { value: 'tech-and-data', label: 'Tech and Data' },
+    { value: 'regulation', label: 'Regulation' },
+];
 
 export const route: Route = {
     path: '/:channel',
     categories: ['finance'],
     example: '/fx-markets/trading',
-    parameters: { channel: 'channel, can be found in the navi bar links at the home page' },
+    parameters: { channel: { description: 'channel, can be found in the navi bar links at the home page', options: CHANNEL_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,9 +29,11 @@ export const route: Route = {
     name: 'Channel',
     maintainers: ['mikkkee'],
     handler,
-    description: `| Trading | Infrastructure | Tech and Data | Regulation |
-| ------- | -------------- | ------------- | ---------- |
-| trading | infrastructure | tech-and-data | regulation |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '说明',
+        options: CHANNEL_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

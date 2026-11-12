@@ -5,10 +5,20 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
 import { renderDescription } from './templates/description';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '新闻' },
+    { value: 'announce', label: '公告' },
+    { value: 'events', label: '活动' },
+    { value: 'advertise', label: '广告' },
+    { value: 'all', label: '所有' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 const categories = {
     news: '5310',
@@ -35,7 +45,7 @@ export const route: Route = {
     path: '/zh/:type?',
     categories: ['game'],
     example: '/ff14/zh/news',
-    parameters: { type: '分类名，预设为 `all`' },
+    parameters: { type: { description: '分类名，预设为 `all`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -54,14 +64,16 @@ export const route: Route = {
     maintainers: ['Kiotlin', 'ZeroClad', '15x15G'],
     handler,
     url: 'ff.web.sdo.com/web8/index.html',
-    description: `| 新闻 | 公告     | 活动   | 广告      | 所有 |
-| ---- | -------- | ------ | --------- | ---- |
-| news | announce | events | advertise | all  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const referer = 'https://ff.web.sdo.com/web8/index.html';
-    const type = ctx.req.param('type') ?? 'all';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
 
     if (!Object.hasOwn(typeNumber, type)) {
         throw new InvalidParameterError('Unsupported category. Choose news, announce, events, advertise, or all.');
