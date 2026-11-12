@@ -4,9 +4,21 @@ import type { Route } from '@/types';
 import { getSubPath } from '@/utils/common-utils';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getInitialState, ProcessItem, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '最新资讯频道' },
+    { value: 'newsflashes', label: '快讯' },
+    { value: 'recommend', label: '推荐资讯' },
+    { value: 'life', label: '生活' },
+    { value: 'estate', label: '房产' },
+    { value: 'workplace', label: '职场' },
+    { value: 'search/articles/ 关键词', label: '搜索文章' },
+    { value: 'search/newsflashes/ 关键词', label: '搜索快讯' },
+];
 
 const shortcuts = {
     '/information': '/information/web_news',
@@ -37,15 +49,17 @@ export const route: Route = {
     categories: ['new-media'],
     example: '/36kr/newsflashes',
     parameters: {
-        category: '分类，必填项',
+        category: { description: '分类，必填项', options: CATEGORY_OPTIONS },
         subCategory: '子分类，选填项，目的是为了兼容老逻辑',
         keyword: '关键词，选填项，仅搜索文章/快讯时有效',
     },
     name: '资讯, 快讯, 用户文章, 主题文章, 专题文章, 搜索文章, 搜索快讯',
     maintainers: ['nczitzk', 'fashioncj'],
-    description: `| 最新资讯频道 | 快讯        | 推荐资讯  | 生活 | 房产   | 职场      | 搜索文章                | 搜索快讯                   |
-| ------------ | ----------- | --------- | ---- | ------ | --------- | ----------------------- | -------------------------- |
-| news         | newsflashes | recommend | life | estate | workplace | search/articles/ 关键词 | search/newsflashes/ 关键词 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
