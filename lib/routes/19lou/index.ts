@@ -6,8 +6,32 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { isValidHost } from '@/utils/valid-host';
+
+const CITY_OPTIONS = [
+    { value: 'www', label: '杭州' },
+    { value: 'taizhou', label: '台州' },
+    { value: 'jiaxing', label: '嘉兴' },
+    { value: 'ningbo', label: '宁波' },
+    { value: 'huzhou', label: '湖州' },
+    { value: 'shaoxing', label: '绍兴' },
+    { value: 'wenzhou', label: '温州' },
+    { value: 'jinhua', label: '金华' },
+    { value: 'zhoushan', label: '舟山' },
+    { value: 'quzhou', label: '衢州' },
+    { value: 'lishui', label: '丽水' },
+    { value: 'yiwu', label: '义乌' },
+    { value: 'xiaoshan', label: '萧山' },
+    { value: 'yuhang', label: '余杭' },
+    { value: 'linan', label: '临安' },
+    { value: 'fuyang', label: '富阳' },
+    { value: 'tonglu', label: '桐庐' },
+    { value: 'jiande', label: '建德' },
+    { value: 'chunan', label: '淳安' },
+];
+const CITY_OPTIONS_DEFAULT = 'www';
 
 const setCookie = function (cookieName, cookieValue, seconds, path, domain, secure?) {
     let expires: Date | null = null;
@@ -22,7 +46,7 @@ export const route: Route = {
     path: '/:city?',
     categories: ['bbs'],
     example: '/19lou/jiaxing',
-    parameters: { city: '分类，见下表，默认为 www，即杭州' },
+    parameters: { city: { description: '分类，见下表，默认为 www，即杭州', options: CITY_OPTIONS, default: CITY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -34,25 +58,15 @@ export const route: Route = {
     name: '头条',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 杭州 | 台州    | 嘉兴    | 宁波   | 湖州   |
-| ---- | ------- | ------- | ------ | ------ |
-| www  | taizhou | jiaxing | ningbo | huzhou |
-
-| 绍兴     | 湖州   | 温州    | 金华   | 舟山     |
-| -------- | ------ | ------- | ------ | -------- |
-| shaoxing | huzhou | wenzhou | jinhua | zhoushan |
-
-| 衢州   | 丽水   | 义乌 | 萧山     | 余杭   |
-| ------ | ------ | ---- | -------- | ------ |
-| quzhou | lishui | yiwu | xiaoshan | yuhang |
-
-| 临安  | 富阳   | 桐庐   | 建德   | 淳安   |
-| ----- | ------ | ------ | ------ | ------ |
-| linan | fuyang | tonglu | jiande | chunan |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'city',
+        description: '分类',
+        options: CITY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const city = ctx.req.param('city') ?? 'www';
+    const city = ctx.req.param('city') ?? CITY_OPTIONS_DEFAULT;
     if (!isValidHost(city)) {
         throw new InvalidParameterError('Invalid city');
     }

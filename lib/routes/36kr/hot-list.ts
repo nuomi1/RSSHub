@@ -2,9 +2,18 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getWafTokenId, ProcessItem, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '24', label: '24 小时热榜' },
+    { value: 'renqi', label: '资讯人气榜' },
+    { value: 'zonghe', label: '资讯综合榜' },
+    { value: 'shoucang', label: '资讯收藏榜' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '24';
 
 const categories = {
     24: {
@@ -29,7 +38,7 @@ export const route: Route = {
     path: '/hot-list/:category?',
     categories: ['new-media'],
     example: '/36kr/hot-list',
-    parameters: { category: '分类，默认为24小时热榜' },
+    parameters: { category: { description: '分类，默认为24小时热榜', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -47,9 +56,11 @@ export const route: Route = {
     name: '资讯热榜',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 24 小时热榜 | 资讯人气榜 | 资讯综合榜 | 资讯收藏榜 |
-| ----------- | ---------- | ---------- | ---------- |
-| 24          | renqi      | zonghe     | shoucang   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const getProperty = (object, key) => {
@@ -62,7 +73,7 @@ const getProperty = (object, key) => {
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? '24';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     if (!Object.hasOwn(categories, category)) {
         throw new InvalidParameterError('This category does not exist. Please refer to the documentation for the correct usage.');

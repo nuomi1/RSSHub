@@ -5,6 +5,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const typeMap = {
     1: '轻松一刻',
@@ -23,11 +24,14 @@ const typeMap = {
     14: '浪潮',
     15: '沸点',
 };
+
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/news/special/:type?',
     categories: ['new-media'],
     example: '/163/news/special/1',
-    parameters: { type: '栏目' },
+    parameters: { type: { description: '栏目', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,9 +43,11 @@ export const route: Route = {
     name: '专栏',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 轻松一刻 | 槽值 | 人间 | 大国小民 | 三三有梗 | 数读 | 看客 | 下划线 | 谈心社 | 哒哒 | 胖编怪聊 | 曲一刀 | 今日之声 | 浪潮 | 沸点 |
-| -------- | ---- | ---- | -------- | -------- | ---- | ---- | ------ | ------ | ---- | -------- | ------ | -------- | ---- | ---- |
-| 1        | 2    | 3    | 4        | 5        | 6    | 7    | 8      | 9      | 10   | 11       | 12     | 13       | 14   | 15   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

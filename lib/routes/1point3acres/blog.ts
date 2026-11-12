@@ -3,13 +3,23 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: 'studyinusa', label: '留学申请' },
+    { value: 'career', label: '找工求职' },
+    { value: 'lifestyle', label: '生活攻略' },
+    { value: 'invest', label: '投资理财' },
+    { value: 'visa', label: '签证移民' },
+    { value: 'news', label: '时政要闻' },
+];
 
 export const route: Route = {
     path: '/blog/:category?',
     categories: ['bbs'],
     example: '/1point3acres/blog',
-    parameters: { category: '分类，见下表，可在对应分类页 URL 中找到' },
+    parameters: { category: { description: '分类，见下表，可在对应分类页 URL 中找到', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +36,11 @@ export const route: Route = {
     name: '博客',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 留学申请   | 找工求职 | 生活攻略  | 投资理财 | 签证移民 | 时政要闻 |
-| ---------- | -------- | --------- | -------- | -------- | -------- |
-| studyinusa | career   | lifestyle | invest   | visa     | news     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

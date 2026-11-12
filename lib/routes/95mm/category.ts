@@ -1,12 +1,24 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { ProcessItems, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '1', label: '清纯唯美' },
+    { value: '2', label: '摄影私房' },
+    { value: '4', label: '明星写真' },
+    { value: '5', label: '三次元' },
+    { value: '6', label: '异域美景' },
+    { value: '7', label: '性感妖姬' },
+    { value: '9', label: '游戏主题' },
+    { value: '11', label: '美女壁纸' },
+];
 
 export const route: Route = {
     path: '/category/:category',
     categories: ['picture'],
     example: '/95mm/category/1',
-    parameters: { category: '集合，见下表' },
+    parameters: { category: { description: '集合，见下表', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,9 +37,11 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: '95mm.org/',
-    description: `| 清纯唯美 | 摄影私房 | 明星写真 | 三次元 | 异域美景 | 性感妖姬 | 游戏主题 | 美女壁纸 |
-| -------- | -------- | -------- | ------ | -------- | -------- | -------- | -------- |
-| 1        | 2        | 4        | 5      | 6        | 7        | 9        | 11       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '集合',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

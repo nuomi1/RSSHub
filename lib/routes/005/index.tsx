@@ -5,11 +5,20 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
+const CATEGORY_OPTIONS = [
+    { value: 'zx', label: '二次元资讯' },
+    { value: 'zwh', label: '慢慢说' },
+    { value: 'dtts', label: '道听途说' },
+    { value: 'zh', label: '展会资讯' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zx';
+
 export const handler = async (ctx) => {
-    const { category = 'zx' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 20);
 
     const rootUrl = 'https://005.tv';
@@ -103,10 +112,12 @@ export const route: Route = {
     maintainers: ['junfengP', 'nczitzk'],
     handler,
     example: '/005/zx',
-    parameters: { category: '分类，可在对应分类页 URL 中找到，默认为二次元资讯' },
-    description: `| 二次元资讯 | 慢慢说 | 道听途说 | 展会资讯 |
-| ---------- | ------ | -------- | -------- |
-| zx         | zwh    | dtts     | zh       |`,
+    parameters: { category: { description: '分类，可在对应分类页 URL 中找到，默认为二次元资讯', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['anime'],
 
     features: {

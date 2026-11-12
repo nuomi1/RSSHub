@@ -4,13 +4,72 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '3', label: '最新合集' },
+    { value: '4', label: '亞洲無碼' },
+    { value: '5', label: '日本騎兵' },
+    { value: '13', label: '歐美新片' },
+    { value: '15', label: '國內原創' },
+    { value: '16', label: '中字原創' },
+    { value: '18', label: '三級寫真' },
+    { value: '116', label: '有碼.HD' },
+    { value: '114', label: '亞洲 SM.HD' },
+    { value: '96', label: '日韓 VR/3D' },
+    { value: '97', label: '歐美 VR/3D' },
+    { value: '119', label: 'S-cute / Mywife / G-area' },
+    { value: '23', label: '網友自拍' },
+    { value: '24', label: '亞洲激情' },
+    { value: '25', label: '歐美激情' },
+    { value: '26', label: '露出偷窺' },
+    { value: '27', label: '高跟絲襪' },
+    { value: '28', label: '卡通漫畫' },
+    { value: '135', label: '原創达人' },
+    { value: '21', label: '唯美清純' },
+    { value: '274', label: '网络正妹' },
+    { value: '276', label: '亞洲正妹' },
+    { value: '277', label: '素人正妹' },
+    { value: '278', label: 'COSPLAY' },
+    { value: '29', label: '女优情报' },
+    { value: '', label: 'Gif 动图' },
+    { value: '213', label: '獨家拍攝' },
+    { value: '94', label: '稀有首發' },
+    { value: '283', label: '网络见闻' },
+    { value: '111', label: '主播實錄' },
+    { value: '88', label: '珍稀套圖' },
+    { value: '131', label: '名站同步' },
+    { value: '180', label: '实用漫画' },
+    { value: '72', label: '网盘二区' },
+    { value: '272', label: '网盘三区' },
+    { value: '195', label: '分享福利' },
+    { value: '280', label: '国产精选' },
+    { value: '79', label: '高清福利' },
+    { value: '216', label: '高清首发' },
+    { value: '76', label: '多挂原创' },
+    { value: '43', label: '磁链迅雷' },
+    { value: '67', label: '正片大片' },
+    { value: '66', label: 'H-GAME' },
+    { value: '55', label: '有声小说' },
+    { value: '78', label: '在线视频' },
+    { value: '279', label: '在线快播影院' },
+    { value: '48', label: '综合小说' },
+    { value: '103', label: '人妻意淫' },
+    { value: '50', label: '乱伦迷情' },
+    { value: '54', label: '长篇连载' },
+    { value: '100', label: '文学作者' },
+    { value: '109', label: 'TXT 小说打包' },
+    { value: '57', label: '聚友客栈' },
+    { value: '136', label: '坛友自售' },
+];
+const ID_OPTIONS_DEFAULT = '3';
 
 export const route: Route = {
     path: '/:id?',
     categories: ['multimedia'],
     example: '/2048/2',
-    parameters: { id: '板块 ID, 见下表，默认为最新合集，即 `3`，亦可在 URL 中找到, 例如, `thread.php?fid-3.html`中, 板块 ID 为`3`' },
+    parameters: { id: { description: '板块 ID, 见下表，默认为最新合集，即 `3`，亦可在 URL 中找到, 例如, `thread.php?fid-3.html`中, 板块 ID 为`3`', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,45 +82,15 @@ export const route: Route = {
     name: '论坛',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 最新合集 | 亞洲無碼 | 日本騎兵 | 歐美新片 | 國內原創 | 中字原創 | 三級寫真 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 3        | 4        | 5        | 13       | 15       | 16       | 18       |
-
-| 有碼.HD | 亞洲 SM.HD | 日韓 VR/3D | 歐美 VR/3D | S-cute / Mywife / G-area |
-| ------- | ---------- | ---------- | ---------- | ------------------------ |
-| 116     | 114        | 96         | 97         | 119                      |
-
-| 網友自拍 | 亞洲激情 | 歐美激情 | 露出偷窺 | 高跟絲襪 | 卡通漫畫 | 原創达人 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 23       | 24       | 25       | 26       | 27       | 28       | 135      |
-
-| 唯美清純 | 网络正妹 | 亞洲正妹 | 素人正妹 | COSPLAY | 女优情报 | Gif 动图 |
-| -------- | -------- | -------- | -------- | ------- | -------- | -------- |
-| 21       | 274      | 276      | 277      | 278     | 29       |          |
-
-| 獨家拍攝 | 稀有首發 | 网络见闻 | 主播實錄 | 珍稀套圖 | 名站同步 | 实用漫画 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 213      | 94       | 283      | 111      | 88       | 131      | 180      |
-
-| 网盘二区 | 网盘三区 | 分享福利 | 国产精选 | 高清福利 | 高清首发 | 多挂原创 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 72       | 272      | 195      | 280      | 79       | 216      | 76       |
-
-| 磁链迅雷 | 正片大片 | H-GAME | 有声小说 | 在线视频 | 在线快播影院 |
-| -------- | -------- | ------ | -------- | -------- | ------------ |
-| 43       | 67       | 66     | 55       | 78       | 279          |
-
-| 综合小说 | 人妻意淫 | 乱伦迷情 | 长篇连载 | 文学作者 | TXT 小说打包 |
-| -------- | -------- | -------- | -------- | -------- | ------------ |
-| 48       | 103      | 50       | 54       | 100      | 109          |
-
-| 聚友客栈 | 坛友自售 |
-| -------- | -------- |
-| 57       | 136      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '板块 ID',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '3';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://hjd2048.com';
     // Resolve the address page before caching the forum URL.

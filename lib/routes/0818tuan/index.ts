@@ -4,13 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const LIST_ID_OPTIONS = [
+    { value: '1', label: '最新线报' },
+    { value: '2', label: '实测活动' },
+    { value: '3', label: '优惠券' },
+];
+const LIST_ID_OPTIONS_DEFAULT = '1';
 
 export const route: Route = {
     path: '/:listId?',
     categories: ['shopping'],
     example: '/0818tuan',
-    parameters: { listId: '活动分类，见下表，默认为 `1`' },
+    parameters: { listId: { description: '活动分类，见下表，默认为 `1`', options: LIST_ID_OPTIONS, default: LIST_ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,14 +30,16 @@ export const route: Route = {
     name: '分类',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 最新线报 | 实测活动 | 优惠券 |
-| -------- | -------- | ------ |
-| 1        | 2        | 3      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'listId',
+        description: '活动分类',
+        options: LIST_ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const baseUrl = 'http://www.0818tuan.com';
-    const listId = ctx.req.param('listId') || '1';
+    const listId = ctx.req.param('listId') || LIST_ID_OPTIONS_DEFAULT;
     const url = `${baseUrl}/list-${listId}-0.html`;
 
     const { data: response } = await got(url);

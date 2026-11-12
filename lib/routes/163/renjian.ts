@@ -5,6 +5,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
@@ -16,11 +17,14 @@ const titles = {
     kanke: '看客',
 };
 
+const CATEGORY_OPTIONS = Object.entries(titles).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'texie';
+
 export const route: Route = {
     path: '/renjian/:category?',
     categories: ['new-media'],
     example: '/163/renjian/texie',
-    parameters: { category: '分类，见下表，默认为特写' },
+    parameters: { category: { description: '分类，见下表，默认为特写', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,13 +41,15 @@ export const route: Route = {
     name: '人间',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 特写  | 记事  | 大写  | 好读  | 看客  |
-| ----- | ----- | ----- | ----- | ----- |
-| texie | jishi | daxie | haodu | kanke |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'texie';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 50);
 
     const rootUrl = 'https://renjian.163.com';

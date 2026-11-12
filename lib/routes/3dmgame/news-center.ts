@@ -3,15 +3,24 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { parseArticle } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '新闻推荐' },
+    { value: 'game', label: '游戏新闻' },
+    { value: 'acg', label: '动漫影视' },
+    { value: 'next', label: '智能数码' },
+    { value: 'news_36_1', label: '时事焦点' },
+];
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['game'],
     example: '/3dmgame/news',
-    parameters: { category: '分类名或 ID，见下表，默认为新闻推荐，ID 可从分类 URL 中找到，如 Steam 为 `22221`' },
+    parameters: { category: { description: '分类名或 ID，见下表，默认为新闻推荐，ID 可从分类 URL 中找到，如 Steam 为 `22221`', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +37,11 @@ export const route: Route = {
     name: '新闻中心',
     maintainers: ['zhboner', 'lyqluis'],
     handler,
-    description: `| 新闻推荐 | 游戏新闻 | 动漫影视 | 智能数码 | 时事焦点    |
-| -------- | -------- | -------- | -------- | ----------- |
-|          | game     | acg      | next     | news\\_36\\_1 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名或 ID',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

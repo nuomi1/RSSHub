@@ -3,13 +3,21 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseArticle } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '新闻' },
+    { value: 'gl', label: '攻略' },
+    { value: 'resource', label: '资源' },
+];
+const TYPE_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/games/:name/:type?',
     example: '/3dmgame/games/detroitbecomehuman/news',
-    parameters: { name: '游戏名字，可以在专题页的 url 中找到', type: '资讯类型，见下表，默认为 `news`' },
+    parameters: { name: '游戏名字，可以在专题页的 url 中找到', type: { description: '资讯类型，见下表，默认为 `news`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['3dmgame.com/games/:name/:type'],
@@ -19,13 +27,15 @@ export const route: Route = {
     categories: ['game'],
     maintainers: ['sinchang', 'yangkghjh', 'HenryQW', 'lyqluis'],
     handler,
-    description: `| 新闻 | 攻略 | 资源     |
-| ---- | ---- | -------- |
-| news | gl   | resource |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '资讯类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { name, type = 'news' } = ctx.req.param();
+    const { name, type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const url = `https://www.3dmgame.com/games/${name}/${type}/`;
 
     const { data: response } = await got(url);
