@@ -2,15 +2,22 @@ import pMap from 'p-map';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { apiRootUrl, parseArticle, parseResult, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'method', label: '方法' },
+    { value: 'opinion', label: '观点' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'method';
 
 export const route: Route = {
     path: '/category/:category?',
     categories: ['new-media'],
     example: '/utgd/category/method',
-    parameters: { category: '分类，可在对应分类页的 URL 中找到，默认为方法' },
+    parameters: { category: { description: '分类，可在对应分类页的 URL 中找到，默认为方法', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +39,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 方法   | 观点    |
-| ------ | ------- |
-| method | opinion |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'method';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 9);
 
     const apiUrl = `${apiRootUrl}/api/v2/categories`;

@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const MAP = {
@@ -20,11 +21,14 @@ const HEAD = {
     states: '学工动态',
     notice: '通知公告',
 };
+
+const TYPE_OPTIONS = Object.entries(HEAD).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/jsj/:type',
     categories: ['university'],
     example: '/upc/jsj/news',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -36,9 +40,11 @@ export const route: Route = {
     name: '计算机科学与技术学院',
     maintainers: ['Veagau'],
     handler,
-    description: `| 学院新闻 | 学术关注 | 学工动态 | 通知公告 |
-| -------- | -------- | -------- | -------- |
-| news     | scholar  | states   | notice   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 function parseArticleAuthor(byline: string | undefined) {
     const prefix = byline && /^【(?:作者(?:、[^：:]+)?|文字)[：:]\s*/.exec(byline);

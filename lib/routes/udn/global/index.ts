@@ -6,6 +6,13 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '首頁' },
+    { value: 'editor', label: '編輯精選' },
+    { value: 'hot', label: '熱門文章' },
+];
 
 const categoriesConf = {
     hot: {
@@ -26,7 +33,7 @@ export const route: Route = {
     path: '/global/:category?',
     categories: ['traditional-media'],
     example: '/udn/global',
-    parameters: { category: '分类，见下表，默认为首頁' },
+    parameters: { category: { description: '分类，见下表，默认为首頁', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,9 +50,11 @@ export const route: Route = {
     name: '轉角國際 - 首頁',
     maintainers: ['nczitzk', 'pseudoyu'],
     handler,
-    description: `| 首頁 | 編輯精選 | 熱門文章 |
-| ---- | -------- | -------- |
-|      | editor   | hot      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

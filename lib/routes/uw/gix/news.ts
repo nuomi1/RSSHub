@@ -5,6 +5,12 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'blog', label: 'Blog' },
+    { value: 'inthenews', label: 'In The News' },
+];
 
 const gixBaseURL = 'https://gixnetwork.org';
 
@@ -12,7 +18,7 @@ export const route: Route = {
     path: '/gix/news/:category',
     categories: ['university'],
     example: '/uw/gix/news/blog',
-    parameters: { category: 'Blog Type' },
+    parameters: { category: { description: 'Blog Type', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +35,11 @@ export const route: Route = {
     name: 'Global Innovation Exchange News',
     maintainers: ['dykderrick'],
     handler,
-    description: `| Blog | In The News |
-| ---- | ----------- |
-| blog | inthenews   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Blog Type',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

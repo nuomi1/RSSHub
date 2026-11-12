@@ -5,7 +5,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'ynxw', label: '院内新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'kydt', label: '科研动态' },
+    { value: 'xshd', label: '学术活动' },
+    { value: '自定义 id', label: '其他' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
+
 // import InvalidParameterError from '@/errors/types/invalid-parameter';
 const map = new Map([
     ['kydt', { title: '科研动态', id: '2404' }],
@@ -18,7 +29,7 @@ export const route: Route = {
     path: '/scms/:type?',
     categories: ['university'],
     example: '/ustc/scms/tzgg',
-    parameters: { type: '分类，见下表，默认为通知公告' },
+    parameters: { type: { description: '分类，见下表，默认为通知公告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,12 +48,14 @@ export const route: Route = {
     maintainers: ['boxie123'],
     handler,
     url: 'scms.ustc.edu.cn/',
-    description: `| 院内新闻 | 通知公告 | 科研动态 | 学术活动 | 其他      |
-| -------- | -------- | -------- | -------- | --------- |
-| ynxw     | tzgg     | kydt     | xshd     | 自定义 id |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const info = map.get(type);
 
     // if (!info) {

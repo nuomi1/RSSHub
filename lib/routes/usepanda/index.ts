@@ -1,12 +1,15 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [{ value: '5718e53e7a84fb1901e059cc', label: 'Github' }];
 
 export const route: Route = {
     path: '/feeds/:id',
     categories: ['other'],
     example: '/usepanda/feeds/5718e53e7a84fb1901e059cc',
-    parameters: { id: 'Feed ID' },
+    parameters: { id: { description: 'Feed ID', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -18,9 +21,11 @@ export const route: Route = {
     name: 'Feeds',
     maintainers: ['lyrl'],
     handler,
-    description: `| Channel | feedId                   |
-| ------- | ------------------------ |
-| Github  | 5718e53e7a84fb1901e059cc |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: 'Feed ID',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

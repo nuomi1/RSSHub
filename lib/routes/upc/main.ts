@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const MAP = {
@@ -16,6 +17,8 @@ const HEAD = {
     notice: '通知公告',
     scholar: '学术动态',
 };
+
+const TYPE_OPTIONS = Object.entries(HEAD).map(([value, label]) => ({ value, label }));
 
 class ArticleBodyUnavailableError extends Error {}
 
@@ -50,7 +53,7 @@ export const route: Route = {
     path: '/main/:type',
     categories: ['university'],
     example: '/upc/main/notice',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -62,9 +65,11 @@ export const route: Route = {
     name: '主页',
     maintainers: ['Veagau'],
     handler,
-    description: `| 通知公告 | 学术动态 |
-| -------- | -------- |
-| notice   | scholar  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const baseUrl = 'https://news.upc.edu.cn';

@@ -6,6 +6,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const baseUrl = 'https://sise.uestc.edu.cn/';
@@ -31,11 +32,15 @@ const mapTitle = {
     8: '实践教育中心',
     9: "Int'I",
 };
+
+const TYPE_OPTIONS = Object.entries(mapTitle).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = '1';
+
 export const route: Route = {
     path: '/sise/:type?',
     categories: ['university'],
     example: '/uestc/sise/1',
-    parameters: { type: '默认为 `1`' },
+    parameters: { type: { description: '默认为 `1`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -54,9 +59,11 @@ export const route: Route = {
     maintainers: ['Yadomin', 'mobyw'],
     handler,
     url: 'sise.uestc.edu.cn/',
-    description: `| 最新 | 院办 | 学生科 | 教务科 | 研管科 | 组织 | 人事 | 实践教育中心 | Int'I |
-| ---- | ---- | ------ | ------ | ------ | ---- | ---- | ------------ | ----- |
-| 1    | 2    | 3      | 4      | 5      | 6    | 7    | 8            | 9     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = ctx.req.param('type') || 1;

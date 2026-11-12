@@ -4,7 +4,18 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'stock_research', label: '个股研报' },
+    { value: 'industry_research', label: '行业研报' },
+    { value: 'strategy_research', label: '策略研报' },
+    { value: 'macro_research', label: '宏观研报' },
+    { value: 'ipo_research', label: '新股研报' },
+    { value: 'brokerage_news', label: '券商晨报（今日晨报）' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'brokerage_news';
 
 const rootUrl = 'http://www.ulapia.com';
 
@@ -30,7 +41,7 @@ export const route: Route = {
     path: '/reports/:category?',
     categories: ['finance'],
     example: '/ulapia/reports/stock_research',
-    parameters: { category: '频道类型，默认为券商晨报（今日晨报）' },
+    parameters: { category: { description: '频道类型，默认为券商晨报（今日晨报）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -42,13 +53,15 @@ export const route: Route = {
     name: '频道',
     maintainers: ['Fatpandac'],
     handler,
-    description: `|     个股研报    |      行业研报      |      策略研报      |     宏观研报    |    新股研报   | 券商晨报（今日晨报） |
-| :-------------: | :----------------: | :----------------: | :-------------: | :-----------: | :------------------: |
-| stock\\_research | industry\\_research | strategy\\_research | macro\\_research | ipo\\_research |    brokerage\\_news   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '频道类型',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'brokerage_news';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     if (!Object.hasOwn(selectorMap, category)) {
         throw new InvalidParameterError('Unsupported report category. Use brokerage_news, stock_research, industry_research, strategy_research, macro_research, or ipo_research.');
     }

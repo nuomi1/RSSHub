@@ -7,7 +7,14 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwdt', label: '新闻动态' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 const map = new Map([
     ['tzgg', { title: '中国科学技术大学研究生院 - 通知公告', id: '9' }],
@@ -18,7 +25,7 @@ export const route: Route = {
     path: '/gs/:type?',
     categories: ['university'],
     example: '/ustc/gs/tzgg',
-    parameters: { type: '分类，见下表，默认为通知公告' },
+    parameters: { type: { description: '分类，见下表，默认为通知公告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,12 +44,14 @@ export const route: Route = {
     maintainers: ['jasongzy'],
     handler,
     url: 'gradschool.ustc.edu.cn/',
-    description: `| 通知公告 | 新闻动态 |
-| -------- | -------- |
-| tzgg     | xwdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const info = map.get(type);
     if (!info) {
         throw new InvalidParameterError('invalid type');

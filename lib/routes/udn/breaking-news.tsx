@@ -6,7 +6,25 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '0', label: '精選' },
+    { value: '1', label: '要聞' },
+    { value: '2', label: '社會' },
+    { value: '3', label: '地方' },
+    { value: '4', label: '兩岸' },
+    { value: '5', label: '國際' },
+    { value: '6', label: '財經' },
+    { value: '7', label: '運動' },
+    { value: '8', label: '娛樂' },
+    { value: '9', label: '生活' },
+    { value: '11', label: '股市' },
+    { value: '12', label: '文教' },
+    { value: '13', label: '數位' },
+    { value: '99', label: '不分類' },
+];
 
 type ArticleSummary = {
     title: string;
@@ -18,7 +36,7 @@ export const route: Route = {
     path: '/news/breakingnews/:id',
     categories: ['traditional-media'],
     example: '/udn/news/breakingnews/99',
-    parameters: { id: '类别' },
+    parameters: { id: { description: '类别', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,9 +53,11 @@ export const route: Route = {
     name: '即時新聞',
     maintainers: ['miles170', 'pseudoyu'],
     handler,
-    description: `| 0    | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 11   | 12   | 13   | 99     |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ------ |
-| 精選 | 要聞 | 社會 | 地方 | 兩岸 | 國際 | 財經 | 運動 | 娛樂 | 生活 | 股市 | 文教 | 數位 | 不分類 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '类别',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

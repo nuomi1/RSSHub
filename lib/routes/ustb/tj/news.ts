@@ -4,7 +4,30 @@ import pMap from 'p-map';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'csjsxy', label: '城市建设学院' },
+    { value: 'clkxygcxy', label: '材料科学与工程学院' },
+    { value: 'znzzxy', label: '智能制造学院' },
+    { value: 'rgznxy', label: '人工智能学院' },
+    { value: 'dkjsygcxy', label: '低空技术与工程学院' },
+    { value: 'jjxy', label: '经济学院' },
+    { value: 'glxy', label: '管理学院' },
+    { value: 'djkxy', label: '大健康学院' },
+    { value: 'wgyxy', label: '外国语学院' },
+    { value: 'ysxy', label: '艺术学院' },
+    { value: 'fxy', label: '法学院' },
+    { value: 'ldxy', label: '劳动学院' },
+    { value: 'mkszyxy', label: '马克思主义学院' },
+    { value: 'mdtsxy', label: '明德通识学院' },
+    { value: 'tyb', label: '体育部' },
+    { value: 'jcb', label: '基础部' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 const baseUrl = 'https://tj.ustb.edu.cn';
 // The old /Class/<department>/index.htm pages are gone; department news now lives under the news center's 院系动态 section
@@ -48,7 +71,7 @@ export const route: Route = {
     path: '/tj/news/:type?',
     categories: ['university'],
     example: '/ustb/tj/news/xyxw',
-    parameters: { type: '默认为 `all`' },
+    parameters: { type: { description: '默认为 `all`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -60,16 +83,14 @@ export const route: Route = {
     name: '天津学院',
     maintainers: ['henbf'],
     handler,
-    description: `| 全部 | 学院新闻 | 城市建设学院 | 材料科学与工程学院 | 智能制造学院 | 人工智能学院 | 低空技术与工程学院 | 经济学院 | 管理学院 |
-| ---- | -------- | ------------ | ------------------ | ------------ | ------------ | ------------------ | -------- | -------- |
-| all  | xyxw     | csjsxy       | clkxygcxy          | znzzxy       | rgznxy       | dkjsygcxy          | jjxy     | glxy     |
-
-| 大健康学院 | 外国语学院 | 艺术学院 | 法学院 | 劳动学院 | 马克思主义学院 | 明德通识学院 | 体育部 | 基础部 |
-| ---------- | ---------- | -------- | ------ | -------- | -------------- | ------------ | ------ | ------ |
-| djkxy      | wgyxy      | ysxy     | fxy    | ldxy     | mkszyxy        | mdtsxy       | tyb    | jcb    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    let type = ctx.req.param('type') || 'all';
+    let type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.keys(maps).includes(type)) {
         type = 'all';
     }

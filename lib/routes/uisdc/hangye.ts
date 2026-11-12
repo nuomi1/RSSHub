@@ -6,17 +6,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: '', label: '全部新闻' },
+    { value: 'events-activity', label: '活动赛事' },
+    { value: 'brand-news', label: '品牌资讯' },
+    { value: 'new-products', label: '新品推荐' },
+];
 
 export const route: Route = {
     path: '/hangye/:caty?',
     categories: ['design'],
     example: '/uisdc/hangye',
-    parameters: { caty: '分类，见下表，默认为全部新闻' },
-    description: `| 全部新闻 | 活动赛事        | 品牌资讯   | 新品推荐     |
-| -------- | --------------- | ---------- | ------------ |
-|          | events-activity | brand-news | new-products |`,
+    parameters: { caty: { description: '分类，见下表，默认为全部新闻', options: CATY_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分类',
+        options: CATY_OPTIONS,
+    }),
     features: { antiCrawler: true },
     name: '行业新闻',
     maintainers: ['nczitzk'],

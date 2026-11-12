@@ -6,7 +6,16 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'bsh', label: '博士后' },
+    { value: 'ktxmpy', label: '课题项目聘用' },
+    { value: 'glzcrc', label: '管理支撑人才' },
+    { value: 'jxkyrc', label: '教学科研人才' },
+];
+const TYPE_OPTIONS_DEFAULT = 'bsh';
 
 const rootUrl = 'https://zhaopin.ucas.ac.cn';
 
@@ -28,7 +37,7 @@ export const route: Route = {
     path: '/job/:type?',
     categories: ['university'],
     example: '/ucas/job',
-    parameters: { type: '招聘类型，默认为博士后' },
+    parameters: { type: { description: '招聘类型，默认为博士后', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -46,13 +55,15 @@ export const route: Route = {
     name: '招聘信息',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 招聘类型 | 博士后 | 课题项目聘用 | 管理支撑人才 | 教学科研人才 |
-| :------: | :----: | :----------: | :----------: | :----------: |
-|   参数   |   bsh  |    ktxmpy    |    glzcrc    |    jxkyrc    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '招聘类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'bsh';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(idMap, type)) {
         throw new InvalidParameterError('Invalid recruitment type. Use jxkyrc, glzcrc, ktxmpy, or bsh.');
     }

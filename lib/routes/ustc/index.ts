@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'jx', label: '教学类' },
+    { value: 'ky', label: '科研类' },
+    { value: 'gl', label: '管理类' },
+    { value: 'fw', label: '服务类' },
+];
+const TYPE_OPTIONS_DEFAULT = 'gl';
 
 const noticeType = {
     jx: { title: '中国科学技术大学 - 教学类通知', url: 'https://ustc.edu.cn/tzgg/jxltz.htm' },
@@ -30,7 +39,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/ustc/news/gl',
-    parameters: { type: '分类，默认为管理类' },
+    parameters: { type: { description: '分类，默认为管理类', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -49,12 +58,14 @@ export const route: Route = {
     maintainers: ['hang333', 'jasongzy'],
     handler,
     url: 'ustc.edu.cn/',
-    description: `| 教学类 | 科研类 | 管理类 | 服务类 |
-| ------ | ------ | ------ | ------ |
-| jx     | ky     | gl     | fw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'gl';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const response = await got({
         method: 'get',
         /* headers: {

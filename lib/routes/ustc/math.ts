@@ -6,7 +6,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xsjl', label: '学术交流' },
+    { value: 'xsbg', label: '学术报告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 const map = new Map([
     ['xyxw', { title: '中国科学技术大学数学科学学院 - 学院新闻', id: 'xyxw' }],
@@ -19,7 +28,7 @@ export const route: Route = {
     path: '/math/:type?',
     categories: ['university'],
     example: '/ustc/math/tzgg',
-    parameters: { type: '分类，见下表，默认为通知公告' },
+    parameters: { type: { description: '分类，见下表，默认为通知公告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,12 +47,14 @@ export const route: Route = {
     maintainers: ['ne0-wu'],
     handler,
     url: 'math.ustc.edu.cn/',
-    description: `| 学院新闻 | 通知公告 | 学术交流 | 学术报告 |
-| -------- | -------- | -------- | -------- |
-| xyxw     | tzgg     | xsjl     | xsbg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const info = map.get(type);
     if (!info) {
         throw new InvalidParameterError('invalid type');

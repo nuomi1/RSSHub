@@ -5,14 +5,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '所有通知' },
+    { value: '18519', label: '教学・运行' },
+    { value: '18520', label: '学业・学籍' },
+    { value: '18521', label: '教学・研究' },
+    { value: '18522', label: '课程・教材' },
+    { value: '18523', label: '实践・教学' },
+    { value: '18524', label: '创新・创业' },
+    { value: 'yywwz', label: '语言・文字' },
+    { value: 'jxwjy', label: '继续・教育' },
+    { value: 'bkwzs', label: '本科・招生' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 interface AppArticle {
     content: string;
     author: string;
 }
 const handler = async (ctx) => {
-    const { type = 'tzgg' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://jwc.upc.edu.cn';
     const { data: response } = await got(`${baseUrl}/${type}/list.htm`);
     const $ = load(response);
@@ -106,7 +121,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/upc/jwc/tzgg',
-    parameters: { type: '分类，见下表，其值与对应网页url路径参数一致，默认为所有通知' },
+    parameters: { type: { description: '分类，见下表，其值与对应网页url路径参数一致，默认为所有通知', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -123,9 +138,11 @@ export const route: Route = {
     ],
     name: '教务处',
     maintainers: ['sddzhyc'],
-    description: `| 所有通知 | 教学・运行 | 学业・学籍 | 教学・研究 | 课程・教材 | 实践・教学 | 创新・创业 | 语言・文字 | 继续・教育 | 本科・招生 |
-| -------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
-| tzgg     | 18519      | 18520      | 18521      | 18522      | 18523      | 18524      | yywwz      | jxwjy      | bkwzs      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     url: 'jwc.upc.edu.cn/tzgg/list.htm',
     handler,
 };

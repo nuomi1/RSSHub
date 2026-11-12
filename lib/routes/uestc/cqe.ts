@@ -4,6 +4,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const baseUrl = 'https://cqe.uestc.edu.cn/';
@@ -18,11 +19,14 @@ const mapTitle = {
     tzgg: '通知公告',
 };
 
+const TYPE_OPTIONS = Object.entries(mapTitle).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
+
 export const route: Route = {
     path: '/cqe/:type?',
     categories: ['university'],
     example: '/uestc/cqe/tzgg',
-    parameters: { type: '默认为 `tzgg`' },
+    parameters: { type: { description: '默认为 `tzgg`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -41,13 +45,15 @@ export const route: Route = {
     maintainers: ['truobel', 'mobyw'],
     handler,
     url: 'cqe.uestc.edu.cn/',
-    description: `| 活动预告 | 通知公告 |
-| -------- | -------- |
-| hdyg     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'tzgg';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(mapUrl, type)) {
         throw new InvalidParameterError('Unsupported type. Use hdyg or tzgg.');
     }

@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '', label: '类型' },
+    { value: 'jwdt', label: '教务动态' },
+    { value: 'ggzx', label: '公告在线' },
+    { value: 'xktz', label: '选课通知' },
+];
+const TYPE_OPTIONS_DEFAULT = 'jwdt';
 
 const rootURL = 'http://jwch.usts.edu.cn/index';
 
@@ -15,7 +24,7 @@ export const route: Route = {
     path: '/jwch/:type?',
     categories: ['university'],
     example: '/usts/jwch',
-    parameters: { type: '类型，默认为教务动态' },
+    parameters: { type: { description: '类型，默认为教务动态', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,13 +36,15 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 类型 | 教务动态 | 公告在线 | 选课通知 |
-| ---- | -------- | -------- | -------- |
-|      | jwdt     | ggzx     | xktz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'jwdt';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const url = `${rootURL}/${type}.htm`;
     const response = await got(url);
 

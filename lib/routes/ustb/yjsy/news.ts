@@ -4,14 +4,41 @@ import iconv from 'iconv-lite';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '北京科技大学研究生院' },
+    { value: 'cres', label: '土木与资源工程学院' },
+    { value: 'seee', label: '能源与环境工程学院' },
+    { value: 'metall', label: '冶金与生态工程学院' },
+    { value: 'mse', label: '材料科学与工程学院' },
+    { value: 'me', label: '机械工程学院' },
+    { value: 'saee', label: '自动化学院' },
+    { value: 'scce', label: '计算机与通信工程学院' },
+    { value: 'shuli', label: '数理学院' },
+    { value: 'huasheng', label: '化学与生物工程学院' },
+    { value: 'sem', label: '经济管理学院' },
+    { value: 'wenfa', label: '文法学院' },
+    { value: 'marx', label: '马克思主义学院' },
+    { value: 'sfs', label: '外国语学院' },
+    { value: 'ncms', label: '国家材料服役安全科学中心' },
+    { value: 'skl', label: '新金属材料国家重点实验室' },
+    { value: 'iet', label: '工程技术研究院' },
+    { value: 'cicst', label: '钢铁共性技术协同创新中心' },
+    { value: 'slam', label: '钢铁冶金新技术国家重点实验室' },
+    { value: 'adma', label: '新材料技术研究院' },
+    { value: 'ihmm', label: '科技史与文化遗产研究院' },
+    { value: 'sd', label: '顺德研究生院' },
+];
+
 // import logger from '@/utils/logger';
 
 export const route: Route = {
     path: '/yjsy/news/:type',
     categories: ['university'],
     example: '/ustb/yjsy/news/all',
-    parameters: { type: '文章类别' },
+    parameters: { type: { description: '文章类别', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +56,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['DA1Y1'],
     handler,
-    description: `| 北京科技大学研究生院 | 土木与资源工程学院 | 能源与环境工程学院 | 冶金与生态工程学院 | 材料科学与工程学院 | 机械工程学院 | 自动化学院 | 计算机与通信工程学院 | 数理学院 | 化学与生物工程学院 | 经济管理学院 | 文法学院 | 马克思主义学院 | 外国语学院 | 国家材料服役安全科学中心 | 新金属材料国家重点实验室 | 工程技术研究院 | 钢铁共性技术协同创新中心 | 钢铁冶金新技术国家重点实验室 | 新材料技术研究院 | 科技史与文化遗产研究院 | 顺德研究生院 |
-| -------------------- | ------------------ | ------------------ | ------------------ | ------------------ | ------------ | ---------- | -------------------- | -------- | ------------------ | ------------ | -------- | -------------- | ---------- | ------------------------ | ------------------------ | -------------- | ------------------------ | ---------------------------- | ---------------- | ---------------------- | ------------ |
-| all                  | cres               | seee               | metall             | mse                | me           | saee       | scce                 | shuli    | huasheng           | sem          | wenfa    | marx           | sfs        | ncms                     | skl                      | iet            | cicst                    | slam                         | adma             | ihmm                   | sd           |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '文章类别',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

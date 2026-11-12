@@ -4,7 +4,15 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'academy', label: '学术' },
+    { value: 'culture', label: '文化' },
+    { value: 'announcement', label: '公告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'announcement';
 
 const baseUrl = 'https://news.uestc.edu.cn';
 
@@ -18,7 +26,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/uestc/news/culture',
-    parameters: { type: '默认为 `announcement`' },
+    parameters: { type: { description: '默认为 `announcement`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,13 +45,15 @@ export const route: Route = {
     maintainers: ['achjqz', 'mobyw'],
     handler,
     url: 'news.uestc.edu.cn/',
-    description: `| 学术    | 文化    | 公告         |
-| ------- | ------- | ------------ |
-| academy | culture | announcement |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'announcement';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Unsupported type. Use academy, culture, or announcement.');
     }

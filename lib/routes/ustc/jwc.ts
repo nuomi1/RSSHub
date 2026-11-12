@@ -5,15 +5,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const noticeUrl = 'https://www.teach.ustc.edu.cn/category/notice';
 const noticeType = { teaching: '教学', info: '信息', exam: '考试', exchange: '交流' };
+
+const TYPE_OPTIONS = Object.entries(noticeType).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/ustc/jwc/info',
-    parameters: { type: '分类，默认显示所有种类' },
+    parameters: { type: { description: '分类，默认显示所有种类', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,9 +36,11 @@ export const route: Route = {
     maintainers: ['hang333'],
     handler,
     url: 'www.teach.ustc.edu.cn/',
-    description: `| 信息 | 教学     | 考试 | 交流     |
-| ---- | -------- | ---- | -------- |
-| info | teaching | exam | exchange |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = ctx.req.param('type') ?? '';
