@@ -7,16 +7,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATEGORY_OPTIONS = [
-    { value: 'szyw', label: '时政要闻' },
-    { value: 'hjywnews', label: '环境要闻' },
-    { value: 'dfnews', label: '地方快讯' },
-    { value: 'xwfb', label: '新闻发布' },
-    { value: 'spxw', label: '视频新闻' },
-    { value: 'gsgg', label: '公示公告' },
-];
-const CATEGORY_OPTIONS_DEFAULT = 'szyw';
-
 const baseUrl = 'https://www.mee.gov.cn/';
 const columns = {
     szyw: { name: '时政要闻', order: 1 },
@@ -26,6 +16,9 @@ const columns = {
     spxw: { name: '视频新闻', order: 5 },
     gsgg: { name: '公示公告', order: 6 },
 };
+
+const CATEGORY_OPTIONS = Object.entries(columns).map(([value, item]) => ({ value, label: item.name }));
+const CATEGORY_OPTIONS_DEFAULT = 'szyw';
 
 export const route: Route = {
     path: '/ywdt/:category?',

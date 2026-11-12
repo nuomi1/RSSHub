@@ -8,12 +8,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'xwg', label: '新闻稿' },
-    { value: 'xfzx', label: '消费资讯' },
-];
-const TYPE_OPTIONS_DEFAULT = 'xwg';
-
 const rootUrl = 'https://cpc.ey.gov.tw';
 
 const typeMap = {
@@ -26,6 +20,9 @@ const typeMap = {
         url: '/Page/E414CC218269CCE8',
     },
 };
+
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, item]) => ({ value, label: item.name }));
+const TYPE_OPTIONS_DEFAULT = 'xwg';
 
 export const route: Route = {
     path: '/:type?',
