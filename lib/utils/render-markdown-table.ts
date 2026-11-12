@@ -42,6 +42,20 @@ export const MarkdownTableSchema = z
 
 export type MarkdownTable = z.infer<typeof MarkdownTableSchema>;
 
+/**
+ * A parameter option table: the parameter name, its description and the `{ value, label }` options.
+ * Deliberately inlined instead of reusing the header/row schemas — an option table always has
+ * exactly two unaligned columns, so the header pair is modelled as two plain strings.
+ */
+export const OptionsMarkdownTableSchema = z.object({
+    parameter: z.string(),
+    description: z.string(),
+    // oxlint-disable-next-line unicorn/max-nested-calls -- zod schema literals nest by nature
+    options: z.array(z.object({ value: z.string(), label: z.string() })).min(1, 'options must contain at least one entry'),
+});
+
+export type OptionsMarkdownTable = z.infer<typeof OptionsMarkdownTableSchema>;
+
 type MarkdownTableAlign = z.infer<typeof MarkdownTableAlignSchema>;
 type MarkdownTableHeader = z.infer<typeof MarkdownTableHeaderSchema>;
 
@@ -105,4 +119,28 @@ export const renderMarkdownTable = (table: MarkdownTable): string => {
     const bodyRows = rows.map((row) => renderRow(row.map((cell) => renderCell(cell))));
 
     return [renderRow(headerCells), renderRow(delimiterCells), ...bodyRows].join('\n');
+};
+
+/**
+ * Renders a parameter option table — the shape used by route descriptions.
+ *
+ * Validates the option form, builds the equivalent `MarkdownTable` and renders it through
+ * `renderMarkdownTable`, so both entry points share one rendering path.
+ *
+ * @param input - The parameter name, its description and the `{ value, label }` options.
+ * @returns The table as a markdown string, one line per row.
+ * @throws ZodError when the options are empty or an entry is not a string pair.
+ *
+ * @example
+ * renderOptionsMarkdownTable({ parameter: 'category', description: '分类', options: CATEGORY_OPTIONS });
+ */
+export const renderOptionsMarkdownTable = (input: OptionsMarkdownTable): string => {
+    const { parameter, description, options } = OptionsMarkdownTableSchema.parse(input);
+
+    const table: MarkdownTable = {
+        headers: [parameter, description],
+        rows: options.map(({ value, label }) => [value, label]),
+    };
+
+    return renderMarkdownTable(table);
 };

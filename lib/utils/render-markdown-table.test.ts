@@ -2,7 +2,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import { describe, expect, it } from 'vitest';
 
-import { type MarkdownTable, MarkdownTableSchema, renderMarkdownTable } from './render-markdown-table';
+import { type MarkdownTable, MarkdownTableSchema, OptionsMarkdownTableSchema, renderMarkdownTable, renderOptionsMarkdownTable } from './render-markdown-table';
 
 // ============================================================
 // Helpers
@@ -408,6 +408,47 @@ describe('renderMarkdownTable', () => {
             expect(description.startsWith(INFO_10000LINK_TIP)).toBe(true);
             expect(description.slice(INFO_10000LINK_TIP.length)).toBe(`\n\n${table}`);
             expect(parseTables(description)).toHaveLength(1);
+        });
+    });
+
+    describe('option shorthand', () => {
+        it('renders the same table as the explicit headers/rows form', () => {
+            const options = [
+                { value: '1', label: '最新线报' },
+                { value: '2', label: '实测活动' },
+            ];
+
+            const shorthand = renderOptionsMarkdownTable({ parameter: 'listId', description: '分类', options });
+            const explicit = renderMarkdownTable({
+                headers: ['listId', '分类'],
+                rows: options.map(({ value, label }) => [value, label]),
+            });
+
+            expect(shorthand).toBe(explicit);
+            expect(shorthand.split('\n')).toEqual(['| listId | 分类 |', '| --- | --- |', '| 1 | 最新线报 |', '| 2 | 实测活动 |']);
+        });
+
+        it('keeps two columns for a single option', () => {
+            const markdown = renderOptionsMarkdownTable({ parameter: 'type', description: '类型', options: [{ value: 'xs', label: '新闻' }] });
+
+            expect(markdown.split('\n')).toHaveLength(3);
+            expect(markdown.split('\n').every((line) => line.split('|').length === 4)).toBe(true);
+        });
+
+        it('rejects a non-string option value', () => {
+            const options = [{ value: 1 as unknown as string, label: '新闻' }];
+
+            expect(() => renderOptionsMarkdownTable({ parameter: 'type', description: '类型', options })).toThrow();
+        });
+
+        it('rejects an input without a parameter name', () => {
+            const input = { description: '分类', options: [{ value: '1', label: '新闻' }] };
+
+            expect(OptionsMarkdownTableSchema.safeParse(input).success).toBe(false);
+        });
+
+        it('rejects an empty option list', () => {
+            expect(OptionsMarkdownTableSchema.safeParse({ parameter: 'type', description: '类型', options: [] }).success).toBe(false);
         });
     });
 });
