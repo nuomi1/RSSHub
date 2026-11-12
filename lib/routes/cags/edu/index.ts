@@ -4,14 +4,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATEGORY_OPTIONS = [
-    { value: 'tzgg', label: '通知公告' },
-    { value: 'ywjx', label: '要闻简讯' },
-    { value: 'zs_bss', label: '博士生招生' },
-    { value: 'zs_sss', label: '硕士生招生' },
-    { value: 'zs_dxsxly', label: '大学生夏令营' },
-];
-
 const host = 'https://edu.cags.ac.cn';
 
 const titles = {
@@ -21,6 +13,8 @@ const titles = {
     zs_sss: '硕士生招生',
     zs_dxsxly: '大学生夏令营',
 };
+
+const CATEGORY_OPTIONS = Object.entries(titles).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/edu/:category',

@@ -4,15 +4,6 @@ import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
-const ID_OPTIONS = [
-    { value: 'android', label: '安卓版' },
-    { value: 'iphone', label: 'iPhone 版' },
-    { value: 'ipad', label: 'iPad HD 版' },
-    { value: 'win', label: 'UWP 版' },
-    { value: 'android_tv_yst', label: 'TV 版' },
-];
-const ID_OPTIONS_DEFAULT = 'android';
-
 const config = {
     android: '安卓版',
     iphone: 'iPhone 版',
@@ -20,6 +11,9 @@ const config = {
     win: 'UWP 版',
     android_tv_yst: 'TV 版',
 };
+
+const ID_OPTIONS = Object.entries(config).map(([value, label]) => ({ value, label }));
+const ID_OPTIONS_DEFAULT = 'android';
 
 interface AppVersion {
     plat: number;
