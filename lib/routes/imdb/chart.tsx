@@ -5,8 +5,17 @@ import { renderToString } from 'hono/jsx/dom/server';
 import type { Route } from '@/types';
 import { ViewType } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import type { ChartTitleSearchConnection } from './types';
+
+const CHART_OPTIONS = [
+    { value: 'top', label: 'Top 250 Movies' },
+    { value: 'moviemeter', label: 'Most Popular Movies' },
+    { value: 'toptv', label: 'Top 250 TV Shows' },
+    { value: 'tvmeter', label: 'Most Popular TV Shows' },
+];
+const CHART_OPTIONS_DEFAULT = 'top';
 
 const render = ({ primaryImage, originalTitleText, certificate, ratingsSummary, plot }) =>
     renderToString(
@@ -37,13 +46,8 @@ export const route: Route = {
     parameters: {
         chart: {
             description: 'The chart to display, `top` by default',
-            options: [
-                { value: 'top', label: 'Top 250 Movies' },
-                { value: 'moviemeter', label: 'Most Popular Movies' },
-                { value: 'toptv', label: 'Top 250 TV Shows' },
-                { value: 'tvmeter', label: 'Most Popular TV Shows' },
-            ],
-            default: 'top',
+            options: CHART_OPTIONS,
+            default: CHART_OPTIONS_DEFAULT,
         },
     },
     example: '/imdb/chart',
@@ -55,13 +59,15 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'www.imdb.com/chart/top/',
-    description: `| Top 250 Movies | Most Popular Movies | Top 250 TV Shows | Most Popular TV Shows |
-| -------------- | ------------------- | ---------------- | --------------------- |
-| top            | moviemeter          | toptv            | tvmeter               |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'chart',
+        description: 'chart',
+        options: CHART_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const { chart = 'top' } = ctx.req.param();
+    const { chart = CHART_OPTIONS_DEFAULT } = ctx.req.param();
     if (!['top', 'moviemeter', 'toptv', 'tvmeter'].includes(chart)) {
         throw new Error('Invalid chart. Supported values: top, moviemeter, toptv, tvmeter.');
     }

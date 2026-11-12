@@ -3,12 +3,25 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: 'All' },
+    { value: 'circuits', label: 'Circuits' },
+    { value: 'workshop', label: 'Workshop' },
+    { value: 'craft', label: 'Craft' },
+    { value: 'cooking', label: 'Cooking' },
+    { value: 'living', label: 'Living' },
+    { value: 'outside', label: 'Outside' },
+    { value: 'teachers', label: 'Teachers' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/projects/:category?',
     categories: ['other'],
     example: '/instructables/projects/circuits',
-    parameters: { category: 'Category, empty by default, can be found in URL or see the table below' },
+    parameters: { category: { description: 'Category, empty by default, can be found in URL or see the table below', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +44,11 @@ export const route: Route = {
     maintainers: ['wolfg1969'],
     handler,
     url: 'instructables.com/projects',
-    description: `| All | Circuits | Workshop | Craft | Cooking | Living | Outside | Teachers |
-| --- | -------- | -------- | ----- | ------- | ------ | ------- | -------- |
-|     | circuits | workshop | craft | cooking | living | outside | teachers |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const parsePublicationDate = (value?: string | number) => {
@@ -45,13 +60,13 @@ const parsePublicationDate = (value?: string | number) => {
 };
 
 async function handler(ctx) {
-    const { category = 'all' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 50;
 
     const siteDomain = 'instructables.com';
 
     let pathPrefix, projectFilter;
-    if (category === 'all') {
+    if (category === CATEGORY_OPTIONS_DEFAULT) {
         pathPrefix = '';
         projectFilter = '';
     } else {

@@ -5,14 +5,21 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseSourceDate } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: '24h', label: '24 小时阅读榜' },
+    { value: '7days', label: '7 天最热' },
+    { value: '月榜', label: 'monthly' },
+];
 
 export const route: Route = {
     path: '/ranking/:type',
     categories: ['new-media'],
     example: '/ithome/ranking/24h',
-    parameters: { type: '类别' },
+    parameters: { type: { description: '类别', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +31,11 @@ export const route: Route = {
     name: '热榜',
     maintainers: ['immmortal', 'luyuhuang'],
     handler,
-    description: `| 24h           | 7days    | monthly |
-| ------------- | -------- | ------- |
-| 24 小时阅读榜 | 7 天最热 | 月榜    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类别',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

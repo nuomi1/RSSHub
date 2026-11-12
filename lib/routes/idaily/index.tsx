@@ -6,14 +6,21 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Data, Language, Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const LANGUAGE_OPTIONS = [
+    { value: 'zh-hans', label: '简体中文' },
+    { value: 'zh-hant', label: '繁体中文' },
+];
+const LANGUAGE_OPTIONS_DEFAULT = 'zh-hans';
 
 export const route: Route = {
     path: '/:language?',
     name: '每日环球视野',
     example: '/idaily',
     maintainers: ['zphw', 'nczitzk'],
-    parameters: { language: '语言，见下表，默认为简体中文' },
+    parameters: { language: { description: '语言，见下表，默认为简体中文', options: LANGUAGE_OPTIONS, default: LANGUAGE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['idai.ly/'],
@@ -21,13 +28,15 @@ export const route: Route = {
         },
     ],
     handler,
-    description: `| 简体中文 | 繁体中文 |
-| -------- | -------- |
-| zh-hans  | zh-hant  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: '语言',
+        options: LANGUAGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {
-    const { language = 'zh-hans' } = ctx.req.param();
+    const { language = LANGUAGE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!['zh-hans', 'zh-hant'].includes(language)) {
         throw new InvalidParameterError('Invalid language. Use zh-hans or zh-hant.');
     }

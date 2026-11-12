@@ -7,7 +7,18 @@ import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage, type Page } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CHANNEL_OPTIONS = [
+    { value: '', label: '最新文章' },
+    { value: 'fresh', label: '行业快讯' },
+    { value: 'industry', label: '行业观察' },
+    { value: 'talk', label: '镁客请讲' },
+    { value: 'intech', label: '硬科技 100 人' },
+    { value: 'investor', label: '投融界' },
+    { value: 'everything', label: '万象' },
+];
 
 type Category = {
     id: number;
@@ -51,10 +62,12 @@ export const route: Route = {
     path: '/:channel?',
     categories: ['new-media'],
     example: '/im2maker',
-    parameters: { channel: '默认不填为 最新文章 ，频道如下' },
-    description: `| 最新文章 | 行业快讯 | 行业观察 | 镁客请讲 | 硬科技 100 人 | 投融界   | 万象       |
-| -------- | -------- | -------- | -------- | ------------- | -------- | ---------- |
-|          | fresh    | industry | talk     | intech        | investor | everything |`,
+    parameters: { channel: { description: '默认不填为 最新文章 ，频道如下', options: CHANNEL_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '默认不填为 最新文章',
+        options: CHANNEL_OPTIONS,
+    }),
     name: '频道',
     maintainers: ['jin1218scu'],
     features: {

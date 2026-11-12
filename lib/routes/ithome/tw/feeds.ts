@@ -6,12 +6,21 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '新聞' },
+    { value: 'big-data', label: 'AI' },
+    { value: 'cloud', label: 'Cloud' },
+    { value: 'devops', label: 'DevOps' },
+    { value: 'security', label: '資安' },
+];
 
 export const route: Route = {
     path: '/tw/feeds/:category',
     categories: ['new-media'],
     example: '/ithome/tw/feeds/news',
-    parameters: { category: '類別' },
+    parameters: { category: { description: '類別', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +37,11 @@ export const route: Route = {
     name: 'Feeds',
     maintainers: ['miles170'],
     handler,
-    description: `| 新聞 | AI       | Cloud | DevOps | 資安     |
-| ---- | -------- | ----- | ------ | -------- |
-| news | big-data | cloud | devops | security |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '類別',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

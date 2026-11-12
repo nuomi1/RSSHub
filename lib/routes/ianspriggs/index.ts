@@ -5,16 +5,23 @@ import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import { isValidHost } from '@/utils/valid-host';
 
 import { renderDescription } from './templates/description';
 
+const CATEGORY_OPTIONS = [
+    { value: 'portraits', label: '3D PORTRAITS' },
+    { value: 'characters', label: 'CHARACTERS' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'portraits';
+
 export const route: Route = {
     path: '/:category?',
     categories: ['blog'],
     example: '/ianspriggs/portraits',
-    parameters: { category: 'Category, see below, 3D PORTRAITS by default' },
+    parameters: { category: { description: 'Category, see below, 3D PORTRAITS by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +33,11 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 3D PORTRAITS | CHARACTERS |
-| ------------ | ---------- |
-| portraits    | characters |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const parseYear = (value: string) => {
@@ -37,7 +46,7 @@ const parseYear = (value: string) => {
 };
 
 async function handler(ctx) {
-    const { category = 'portraits' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     if (!isValidHost(category)) {
         throw new InvalidParameterError('Invalid category');
     }

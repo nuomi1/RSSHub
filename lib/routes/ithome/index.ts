@@ -5,8 +5,21 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseSourceDate } from './utils';
+
+const CATY_OPTIONS = [
+    { value: 'it', label: 'IT 资讯' },
+    { value: 'soft', label: '软件之家' },
+    { value: 'win10', label: 'win10 之家' },
+    { value: 'win11', label: 'win11 之家' },
+    { value: 'iphone', label: 'iphone 之家' },
+    { value: 'ipad', label: 'ipad 之家' },
+    { value: 'android', label: 'android 之家' },
+    { value: 'digi', label: '数码之家' },
+    { value: 'next', label: '智能时代' },
+];
 
 const getUrl = (caty) => `https://${caty}.ithome.com/`;
 
@@ -44,7 +57,7 @@ export const route: Route = {
     path: '/:caty',
     categories: ['new-media'],
     example: '/ithome/it',
-    parameters: { caty: '类别' },
+    parameters: { caty: { description: '类别', options: CATY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -56,9 +69,7 @@ export const route: Route = {
     name: '分类资讯',
     maintainers: ['luyuhuang'],
     handler,
-    description: `| it      | soft     | win10      | win11      | iphone      | ipad      | android      | digi     | next     |
-| ------- | -------- | ---------- | ---------- | ----------- | --------- | ------------ | -------- | -------- |
-| IT 资讯 | 软件之家 | win10 之家 | win11 之家 | iphone 之家 | ipad 之家 | android 之家 | 数码之家 | 智能时代 |`,
+    description: renderOptionsMarkdownTable({ parameter: 'caty', description: '类别', options: CATY_OPTIONS }),
 };
 
 async function handler(ctx) {

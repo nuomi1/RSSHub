@@ -5,15 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { extractDoc, renderVideo } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'doc', label: '文章' },
+    { value: 'video', label: '视频' },
+];
 
 export const route: Route = {
     path: '/feng/:id/:type',
     categories: ['new-media'],
     example: '/ifeng/feng/2583/doc',
-    parameters: { id: '对应 id，可在 大风号作者页面 找到', type: '类型，见下表' },
+    parameters: { id: '对应 id，可在 大风号作者页面 找到', type: { description: '类型，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,9 +31,11 @@ export const route: Route = {
     name: '大风号',
     maintainers: ['Jamch'],
     handler,
-    description: `| 文章 | 视频  |
-| ---- | ----- |
-| doc  | video |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function parseNewsDate(value: string) {
