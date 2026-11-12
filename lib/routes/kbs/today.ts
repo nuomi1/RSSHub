@@ -6,7 +6,23 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const LANGUAGE_OPTIONS = [
+    { value: 'k', label: '한국어' },
+    { value: 'a', label: 'عربي' },
+    { value: 'c', label: '中国语' },
+    { value: 'e', label: 'English' },
+    { value: 'f', label: 'Français' },
+    { value: 'g', label: 'Deutsch' },
+    { value: 'i', label: 'Bahasa Indonesia' },
+    { value: 'j', label: '日本語' },
+    { value: 'r', label: 'Русский' },
+    { value: 's', label: 'Español' },
+    { value: 'v', label: 'Tiếng Việt' },
+];
+const LANGUAGE_OPTIONS_DEFAULT = 'e';
 
 const languages = { k: 'ko', c: 'zh-CN', e: 'en', f: 'fr', g: 'de', i: 'id', j: 'ja', r: 'ru', s: 'es', v: 'vi' } satisfies Record<string, Language>;
 const isLanguageKey = (key: string): key is keyof typeof languages => Object.hasOwn(languages, key);
@@ -15,7 +31,7 @@ export const route: Route = {
     path: '/today/:language?',
     categories: ['new-media'],
     example: '/kbs/today',
-    parameters: { language: 'Language, see below, e as English by default' },
+    parameters: { language: { description: 'Language, see below, e as English by default', options: LANGUAGE_OPTIONS, default: LANGUAGE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -34,13 +50,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'world.kbs.co.kr/',
-    description: `| 한국어 | عربي | 中国语 | English | Français | Deutsch | Bahasa Indonesia | 日本語 | Русский | Español | Tiếng Việt |
-| ------ | ---- | ------ | ------- | -------- | ------- | ---------------- | ------ | ------- | ------- | ---------- |
-| k      | a    | c      | e       | f        | g       | i                | j      | r       | s       | v          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: 'Language',
+        options: LANGUAGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const language = ctx.req.param('language') ?? 'e';
+    const language = ctx.req.param('language') ?? LANGUAGE_OPTIONS_DEFAULT;
 
     if (!['k', 'a', 'c', 'e', 'f', 'g', 'i', 'j', 'r', 's', 'v'].includes(language)) {
         throw new InvalidParameterError(`Unknown kbs language: ${language}. Use a documented language code.`);

@@ -5,18 +5,27 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notify', label: '教务通知' },
+    { value: 'news', label: '教务新闻' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notify';
 
 export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/kmust/jwc/notify',
-    parameters: { type: '默认为 `notify`' },
+    parameters: { type: { description: '默认为 `notify`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '教务处',
     maintainers: ['geekrainy'],
-    description: `| 教务通知 | 教务新闻 |
-| -------- | -------- |
-| notify   | news     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -33,7 +42,7 @@ const typeProps = {
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { type = 'notify' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const pageUrl = new URL(typeProps[type].url, baseUrl).href;
     const title = `${typeProps[type].title}-昆明理工大学`;
     const response = await ofetch(pageUrl);

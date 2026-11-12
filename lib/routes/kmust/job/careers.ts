@@ -2,6 +2,13 @@ import type { Context } from 'hono';
 
 import type { Data, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'inner', label: '校内宣讲会' },
+    { value: 'outer', label: '校外宣讲会' },
+];
+const TYPE_OPTIONS_DEFAULT = 'inner';
 
 interface Career {
     meet_day?: string;
@@ -18,19 +25,21 @@ export const route: Route = {
     path: '/job/careers/:type?',
     categories: ['university'],
     example: '/kmust/job/careers/inner',
-    parameters: { type: '默认为 `inner`' },
+    parameters: { type: { description: '默认为 `inner`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '宣讲会',
     maintainers: ['geekrainy'],
-    description: `| 校内宣讲会 | 校外宣讲会 |
-| ---------- | ---------- |
-| inner      | outer      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
 const baseUrl = 'http://job.kmust.edu.cn';
 
 async function handler(ctx: Context): Promise<Data> {
-    const { type = 'inner' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const title = `${type === 'inner' ? '校内宣讲会' : '校外宣讲会'}-昆明理工大学就业网`;
     const pageUrl = `${baseUrl}/module/getcareers?start_page=1&keyword=&type=${type}&day=&count=20&start=1&_=${Date.now()}`;
     const data = await ofetch<{ data: Career[] }>(pageUrl);

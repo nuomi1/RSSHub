@@ -5,6 +5,14 @@ import type { Route } from '@/types';
 import { ViewType } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const PERIOD_OPTIONS = [
+    { value: '1d', label: '最近 24 小时' },
+    { value: '1w', label: '最近一周' },
+    { value: '1m', label: '最近一月' },
+    { value: '1y', label: '最近一年' },
+];
 
 export const route: Route = {
     path: '/post/popular_recent/:period?',
@@ -26,9 +34,11 @@ export const route: Route = {
     radar: [{ source: ['konachan.com/post'], target: '/post/popular_recent' }],
     name: 'Popular Recent Posts',
     maintainers: ['magic-akari', 'NekoAria', 'sineeeee'],
-    description: `| 最近 24 小时 | 最近一周 | 最近一月 | 最近一年 |
-| ------------ | -------- | -------- | -------- |
-| 1d           | 1w       | 1m       | 1y       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'period',
+        description: '展示时间',
+        options: PERIOD_OPTIONS,
+    }),
     handler,
     features: {
         nsfw: true,
