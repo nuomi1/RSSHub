@@ -5,6 +5,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const SECTION_OPTIONS = [
+    { value: 'news', label: '首页' },
+    { value: 'gazette', label: '特稿' },
+    { value: 'research-', label: '学术' },
+    { value: 'academics-', label: '教学' },
+    { value: 'international', label: '国际' },
+    { value: 'campus', label: '校园' },
+    { value: 'people', label: '人物' },
+    { value: 'multimedia', label: '视讯' },
+    { value: 'notice', label: '公告' },
+];
+const SECTION_OPTIONS_DEFAULT = 'news';
 
 const url = 'https://news.shisu.edu.cn';
 const banner = 'https://news.shisu.edu.cn/news/index/39adf3d9ae414bc39c6d3b9316ae531f.png';
@@ -13,7 +27,7 @@ export const route: Route = {
     path: '/news/:section',
     categories: ['university'],
     example: '/shisu/news/news',
-    parameters: { section: '主站的新闻类别' },
+    parameters: { section: { description: '主站的新闻类别', options: SECTION_OPTIONS, default: SECTION_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,13 +45,15 @@ export const route: Route = {
     name: '上外新闻',
     maintainers: ['Duuckjing'],
     handler,
-    description: `| 首页 | 特稿    | 学术      | 教学       | 国际          | 校园   | 人物   | 视讯       | 公告   |
-| ---- | ------- | --------- | ---------- | ------------- | ------ | ------ | ---------- | ------ |
-| news | gazette | research- | academics- | international | campus | people | multimedia | notice |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'section',
+        description: '主站的新闻类别',
+        options: SECTION_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { section = 'news' } = ctx.req.param();
+    const { section = SECTION_OPTIONS_DEFAULT } = ctx.req.param();
     const r = await ofetch(`${url}/${section}/index.html`);
     const $ = load(r);
     let itemsoup: Array<DataItem & { link: string }>;

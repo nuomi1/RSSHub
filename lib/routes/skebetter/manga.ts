@@ -1,14 +1,21 @@
 import { config } from '@/config';
 import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchData, processItems } from './utils';
+
+const ORDER_OPTIONS = [
+    { value: '1', label: '新着 (Latest)' },
+    { value: '2', label: '人気 (Hot)' },
+];
+const ORDER_OPTIONS_DEFAULT = '1';
 
 export const route: Route = {
     path: '/manga/:order',
     categories: ['anime'],
     example: '/skebetter/manga/1',
-    parameters: { order: 'Order, see below.' },
+    parameters: { order: { description: 'Order, see below.', options: ORDER_OPTIONS, default: ORDER_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,13 +40,15 @@ export const route: Route = {
             target: '/manga/2',
         },
     ],
-    description: `| 新着 (Latest) | 人気 (Hot) |
-| ------------- | ---------- |
-| 1             | 2          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'order',
+        description: 'Order',
+        options: ORDER_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {
-    const order = ctx.req.param('order') ?? '1';
+    const order = ctx.req.param('order') ?? ORDER_OPTIONS_DEFAULT;
     const baseUrl = 'https://api.twieromanga.com/api/mangaseries';
     const orderMap = {
         '1': '新着',

@@ -1,14 +1,22 @@
 import { config } from '@/config';
 import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchData, processItems } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'hot', label: '急上昇' },
+    { value: 'week', label: '週間' },
+    { value: 'month', label: '月間' },
+    { value: 'latest', label: '新着' },
+];
 
 export const route: Route = {
     path: '/illust/:type',
     categories: ['anime'],
     example: '/skebetter/illust/hot',
-    parameters: { type: 'Type, see below' },
+    parameters: { type: { description: 'Type, see below', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,9 +51,11 @@ export const route: Route = {
             target: '/illust/latest',
         },
     ],
-    description: `| 急上昇 | 週間 | 月間  | 新着   |
-| ------ | ---- | ----- | ------ |
-| hot    | week | month | latest |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

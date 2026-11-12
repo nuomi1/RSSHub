@@ -5,6 +5,12 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'events', label: '学术讲座' },
+    { value: 'notes', label: '通知公告' },
+];
 
 const host = 'https://www.shmtu.edu.cn';
 
@@ -33,7 +39,7 @@ export const route: Route = {
     path: '/www/:type',
     categories: ['university'],
     example: '/shmtu/www/events',
-    parameters: { type: '类型名称' },
+    parameters: { type: { description: '类型名称', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -55,9 +61,11 @@ export const route: Route = {
     name: '官网信息',
     maintainers: ['imbytecat', 'simonsmh'],
     handler,
-    description: `| 学术讲座 | 通知公告 |
-| -------- | -------- |
-| events   | notes    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型名称',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

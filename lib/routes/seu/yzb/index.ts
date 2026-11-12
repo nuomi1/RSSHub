@@ -7,12 +7,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '6676', label: '硕士招生' },
+    { value: '6677', label: '博士招生' },
+    { value: '6679', label: '港澳台及中外合作办学' },
+];
 
 export const route: Route = {
     path: '/yzb/:type',
     categories: ['university'],
     example: '/seu/yzb/6676',
-    parameters: { type: '分类名，见下表' },
+    parameters: { type: { description: '分类名，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +36,11 @@ export const route: Route = {
     name: '研究生招生网通知公告',
     maintainers: ['fuzy112'],
     handler,
-    description: `| 硕士招生 | 博士招生 | 港澳台及中外合作办学 |
-| -------- | -------- | -------------------- |
-| 6676     | 6677     | 6679                 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 interface CatalogCollege {

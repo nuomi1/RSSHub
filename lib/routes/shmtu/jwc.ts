@@ -5,7 +5,13 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'jwgg', label: '教务公告' },
+    { value: 'jwxw', label: '教务新闻' },
+];
 
 const host = 'https://jwc.shmtu.edu.cn';
 
@@ -33,7 +39,7 @@ export const route: Route = {
     path: '/jwc/:type',
     categories: ['university'],
     example: '/shmtu/jwc/jwgg',
-    parameters: { type: '类型名称' },
+    parameters: { type: { description: '类型名称', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -50,9 +56,11 @@ export const route: Route = {
     name: '教务信息',
     maintainers: ['imbytecat', 'simonsmh'],
     handler,
-    description: `| 教务公告 | 教务新闻 |
-| -------- | -------- |
-| jwgg     | jwxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型名称',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

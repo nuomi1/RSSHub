@@ -5,7 +5,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'zyxw', label: '重要新闻' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 const noticeType = {
     tzgg: { title: '上海大学 - 通知公告', url: 'https://www.shu.edu.cn/tzgg.htm' },
@@ -16,7 +23,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/shu/news/tzgg',
-    parameters: { type: '分类，默认为通知公告' },
+    parameters: { type: { description: '分类，默认为通知公告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,13 +42,15 @@ export const route: Route = {
     maintainers: ['lonelyion', 'GhhG123'],
     handler,
     url: 'www.shu.edu.cn/',
-    description: `| 通知公告 | 重要新闻 |
-| -------- | -------- |
-| tzgg     | zyxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const rootUrl = 'https://www.shu.edu.cn';
 
     // 发起 HTTP GET 请求

@@ -3,8 +3,15 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import util from './utils';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '研究生' },
+    { value: '2', label: '博士生' },
+];
+const TYPE_OPTIONS_DEFAULT = '1';
 
 const map = new Map([
     [1, { title: '硕士招生 - 深圳大学研究生招生网' }],
@@ -15,7 +22,7 @@ export const route: Route = {
     path: '/yz/:type?',
     categories: ['university'],
     example: '/szu/yz/1',
-    parameters: { type: '默认为 `1`' },
+    parameters: { type: { description: '默认为 `1`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +34,11 @@ export const route: Route = {
     name: '研究生招生网',
     maintainers: ['NagaruZ'],
     handler,
-    description: `| 研究生 | 博士生 |
-| ------ | ------ |
-| 1      | 2      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

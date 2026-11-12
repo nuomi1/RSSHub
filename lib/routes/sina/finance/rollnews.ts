@@ -1,15 +1,28 @@
 import pMap from 'p-map';
 
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getRollNewsList, parseArticle, parseRollNewsList } from '../utils';
+
+const LID_OPTIONS = [
+    { value: '2519', label: '财经' },
+    { value: '2671', label: '股市' },
+    { value: '2672', label: '美股' },
+    { value: '2673', label: '中国概念股' },
+    { value: '2674', label: '港股' },
+    { value: '2675', label: '研究报告' },
+    { value: '2676', label: '全球市场' },
+    { value: '2487', label: '外汇' },
+];
+const LID_OPTIONS_DEFAULT = '2519';
 
 export const route: Route = {
     path: '/finance/rollnews/:lid?',
     categories: ['new-media'],
     example: '/sina/finance/rollnews',
-    parameters: { lid: '分区 id，见下表，默认为 `2519`' },
+    parameters: { lid: { description: '分区 id，见下表，默认为 `2519`', options: LID_OPTIONS, default: LID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +41,11 @@ export const route: Route = {
     maintainers: ['betterandbetterii'],
     handler,
     url: 'finance.sina.com.cn/roll',
-    description: `| 财经 | 股市 | 美股 | 中国概念股 | 港股 | 研究报告 | 全球市场 | 外汇 |
-| ---- | ---- | ---- | ---------- | ---- | -------- | -------- | ---- |
-| 2519 | 2671 | 2672 | 2673       | 2674 | 2675     | 2676     | 2487 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lid',
+        description: '分区 id',
+        options: LID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
@@ -46,7 +61,7 @@ async function handler(ctx) {
     };
 
     const pageid = '384';
-    const { lid = '2519' } = ctx.req.param();
+    const { lid = LID_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 50);
     const response = await getRollNewsList(pageid, lid, limit);
     const list = parseRollNewsList(response.data.result.data);

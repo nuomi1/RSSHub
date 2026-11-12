@@ -5,6 +5,12 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '1793', label: '硕士统考招生' },
+    { value: 'sstmzs', label: '硕士推免招生' },
+];
 
 const campusGot = got.extend({ allowH2: false });
 
@@ -13,7 +19,7 @@ export const route: Route = {
     path: '/gs/:type',
     categories: ['university'],
     example: '/sass/gs/1793',
-    parameters: { type: '类别 ID，见下表，其他未列出的栏目参数可以从页面的 URL Path 中找到，例如：硕士统考招生的网址为 `https://gs.sass.org.cn/1793/list.htm`，则类别 ID 为`1793`' },
+    parameters: { type: { description: '类别 ID，见下表，其他未列出的栏目参数可以从页面的 URL Path 中找到，例如：硕士统考招生的网址为 `https://gs.sass.org.cn/1793/list.htm`，则类别 ID 为`1793`', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +36,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['yanbot-team'],
     handler,
-    description: `| 硕士统考招生 | 硕士推免招生 |
-| ------------ | ------------ |
-| 1793         | sstmzs       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类别 ID',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

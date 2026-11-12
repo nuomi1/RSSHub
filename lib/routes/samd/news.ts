@@ -5,15 +5,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const dict = { '434': '行业资讯', '436': '协会动态', '438': '重要通知', '440': '政策法规' };
+
+const TYPE_ID_OPTIONS = Object.entries(dict).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/news/:typeId',
     categories: ['government'],
     example: '/samd/news/440',
-    parameters: { typeId: '文章类型ID，见下表' },
+    parameters: { typeId: { description: '文章类型ID，见下表', options: TYPE_ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +25,11 @@ export const route: Route = {
         supportPodcast: false,
         supportScihub: false,
     },
-    description: `| 行业资讯 | 协会动态 | 重要通知 | 政策法规 |
-| -------- | -------- | -------- | -------- |
-| 434      | 436      | 438      | 440      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'typeId',
+        description: '文章类型ID',
+        options: TYPE_ID_OPTIONS,
+    }),
     name: '资讯信息',
     maintainers: ['hualiong'],
     handler: async (ctx) => {

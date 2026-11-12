@@ -4,13 +4,20 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CODE_OPTIONS = [
+    { value: '代码', label: '栏目' },
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'xytz', label: '学院通知' },
+];
 
 export const route: Route = {
     path: '/cjxy/:code',
     categories: ['university'],
     example: '/swpu/cjxy/xyxw',
-    parameters: { code: '栏目代码' },
+    parameters: { code: { description: '栏目代码', options: CODE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +36,11 @@ export const route: Route = {
     maintainers: ['RiverTwilight'],
     handler,
     url: 'swpu.edu.cn/',
-    description: `| 栏目 | 学院新闻 | 学院通知 |
-| ---- | -------- | -------- |
-| 代码 | xyxw     | xytz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'code',
+        description: '栏目代码',
+        options: CODE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

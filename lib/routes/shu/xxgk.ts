@@ -5,7 +5,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'dwjlxm', label: '对外交流项目' },
+    { value: 'hzjl', label: '合作交流' },
+];
+const TYPE_OPTIONS_DEFAULT = 'dwjlxm';
 
 const noticeType = {
     dwjlxm: { title: '上海大学信息公开网-信息公开栏目-国际合作与交流-对外交流项目', url: 'https://xxgk.shu.edu.cn/xxgklm/gjhzyjl1/dwjlxm.htm' }, // 对外交流项目
@@ -16,7 +23,7 @@ export const route: Route = {
     path: '/xxgk/:type?',
     categories: ['university'],
     example: '/shu/xxgk/dwjlxm',
-    parameters: { type: '分类，默认为对外交流项目' },
+    parameters: { type: { description: '分类，默认为对外交流项目', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,13 +42,15 @@ export const route: Route = {
     maintainers: ['GhhG123'],
     handler,
     url: 'xxgk.shu.edu.cn/',
-    description: `| 对外交流项目 | 合作交流 |
-| ------------ | -------- |
-| dwjlxm       | hzjl     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'dwjlxm';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const rootUrl = 'https://xxgk.shu.edu.cn';
 
     // 发起 HTTP GET 请求

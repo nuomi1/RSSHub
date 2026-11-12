@@ -4,13 +4,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xwgg', label: '新闻公告' },
+    { value: 'xsbg', label: '学术报告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xwgg';
 
 export const route: Route = {
     path: '/yan/:category?',
     categories: ['university'],
     example: '/sicau/yan/xwgg',
-    parameters: { category: '分类，见下表，默认为新闻公告' },
+    parameters: { category: { description: '分类，见下表，默认为新闻公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +35,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'yan.sicau.edu.cn/',
-    description: `| 新闻公告 | 学术报告 |
-| -------- | -------- |
-| xwgg     | xsbg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'xwgg';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://yan.sicau.edu.cn';
     const currentUrl = `${rootUrl}/index/${category}.htm`;

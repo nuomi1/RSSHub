@@ -6,16 +6,33 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '0', label: '推荐' },
+    { value: '3', label: '时事日报' },
+    { value: '6', label: '时事专题' },
+    { value: '13', label: '备考技巧' },
+    { value: '12', label: '招考信息' },
+    { value: '4', label: '时事月报' },
+    { value: '10', label: '重要会议' },
+    { value: '11', label: '领导讲话' },
+    { value: '5', label: '时事周刊' },
+    { value: '8', label: '官网公告' },
+    { value: '7', label: '时事评论' },
+];
 
 export const route: Route = {
     path: '/article/:id?',
     categories: ['new-media'],
     example: '/ssydt/article',
-    parameters: { id: 'id，见下表，默认为推荐' },
-    description: `| 推荐 | 时事日报 | 时事专题 | 备考技巧 | 招考信息 | 时事月报 | 重要会议 | 领导讲话 | 时事周刊 | 官网公告 | 时事评论 |
-| ---- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 0    | 3        | 6        | 13       | 12       | 4        | 10       | 11       | 5        | 8        | 7        |`,
+    parameters: { id: { description: 'id，见下表，默认为推荐', options: ID_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '编号',
+        options: ID_OPTIONS,
+    }),
     name: '资讯',
     maintainers: ['nczitzk'],
     handler,

@@ -6,9 +6,17 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { joinUrl } from './utils';
+
+const CODE_OPTIONS = [
+    { value: '代码', label: '栏目' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwbd', label: '新闻报道' },
+    { value: 'sdsy', label: '视点声音' },
+];
 
 async function getArticle(link: string): Promise<Partial<DataItem>> {
     const item: Partial<DataItem> = {};
@@ -44,7 +52,7 @@ export const route: Route = {
     path: '/dean/:code',
     categories: ['university'],
     example: '/swpu/dean/tzgg',
-    parameters: { code: '栏目代码' },
+    parameters: { code: { description: '栏目代码', options: CODE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -63,9 +71,11 @@ export const route: Route = {
     maintainers: ['CYTMWIA'],
     handler,
     url: 'swpu.edu.cn/',
-    description: `| 栏目 | 通知公告 | 新闻报道 | 视点声音 |
-| ---- | -------- | -------- | -------- |
-| 代码 | tzgg     | xwbd     | sdsy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'code',
+        description: '栏目代码',
+        options: CODE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

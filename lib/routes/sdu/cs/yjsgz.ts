@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem } from '@/utils/wechat-mp';
 
 const host = 'https://csyh.sdu.edu.cn/';
@@ -17,11 +18,14 @@ const titleMap = {
     gsl: '公示栏',
 };
 
+const TYPE_OPTIONS = Object.entries(titleMap).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = 'zytz';
+
 export const route: Route = {
     path: '/cs/yjsgz/:type?',
     categories: ['university'],
     example: '/sdu/cs/yjsgz/zytz',
-    parameters: { type: '默认为`zytz`' },
+    parameters: { type: { description: '默认为`zytz`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,13 +37,15 @@ export const route: Route = {
     name: '计算机科学与技术学院研究生工作网站',
     maintainers: ['kukeya', 'wiketool'],
     handler,
-    description: `| 重要通知 | 公示栏 |
-| -------- | ------ |
-| zytz     | gsl    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'zytz';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
 
     const link = new URL(typeMap[type], host).href;
 

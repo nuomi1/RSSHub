@@ -5,14 +5,22 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { renderDescription } from './templates/description';
+
+const LANGUAGE_OPTIONS = [
+    { value: '', label: 'English' },
+    { value: 'zh-CN', label: 'Chinese' },
+    { value: 'ja', label: 'Japanese' },
+    { value: 'ko', label: 'Korean' },
+];
 
 export const route: Route = {
     path: '/blog/:language?',
     categories: ['new-media'],
     example: '/sensortower/blog',
-    parameters: { language: 'Language, see below, English by default' },
+    parameters: { language: { description: 'Language, see below, English by default', options: LANGUAGE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,9 +51,11 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'sensortower.com/blog',
-    description: `| English | Chinese | Japanese | Korean |
-| ------- | ------- | -------- | ------ |
-|         | zh-CN   | ja       | ko     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: 'Language',
+        options: LANGUAGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -7,13 +7,28 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'work', label: '夥伴聊聊' },
+    { value: 'talk', label: '專案設計' },
+    { value: 'news', label: '國內外新聞' },
+    { value: 'politics', label: '政治百分百' },
+    { value: 'society', label: '社會觀察家' },
+    { value: 'psychology-philosophy', label: '心理與哲學' },
+    { value: 'science', label: '科學大探索' },
+    { value: 'environment-health', label: '環境與健康' },
+    { value: 'acg', label: 'ACG 快樂聊' },
+    { value: 'book-sharing', label: '好書籍分享' },
+    { value: 'other-topics', label: '其它主題' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/simpleinfo',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,17 +50,11 @@ export const route: Route = {
     name: '志祺七七',
     maintainers: ['haukeng'],
     handler,
-    description: `| 夥伴聊聊 | 專案設計 |
-| -------- | -------- |
-| work     | talk     |
-
-| 國內外新聞 | 政治百分百 | 社會觀察家 | 心理與哲學            |
-| ---------- | ---------- | ---------- | --------------------- |
-| news       | politics   | society    | psychology-philosophy |
-
-| 科學大探索 | 環境與健康         | ACG 快樂聊 | 好書籍分享   | 其它主題     |
-| ---------- | ------------------ | ---------- | ------------ | ------------ |
-| science    | environment-health | acg        | book-sharing | other-topics |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

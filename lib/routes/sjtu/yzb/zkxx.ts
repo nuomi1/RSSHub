@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { fetchArticle } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'bszs', label: '博士招生' },
+    { value: 'sszs', label: '硕士招生' },
+    { value: 'gatzs', label: '港澳台招生' },
+    { value: 'kdxx', label: '考点信息' },
+    { value: 'yxdt', label: '院系动态' },
+];
 
 const baseTitle = '上海交通大学研究生招生网招考信息';
 const baseUrl = 'https://yzb.sjtu.edu.cn/zkxx/';
@@ -14,7 +23,7 @@ export const route: Route = {
     path: '/yzb/zkxx/:type',
     categories: ['university'],
     example: '/sjtu/yzb/zkxx/sszs',
-    parameters: { type: '无默认选项' },
+    parameters: { type: { description: '无默认选项', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +35,11 @@ export const route: Route = {
     name: '研究生招生网招考信息',
     maintainers: ['stdrc'],
     handler,
-    description: `| 博士招生 | 硕士招生 | 港澳台招生 | 考点信息 | 院系动态 |
-| -------- | -------- | ---------- | -------- | -------- |
-| bszs     | sszs     | gatzs      | kdxx     | yxdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -5,13 +5,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xydt', label: '学院动态' },
+    { value: 'jxgl', label: '教学管理' },
+    { value: 'dkdjt', label: '动科大讲堂' },
+    { value: 'zpxx', label: '就业信息' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg';
 
 export const route: Route = {
     path: '/dky/:category?',
     categories: ['university'],
     example: '/sicau/dky/tzgg',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,13 +39,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'dky.sicau.edu.cn/',
-    description: `| 通知公告 | 学院动态 | 教学管理 | 动科大讲堂 | 就业信息 |
-| -------- | -------- | -------- | ---------- | -------- |
-| tzgg     | xydt     | jxgl     | dkdjt      | zpxx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'tzgg';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://dky.sicau.edu.cn';
     const currentUrl = `${rootUrl}/${category}.htm`;

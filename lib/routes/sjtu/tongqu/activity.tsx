@@ -2,6 +2,24 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'newest', label: '最新' },
+    { value: 'recruitment', label: '招新' },
+    { value: 'lecture', label: '讲座' },
+    { value: 'outdoors', label: '户外' },
+    { value: 'jobs', label: '招聘' },
+    { value: 'studyTours', label: '游学' },
+    { value: 'competitions', label: '比赛' },
+    { value: 'publicWarefare', label: '公益' },
+    { value: 'partyDay', label: '主题党日' },
+    { value: 'studentAffairs', label: '学生事务' },
+    { value: 'ads', label: '广告' },
+    { value: 'others', label: '其他' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 const urlRoot = 'https://tongqu.sjtu.edu.cn';
 
@@ -9,7 +27,7 @@ export const route: Route = {
     path: '/tongqu/:type?',
     categories: ['university'],
     example: '/sjtu/tongqu/lecture',
-    parameters: { type: '类型，默认为全部' },
+    parameters: { type: { description: '类型，默认为全部', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,13 +39,15 @@ export const route: Route = {
     name: '同去网最新活动',
     maintainers: ['SeanChao'],
     handler,
-    description: `| 全部 | 最新   | 招新        | 讲座    | 户外     | 招聘 | 游学       | 比赛         | 公益           | 主题党日 | 学生事务       | 广告 | 其他   |
-| ---- | ------ | ----------- | ------- | -------- | ---- | ---------- | ------------ | -------------- | -------- | -------------- | ---- | ------ |
-| all  | newest | recruitment | lecture | outdoors | jobs | studyTours | competitions | publicWarefare | partyDay | studentAffairs | ads  | others |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'all';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     const config = {
         all: 0,
         newest: -1,

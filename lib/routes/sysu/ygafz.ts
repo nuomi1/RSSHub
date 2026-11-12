@@ -5,13 +5,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'jobopening', label: '人才招聘' },
+    { value: 'personnelplan', label: '人才培养' },
+    { value: 'news', label: '新闻动态' },
+    { value: 'notice', label: '通知公告' },
+    { value: 'opinion', label: '专家观点' },
+    { value: 'results', label: '研究成果' },
+    { value: 'papers', label: '研究论文' },
+    { value: 'writings', label: '学术著作' },
+    { value: 'policy', label: '形势政策' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 export const route: Route = {
     path: '/ygafz/:type?',
     categories: ['university'],
     example: '/sysu/ygafz',
-    parameters: { type: '分类，见下表，默认为 `notice`' },
+    parameters: { type: { description: '分类，见下表，默认为 `notice`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,19 +40,17 @@ export const route: Route = {
         },
     ],
     name: '粤港澳发展研究院',
-    description: `| 人才招聘   | 人才培养      | 新闻动态 | 通知公告 | 专家观点 |
-| ---------- | ------------- | -------- | -------- | -------- |
-| jobopening | personnelplan | news     | notice   | opinion  |
-
-| 研究成果 | 研究论文 | 学术著作 | 形势政策 |
-| -------- | -------- | -------- | -------- |
-| results  | papers   | writings | policy   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     maintainers: ['TonyRL'],
     handler,
 };
 
 async function handler(ctx) {
-    const { type = 'notice' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://ygafz.sysu.edu.cn';
     const url = `${baseUrl}/${type}`;
 

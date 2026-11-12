@@ -5,14 +5,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const LIST_ID_OPTIONS = [
+    { value: '897', label: '学生专栏' },
+    { value: '898', label: '教师专栏' },
+];
 
 export const route: Route = {
     path: '/jwc/:listId',
     categories: ['university'],
     example: '/sspu/jwc/897',
-    parameters: { listId: '专栏 ID，见下表' },
+    parameters: { listId: { description: '专栏 ID，见下表', options: LIST_ID_OPTIONS } },
     radar: [
         {
             source: ['jwc.sspu.edu.cn/:listId/list.htm'],
@@ -22,9 +28,11 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 学生专栏 | 教师专栏 |
-| -------- | -------- |
-| 897      | 898      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'listId',
+        description: '专栏 ID',
+        options: LIST_ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

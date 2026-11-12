@@ -5,6 +5,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'zstz', label: '招生拓展' },
+    { value: 'zcwj', label: '政策文件' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 const host = 'https://www.yz.sdu.edu.cn';
 
@@ -12,7 +20,7 @@ export const route: Route = {
     path: '/yz/:type?',
     categories: ['university'],
     example: '/sdu/yz/tzgg',
-    parameters: { type: '默认为`tzgg`' },
+    parameters: { type: { description: '默认为`tzgg`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,13 +32,15 @@ export const route: Route = {
     name: '研究生招生信息网',
     maintainers: ['niuyi1017'],
     handler,
-    description: `| 通知公告 | 招生拓展 | 政策文件 |
-| -------- | -------- | -------- |
-| tzgg     | zstz     | zcwj     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const pageUrl = `${host}/index/${type}.htm`;
 
     const response = await got(pageUrl);

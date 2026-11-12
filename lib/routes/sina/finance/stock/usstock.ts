@@ -3,15 +3,24 @@ import pMap from 'p-map';
 import type { DataItem, Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { parseArticle } from '../../utils';
+
+const CIDS_OPTIONS = [
+    { value: '57045', label: '最新报道' },
+    { value: '57046', label: '中概股' },
+    { value: '56409', label: '国际财经' },
+    { value: '40811', label: '互联网' },
+];
+const CIDS_OPTIONS_DEFAULT = '57045';
 
 export const route: Route = {
     path: '/finance/stock/usstock/:cids?',
     categories: ['new-media'],
     example: '/sina/finance/stock/usstock',
-    parameters: { cids: '分区 id，见下表，默认为 `57045`' },
+    parameters: { cids: { description: '分区 id，见下表，默认为 `57045`', options: CIDS_OPTIONS, default: CIDS_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,13 +39,15 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'finance.sina.com.cn/stock/usstock',
-    description: `| 最新报道 | 中概股 | 国际财经 | 互联网 |
-| -------- | ------ | -------- | ------ |
-| 57045    | 57046  | 56409    | 40811  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'cids',
+        description: '分区 id',
+        options: CIDS_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { cids = '57045' } = ctx.req.param();
+    const { cids = CIDS_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 50);
     const { data: response } = await got('https://interface.sina.cn/pc_api/public_news_data.d.json', {
         searchParams: {

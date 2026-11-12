@@ -1,9 +1,21 @@
 import pMap from 'p-map';
 
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getRollNewsList, parseArticle, parseRollNewsList } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'zx', label: '最新' },
+    { value: 'twhk', label: '天文航空' },
+    { value: 'dwzw', label: '动物植物' },
+    { value: 'zrdl', label: '自然地理' },
+    { value: 'lskg', label: '历史考古' },
+    { value: 'smyx', label: '生命医学' },
+    { value: 'shbk', label: '生活百科' },
+    { value: 'kjqy', label: '科技前沿' },
+];
 
 const link = 'https://tech.sina.com.cn/discovery/';
 const map = new Map([
@@ -21,7 +33,7 @@ export const route: Route = {
     path: '/discovery/:type',
     categories: ['new-media'],
     example: '/sina/discovery/zx',
-    parameters: { type: '订阅分区类型，见下表' },
+    parameters: { type: { description: '订阅分区类型，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +45,11 @@ export const route: Route = {
     name: '科技 - 科学探索',
     maintainers: ['LogicJake'],
     handler,
-    description: `| 最新 | 天文航空 | 动物植物 | 自然地理 | 历史考古 | 生命医学 | 生活百科 | 科技前沿 |
-| ---- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| zx   | twhk     | dwzw     | zrdl     | lskg     | smyx     | shbk     | kjqy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '订阅分区类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

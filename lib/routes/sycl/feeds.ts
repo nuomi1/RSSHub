@@ -1,12 +1,21 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const FEED_OPTIONS = [
+    { value: 'events', label: 'Events' },
+    { value: 'news', label: 'News' },
+    { value: 'research_papers', label: 'Research Paper' },
+    { value: 'videos', label: 'Videos' },
+];
+const FEED_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/:feed?',
     categories: ['programming'],
     example: '/sycl/news',
-    parameters: { feed: 'Feed source, defaults to news, references https://feeds.sycl.tech/' },
+    parameters: { feed: { description: 'Feed source, defaults to news, references https://feeds.sycl.tech/', options: FEED_OPTIONS, default: FEED_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -18,14 +27,16 @@ export const route: Route = {
     name: 'Feeds',
     maintainers: ['mocusez'],
     handler,
-    description: `| Events | News |  Research Paper  | Videos |
-| :----: | :--: | :--------------: | :----: |
-| events | news | research\\_papers | videos |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'feed',
+        description: 'Feed source',
+        options: FEED_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const feeds: string[] = ['news', 'events', 'research_papers', 'videos'];
-    let { feed = 'news' } = ctx.req.param();
+    let { feed = FEED_OPTIONS_DEFAULT } = ctx.req.param();
     if (!feeds.includes(feed)) {
         feed = 'news';
     }

@@ -6,6 +6,18 @@ import cache from '@/utils/cache';
 // 导入必要的模组
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'gwxx', label: '公务信息' },
+    { value: 'djgz', label: '党建工作' },
+    { value: 'rsgz', label: '人事工作' },
+    { value: 'xsgz', label: '学生工作' },
+    { value: 'kysys', label: '科研实验室' },
+    { value: 'bksjw', label: '本科生教务' },
+    { value: 'yjsjw', label: '研究生教务' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'yjsjw';
 
 const categoryMap = {
     gwxx: { title: '公务信息', tag: '20616' },
@@ -21,7 +33,7 @@ export const route: Route = {
     path: '/smae/:category?',
     categories: ['university'],
     example: '/scut/smae/yjsjw',
-    parameters: { category: '通知分类，默认为 `yjsjw`' },
+    parameters: { category: { description: '通知分类，默认为 `yjsjw`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,15 +45,17 @@ export const route: Route = {
     name: '机械与汽车工程学院 - 通知公告',
     maintainers: ['Ermaotie'],
     handler,
-    description: `| 公务信息 | 党建工作 | 人事工作 | 学生工作 | 科研实验室 | 本科生教务 | 研究生教务 |
-| -------- | -------- | -------- | -------- | ---------- | ---------- | ---------- |
-| gwxx     | djgz     | rsgz     | xsgz     | kysys      | bksjw      | yjsjw      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '通知分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const baseUrl = 'http://www2.scut.edu.cn';
 
-    const categoryName = ctx.req.param('category') || 'yjsjw';
+    const categoryName = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     const categoryMeta = categoryMap[categoryName];
     const url = `${baseUrl}/smae/${categoryMeta.tag}/list.htm`;
 

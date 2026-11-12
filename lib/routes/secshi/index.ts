@@ -4,6 +4,17 @@ import type { Context } from 'hono';
 import type { Data, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '1', label: '电影' },
+    { value: '2', label: '电视剧' },
+    { value: '3', label: '动漫' },
+    { value: '4', label: '综艺' },
+    { value: '5', label: '短剧' },
+    { value: '30', label: '网飞' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '1';
 
 const isExpiredCertificate = (error: unknown): error is Error => error instanceof Error && (('code' in error && error.code === 'CERT_HAS_EXPIRED') || isExpiredCertificate(error.cause));
 
@@ -45,10 +56,12 @@ export const route: Route = {
     path: '/:category?',
     categories: ['multimedia'],
     example: '/secshi',
-    parameters: { category: '分类，见下表，默认为 `1`' },
-    description: `| 电影 | 电视剧 | 动漫 | 综艺 | 短剧 | 网飞 |
-| ---- | ------ | ---- | ---- | ---- | ---- |
-| 1    | 2      | 3    | 4    | 5    | 30   |`,
+    parameters: { category: { description: '分类，见下表，默认为 `1`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     features: {
         antiCrawler: true,
         requirePuppeteer: true,
@@ -60,7 +73,7 @@ export const route: Route = {
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { category = '1' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://www.secshi.com';
     const link = `${baseUrl}/go/${category}.html`;
 

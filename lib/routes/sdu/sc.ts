@@ -5,6 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '通知公告' },
+    { value: '1', label: '学术动态' },
+    { value: '2', label: '本科教育' },
+    { value: '3', label: '研究生教育' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const host = 'https://www.sc.sdu.edu.cn/';
 const typelist = ['通知公告', '学术动态', '本科教育', '研究生教育'];
@@ -14,7 +23,7 @@ export const route: Route = {
     path: '/sc/:type?',
     categories: ['university'],
     example: '/sdu/sc/0',
-    parameters: { type: '默认为 `0`' },
+    parameters: { type: { description: '默认为 `0`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +35,11 @@ export const route: Route = {
     name: '软件学院通知',
     maintainers: ['Ji4n1ng'],
     handler,
-    description: `| 通知公告 | 学术动态 | 本科教育 | 研究生教育 |
-| -------- | -------- | -------- | ---------- |
-| 0        | 1        | 2        | 3          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

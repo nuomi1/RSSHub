@@ -5,7 +5,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'whxx', label: '文化信息' },
+    { value: 'xsbg', label: '学术报告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'xsbg';
 
 const noticeType = {
     whxx: { title: '上海大学 - 文化信息', url: 'https://www.shu.edu.cn/xnrc/whxx.htm' },
@@ -16,7 +23,7 @@ export const route: Route = {
     path: '/xykd/:type?',
     categories: ['university'],
     example: '/shu/xykd/xsbg',
-    parameters: { type: '分类，默认为学术报告' },
+    parameters: { type: { description: '分类，默认为学术报告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,13 +42,15 @@ export const route: Route = {
     maintainers: ['GhhG123'],
     handler,
     url: 'www.shu.edu.cn/',
-    description: `| 文化信息 | 学术报告 |
-| -------- | -------- |
-| whxx     | xsbg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'xsbg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const rootUrl = 'https://www.shu.edu.cn';
 
     // 发起 HTTP GET 请求

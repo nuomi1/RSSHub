@@ -7,7 +7,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 const listUrl = 'https://it.swufe.edu.cn/index/';
 
@@ -20,7 +27,7 @@ export const route: Route = {
     path: '/seie/:type?',
     categories: ['university'],
     example: '/swufe/seie/tzgg',
-    parameters: { type: '分类名，默认为 tzgg' },
+    parameters: { type: { description: '分类名，默认为 tzgg', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         { source: ['it.swufe.edu.cn/index/tzgg.htm'], target: '/seie/tzgg' },
         { source: ['it.swufe.edu.cn/index/xyxw.htm'], target: '/seie/xyxw' },
@@ -28,9 +35,11 @@ export const route: Route = {
     name: '计算机与人工智能学院',
     maintainers: ['Hivol'],
     handler,
-    description: `| 学院新闻 | 通知公告 |
-| -------- | -------- |
-| xyxw     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function getArticle(link: string): Promise<Pick<DataItem, 'description' | 'pubDate'>> {
@@ -52,7 +61,7 @@ async function getArticle(link: string): Promise<Pick<DataItem, 'description' | 
 }
 
 async function handler(ctx: Context) {
-    const { type = 'tzgg' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const column = map.get(type);
     if (!column) {
         throw new InvalidParameterError('Unsupported column. Use xyxw or tzgg.');

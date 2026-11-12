@@ -6,13 +6,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jwxx', label: '教务信息' },
+    { value: 'jyxx', label: '就业信息' },
+    { value: 'xgsw', label: '学工事务' },
+];
+const TYPE_OPTIONS_DEFAULT = 'xyxw';
 
 export const route: Route = {
     path: '/cse/:type?',
     categories: ['university'],
     example: '/seu/cse/xyxw',
-    parameters: { type: '分类名，默认为 `xyxw`' },
+    parameters: { type: { description: '分类名，默认为 `xyxw`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +39,11 @@ export const route: Route = {
     name: '计算机科学与工程学院',
     maintainers: ['LogicJake'],
     handler,
-    description: `| 学院新闻 | 通知公告 | 教务信息 | 就业信息 | 学工事务 |
-| -------- | -------- | -------- | -------- | -------- |
-| xyxw     | tzgg     | jwxx     | jyxx     | xgsw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

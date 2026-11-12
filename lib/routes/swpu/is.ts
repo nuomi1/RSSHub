@@ -5,13 +5,23 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CODE_OPTIONS = [
+    { value: '代码', label: '栏目' },
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jyjx', label: '教育教学' },
+    { value: 'xsgz', label: '学生工作' },
+    { value: 'zsjy', label: '招生就业' },
+];
 
 export const route: Route = {
     path: '/is/:code',
     categories: ['university'],
     example: '/swpu/is/xyxw',
-    parameters: { code: '栏目代码' },
+    parameters: { code: { description: '栏目代码', options: CODE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -36,9 +46,11 @@ export const route: Route = {
     maintainers: ['RiverTwilight'],
     handler,
     url: 'swpu.edu.cn/',
-    description: `| 栏目 | 学院新闻 | 通知公告 | 教育教学 | 学生工作 | 招生就业 |
-| ---- | -------- | -------- | -------- | -------- | -------- |
-| 代码 | xyxw     | tzgg     | jyjx     | xsgz     | zsjy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'code',
+        description: '栏目代码',
+        options: CODE_OPTIONS,
+    }),
 };
 
 async function getArticle(link: string): Promise<Pick<DataItem, 'author' | 'description'>> {

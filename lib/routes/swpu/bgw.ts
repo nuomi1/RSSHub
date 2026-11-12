@@ -6,15 +6,23 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { joinUrl } from './utils';
+
+const CODE_OPTIONS = [
+    { value: '代码', label: '栏目' },
+    { value: 'zytzgg', label: '重要通知公告' },
+    { value: 'bmtzgg', label: '部门通知公告' },
+    { value: 'bzhd', label: '本周活动' },
+];
 
 export const route: Route = {
     path: '/bgw/:code',
     categories: ['university'],
     example: '/swpu/bgw/zytzgg',
-    parameters: { code: '栏目代码' },
+    parameters: { code: { description: '栏目代码', options: CODE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +41,11 @@ export const route: Route = {
     maintainers: ['CYTMWIA'],
     handler,
     url: 'swpu.edu.cn/',
-    description: `| 栏目 | 重要通知公告 | 部门通知公告 | 本周活动 |
-| ---- | ------------ | ------------ | -------- |
-| 代码 | zytzgg       | bmtzgg       | bzhd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'code',
+        description: '栏目代码',
+        options: CODE_OPTIONS,
+    }),
 };
 
 async function getArticle(link: string): Promise<Pick<DataItem, 'author' | 'description'>> {

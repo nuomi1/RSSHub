@@ -5,7 +5,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '通知公告' },
+    { value: '1', label: '院所新闻' },
+    { value: '2', label: '教学信息' },
+    { value: '3', label: '学术动态' },
+    { value: '4', label: '学院简报' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const typelist = ['通知公告', '院所新闻', '教学信息', '学术动态', '学院简报'];
 const urlList = ['xwdt/tzgg.htm', 'xwdt/ysxw.htm', 'xwdt/jxxx.htm', 'xwdt/xsdt.htm', 'xwdt/xyjb.htm'];
@@ -15,7 +25,7 @@ export const route: Route = {
     path: '/mech/:type?',
     categories: ['university'],
     example: '/sdu/mech/0',
-    parameters: { type: '默认为 `0`' },
+    parameters: { type: { description: '默认为 `0`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +37,11 @@ export const route: Route = {
     name: '机械工程学院通知',
     maintainers: ['Ji4n1ng'],
     handler,
-    description: `| 通知公告 | 院所新闻 | 教学信息 | 学术动态 | 学院简报 |
-| -------- | -------- | -------- | -------- | -------- |
-| 0        | 1        | 2        | 3        | 4        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

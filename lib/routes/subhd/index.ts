@@ -6,6 +6,14 @@ import cache from '@/utils/cache';
 import { getSubPath } from '@/utils/common-utils';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'new', label: '最新字幕' },
+    { value: 'top', label: '热门字幕' },
+    { value: 'tv', label: '剧集字幕' },
+    { value: 'movie', label: '电影字幕' },
+];
 
 const defaultCategories = {
     sub: 'new',
@@ -16,7 +24,7 @@ export const route: Route = {
     path: '/sub/:category?',
     categories: ['multimedia'],
     example: '/subhd/sub/new',
-    parameters: { category: '分类，见下表，默认为最新' },
+    parameters: { category: { description: '分类，见下表，默认为最新', options: CATEGORY_OPTIONS } },
     radar: [
         {
             source: ['subhd.tv/sub/:category', 'subhd.tv/'],
@@ -24,9 +32,11 @@ export const route: Route = {
         },
     ],
     name: '字幕',
-    description: `| 最新字幕 | 热门字幕 | 剧集字幕 | 电影字幕 |
-| -------- | -------- | -------- | -------- |
-| new      | top      | tv       | movie    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     maintainers: ['laampui', 'nczitzk'],
     handler,
 };

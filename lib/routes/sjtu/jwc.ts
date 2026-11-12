@@ -5,6 +5,22 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '新闻中心' },
+    { value: 'notice', label: '通知通告' },
+    { value: 'operation', label: '教学运行' },
+    { value: 'affairs', label: '注册学务' },
+    { value: 'yjb', label: '研究办' },
+    { value: 'jgb', label: '教改办' },
+    { value: 'zhb', label: '综合办' },
+    { value: 'language', label: '语言文字' },
+    { value: 'party', label: '工会与支部' },
+    { value: 'ge', label: '通识教育' },
+    { value: 'students', label: '面向学生的通知' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 const urlRoot = 'https://jwc.sjtu.edu.cn';
 
@@ -30,7 +46,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/sjtu/jwc',
-    parameters: { type: '默认为 notice' },
+    parameters: { type: { description: '默认为 notice', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -42,13 +58,15 @@ export const route: Route = {
     name: '教务处通知公告',
     maintainers: ['SeanChao'],
     handler,
-    description: `| 新闻中心 | 通知通告 | 教学运行  | 注册学务 | 研究办 | 教改办 | 综合办 | 语言文字 | 工会与支部 | 通识教育 | 面向学生的通知 |
-| -------- | -------- | --------- | -------- | ------ | ------ | ------ | -------- | ---------- | -------- | -------------- |
-| news     | notice   | operation | affairs  | yjb    | jgb    | zhb    | language | party      | ge       | students       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'notice';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const config = {
         all: {
             section: '通知通告',

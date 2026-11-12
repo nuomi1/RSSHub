@@ -5,16 +5,32 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import data from '../data';
 import extractor from '../extractor';
 
+const COLUMN_OPTIONS = [
+    { value: 'xyyw', label: '校园要闻' },
+    { value: 'xsdt', label: '学生动态' },
+    { value: 'zhxw', label: '综合新闻' },
+    { value: 'sdsd', label: '山大视点' },
+    { value: 'jjxy', label: '菁菁校园' },
+    { value: 'xyjx', label: '校园简讯' },
+    { value: 'mjzc', label: '玛珈之窗' },
+    { value: 'rdzt', label: '热点专题' },
+    { value: 'mtsj', label: '媒体视角' },
+    { value: 'gjsy', label: '高教视野' },
+    { value: 'llxx', label: '理论学习' },
+];
+const COLUMN_OPTIONS_DEFAULT = 'xyyw';
+
 export const route: Route = {
     path: '/wh/news/:column?',
     categories: ['university'],
     example: '/sdu/wh/news/xyyw',
-    parameters: { column: '专栏名称，默认为校园要闻（`xyyw`）' },
+    parameters: { column: { description: '专栏名称，默认为校园要闻（`xyyw`）', options: COLUMN_OPTIONS, default: COLUMN_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +42,11 @@ export const route: Route = {
     name: '新闻网',
     maintainers: ['kxxt'],
     handler,
-    description: `| 校园要闻 | 学生动态 | 综合新闻 | 山大视点 | 菁菁校园 | 校园简讯 | 玛珈之窗 | 热点专题 | 媒体视角 | 高教视野 | 理论学习 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| xyyw     | xsdt     | zhxw     | sdsd     | jjxy     | xyjx     | mjzc     | rdzt     | mtsj     | gjsy     | llxx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'column',
+        description: '专栏名称',
+        options: COLUMN_OPTIONS,
+    }),
 };
 
 type ExtractedArticle = {
@@ -38,7 +56,7 @@ type ExtractedArticle = {
 };
 
 async function handler(ctx) {
-    const column = ctx.req.param('column') ?? 'xyyw';
+    const column = ctx.req.param('column') ?? COLUMN_OPTIONS_DEFAULT;
     const baseUrl = data.wh.news.url;
     const response = await got(baseUrl + data.wh.news.columns[column].url);
     const $ = load(response.data);

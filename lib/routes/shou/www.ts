@@ -6,6 +6,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const host = 'https://www.shou.edu.cn';
@@ -18,18 +19,21 @@ const dict = {
     xsjz: '学术讲座',
     xsqy: '科技前沿',
 };
+const TYPE_OPTIONS = Object.entries(dict).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/www/:type',
     categories: ['university'],
     example: '/shou/www/tzgg',
-    parameters: { type: '消息类型' },
+    parameters: { type: { description: '消息类型', options: TYPE_OPTIONS } },
     name: '官网信息',
     maintainers: ['Swung0x48'],
     handler,
-    description: `| 通知公告 | 招标信息 | 要闻 | 媒体聚焦 | 学术讲座 | 科技前沿 |
-| -------- | -------- | ---- | -------- | -------- | -------- |
-| tzgg     | zbxx     | yw   | mtjj     | xsjz     | xsqy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '消息类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

@@ -5,7 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notice', label: '通知通告' },
+    { value: 'news', label: '新闻' },
+    { value: 'policy', label: '政策文件 (bug)' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 const host = 'https://jwb.shu.edu.cn/';
 const alias = new Map([
@@ -18,7 +26,7 @@ export const route: Route = {
     path: '/jwb/:type?',
     categories: ['university'],
     example: '/shu/jwb/notice',
-    parameters: { type: '消息类型,默认为`notice`' },
+    parameters: { type: { description: '消息类型,默认为`notice`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['jwb.shu.edu.cn/index/tzgg.htm'],
@@ -32,9 +40,11 @@ export const route: Route = {
     name: '教务部',
     maintainers: ['tuxinghuan', 'GhhG123'],
     handler,
-    description: `| 通知通告 | 新闻 | 政策文件 (bug) |
-| -------- | ---- | -------------- |
-| notice   | news | policy         |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '消息类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function restorePdfContent($: CheerioAPI, link: string) {
@@ -60,7 +70,7 @@ function restorePdfContent($: CheerioAPI, link: string) {
 }
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'notice';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     const link = `https://jwb.shu.edu.cn/index/${alias.get(type) || type}.htm`;
     const respond = await got.get(link);
     const $ = load(respond.data);

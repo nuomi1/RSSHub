@@ -6,12 +6,20 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '首頁' },
+    { value: 'quote', label: '大師智慧' },
+    { value: 'analysis', label: '深度分析' },
+    { value: 'trend', label: '新知介紹' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/startuplatte',
-    parameters: { category: '分类，见下表，默认为首頁' },
+    parameters: { category: { description: '分类，见下表，默认为首頁', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +36,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 首頁 | 大師智慧 | 深度分析 | 新知介紹 |
-| ---- | -------- | -------- | -------- |
-|      | quote    | analysis | trend    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -5,13 +5,25 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '3157', label: '学校要闻' },
+    { value: '3187', label: '通知' },
+    { value: '3188', label: '学术讲座' },
+    { value: '3185', label: '基层风采书院' },
+    { value: '3186', label: '基层风采院系' },
+    { value: '3199', label: '外媒报道' },
+    { value: '3200', label: '三全学院报' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '3157';
 
 export const route: Route = {
     path: '/www/:category?',
     categories: ['university'],
     example: '/sqmc/www/3157',
-    parameters: { category: '分类ID，默认为`3157`' },
+    parameters: { category: { description: '分类ID，默认为`3157`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +40,15 @@ export const route: Route = {
     name: '官网信息',
     maintainers: ['nyaShine'],
     handler,
-    description: `| 学校要闻 | 通知 | 学术讲座 | 基层风采书院 | 基层风采院系 | 外媒报道 | 三全学院报 |
-| -------- | ---- | -------- | ------------ | ------------ | -------- | ---------- |
-| 3157     | 3187 | 3188     | 3185         | 3186         | 3199     | 3200       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类ID',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') || '3157';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://www.sqmc.edu.cn';
     const currentUrl = `${rootUrl}/${category}/list.htm`;

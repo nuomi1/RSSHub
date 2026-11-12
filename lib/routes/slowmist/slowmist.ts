@@ -5,7 +5,14 @@ import type { DataItem, Route } from '@/types';
 import got from '@/utils/got';
 import logger from '@/utils/logger';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem, WeChatMpError } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '公司新闻' },
+    { value: 'vul', label: '漏洞披露' },
+    { value: 'research', label: '技术研究' },
+];
 
 const baseUrl = 'https://www.slowmist.com';
 
@@ -13,7 +20,7 @@ export const route: Route = {
     path: '/:type?',
     categories: ['new-media'],
     example: '/slowmist/research',
-    parameters: { type: '分类，见下表，默认为公司新闻' },
+    parameters: { type: { description: '分类，见下表，默认为公司新闻', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +38,11 @@ export const route: Route = {
     maintainers: ['AtlasQuan'],
     handler,
     url: 'slowmist.com/zh/news.html',
-    description: `| 公司新闻 | 漏洞披露 | 技术研究 |
-| -------- | -------- | -------- |
-| news     | vul      | research |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

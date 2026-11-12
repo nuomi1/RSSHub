@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem } from '@/utils/wechat-mp';
 
 const host = 'https://www.cs.sdu.edu.cn/';
@@ -23,11 +24,14 @@ const titleMap = {
     postgraduate: '研究生教育',
 };
 
+const TYPE_OPTIONS = Object.entries(titleMap).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = 'announcement';
+
 export const route: Route = {
     path: '/cs/index/:type?',
     categories: ['university'],
     example: '/sdu/cs/index/announcement',
-    parameters: { type: '默认为 `announcement`' },
+    parameters: { type: { description: '默认为 `announcement`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -61,13 +65,15 @@ export const route: Route = {
     name: '计算机科学与技术学院通知',
     maintainers: ['Ji4n1ng', 'wiketool'],
     handler,
-    description: `| 学院公告     | 学术报告 | 科技简讯   | 本科教育      | 研究生教育   |
-| ------------ | -------- | ---------- | ------------- | ------------ |
-| announcement | academic | technology | undergraduate | postgraduate |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'announcement';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const link = new URL(urlMap[type], host).href;
 
     const response = await got(link);

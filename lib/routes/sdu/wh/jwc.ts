@@ -5,16 +5,30 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import data from '../data';
 import extractor from '../extractor';
 
+const COLUMN_OPTIONS = [
+    { value: 'gzzd', label: '规章制度' },
+    { value: 'zyjs', label: '专业建设' },
+    { value: 'sjjx', label: '实践教学' },
+    { value: 'zbfc', label: '支部风采' },
+    { value: 'fwzn', label: '服务指南' },
+    { value: 'jwyw', label: '教务要闻' },
+    { value: 'gztz', label: '工作通知' },
+    { value: 'jwjb', label: '教务简报' },
+    { value: 'cyxz', label: '常用下载' },
+];
+const COLUMN_OPTIONS_DEFAULT = 'gztz';
+
 export const route: Route = {
     path: '/wh/jwc/:column?',
     categories: ['university'],
     example: '/sdu/wh/jwc/gztz',
-    parameters: { column: '专栏名称，默认为工作通知（`gztz`）' },
+    parameters: { column: { description: '专栏名称，默认为工作通知（`gztz`）', options: COLUMN_OPTIONS, default: COLUMN_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +40,11 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['kxxt'],
     handler,
-    description: `| 规章制度 | 专业建设 | 实践教学 | 支部风采 | 服务指南 | 教务要闻 | 工作通知 | 教务简报 | 常用下载 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| gzzd     | zyjs     | sjjx     | zbfc     | fwzn     | jwyw     | gztz     | jwjb     | cyxz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'column',
+        description: '专栏名称',
+        options: COLUMN_OPTIONS,
+    }),
 };
 
 type ExtractedArticle = {
@@ -38,7 +54,7 @@ type ExtractedArticle = {
 };
 
 async function handler(ctx) {
-    const column = ctx.req.param('column') ?? 'gztz';
+    const column = ctx.req.param('column') ?? COLUMN_OPTIONS_DEFAULT;
     const baseUrl = data.wh.jwc.url;
     const response = await got(baseUrl + data.wh.jwc.columns[column].url);
     const $ = load(response.data);

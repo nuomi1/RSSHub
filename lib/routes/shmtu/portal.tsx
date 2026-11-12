@@ -6,7 +6,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'bmtzgg', label: '部门通知公告' },
+    { value: 'xsydxhdgg', label: '学术与大型活动公告' },
+    { value: 'bmdt', label: '部门动态' },
+];
 
 const bootstrapHost = 'https://weixin.shmtu.edu.cn/dynamic/shmtuHttps';
 const host = 'https://portal.shmtu.edu.cn/api';
@@ -75,7 +82,7 @@ export const route: Route = {
     path: '/portal/:type',
     categories: ['university'],
     example: '/shmtu/portal/bmtzgg',
-    parameters: { type: '类型名称' },
+    parameters: { type: { description: '类型名称', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -92,9 +99,11 @@ export const route: Route = {
     name: '数字平台',
     maintainers: ['imbytecat'],
     handler,
-    description: `| 部门通知公告 | 学术与大型活动公告 | 部门动态 |
-| ------------ | ------------------ | -------- |
-| bmtzgg       | xsydxhdgg          | bmdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型名称',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

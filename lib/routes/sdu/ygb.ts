@@ -5,7 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'zytz', label: '重要通知' },
+    { value: 'glfw', label: '管理服务' },
+    { value: 'cxsj', label: '创新实践' },
+];
+const TYPE_OPTIONS_DEFAULT = 'zytz';
 
 const host = 'https://www.ygb.sdu.edu.cn/';
 
@@ -28,7 +36,7 @@ export const route: Route = {
     path: '/ygb/:type?',
     categories: ['university'],
     example: '/sdu/ygb/zytz',
-    parameters: { type: '默认为`zytz`' },
+    parameters: { type: { description: '默认为`zytz`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -40,13 +48,15 @@ export const route: Route = {
     name: '研工部',
     maintainers: ['kukeya'],
     handler,
-    description: `| 重要通知 | 管理服务 | 创新实践 |
-| -------- | -------- | -------- |
-| zytz     | glfw     | cxsj     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'zytz';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const link = new URL(typeMap[type].url, host).href;
 
     const response = await got(link);

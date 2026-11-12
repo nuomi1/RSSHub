@@ -4,7 +4,17 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: 'analysis', label: 'Analysis' },
+    { value: 'news', label: 'News' },
+    { value: 'transcripts', label: 'Transcripts' },
+    { value: 'press-releases', label: 'Press Releases' },
+    { value: 'related-analysis', label: 'Related Analysis' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news';
 
 const baseUrl = 'https://seekingalpha.com';
 
@@ -12,7 +22,7 @@ export const route: Route = {
     path: '/:symbol/:category?',
     categories: ['finance'],
     example: '/seekingalpha/TSM/transcripts',
-    parameters: { symbol: 'Stock symbol', category: 'Category, see below, `news` by default' },
+    parameters: { symbol: 'Stock symbol', category: { description: 'Category, see below, `news` by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         antiCrawler: true,
     },
@@ -25,9 +35,11 @@ export const route: Route = {
     name: 'Summary',
     maintainers: ['TonyRL'],
     handler,
-    description: `| Analysis | News | Transcripts | Press Releases | Related Analysis |
-| -------- | ---- | ----------- | -------------- | ---------------- |
-| analysis | news | transcripts | press-releases | related-analysis |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const getMachineCookie = () =>
@@ -52,7 +64,7 @@ const apiParams = {
 };
 
 async function handler(ctx) {
-    const { category = 'news', symbol } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT, symbol } = ctx.req.param();
     const pageUrl = `${baseUrl}/symbol/${symbol.toUpperCase()}/${category === 'transcripts' ? `earnings/${category}` : category}`;
 
     const limit = getRouteLimit(ctx, category === 'news' ? 40 : 20);

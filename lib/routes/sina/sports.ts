@@ -2,18 +2,37 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseArticle } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'volley', label: '排球' },
+    { value: 'swim', label: '游泳' },
+    { value: 'pingpang', label: '乒乓球' },
+    { value: 'badmin', label: '羽毛球' },
+    { value: 'snooker', label: '台球' },
+    { value: 'tianjing', label: '田径' },
+    { value: 'ticao', label: '体操' },
+    { value: 'winter', label: '冰雪' },
+    { value: 'sh', label: '射击' },
+    { value: 'horse', label: '马术' },
+    { value: 'kungfu', label: '拳击搏击' },
+    { value: 'ufc', label: 'UFC' },
+    { value: 'others', label: '其他' },
+];
 
 export const route: Route = {
     path: '/sports/:type',
     name: '体育',
     categories: ['sport'],
     example: '/sina/sports/volley',
-    parameters: { type: '运动类型，见下表' },
-    description: `| 排球   | 游泳 | 乒乓球   | 羽毛球 | 台球    | 田径     | 体操  | 冰雪   | 射击 | 马术  | 拳击搏击 | UFC | 其他   |
-| ------ | ---- | -------- | ------ | ------- | -------- | ----- | ------ | ---- | ----- | -------- | --- | ------ |
-| volley | swim | pingpang | badmin | snooker | tianjing | ticao | winter | sh   | horse | kungfu   | ufc | others |`,
+    parameters: { type: { description: '运动类型，见下表', options: TYPE_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '运动类型',
+        options: TYPE_OPTIONS,
+    }),
     maintainers: ['nczitzk'],
     handler,
 };

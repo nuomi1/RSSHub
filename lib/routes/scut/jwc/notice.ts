@@ -3,7 +3,19 @@ import querystring from 'node:querystring';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'course', label: '选课' },
+    { value: 'exam', label: '考试' },
+    { value: 'practice', label: '实践' },
+    { value: 'communication', label: '交流' },
+    { value: 'teacher', label: '教师' },
+    { value: 'info', label: '信息' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'all';
 
 const baseUrl = 'http://jw.scut.edu.cn';
 const refererUrl = baseUrl + '/dist/';
@@ -53,7 +65,7 @@ export const route: Route = {
     path: '/jwc/notice/:category?',
     categories: ['university'],
     example: '/scut/jwc/notice/all',
-    parameters: { category: '通知分类，默认为 `all`' },
+    parameters: { category: { description: '通知分类，默认为 `all`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -65,13 +77,15 @@ export const route: Route = {
     name: '教务处通知公告',
     maintainers: ['imkero'],
     handler,
-    description: `| 全部 | 选课   | 考试 | 实践     | 交流          | 教师    | 信息 |
-| ---- | ------ | ---- | -------- | ------------- | ------- | ---- |
-| all  | course | exam | practice | communication | teacher | info |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '通知分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const categoryName = ctx.req.param('category') || 'all';
+    const categoryName = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     const categoryMeta = categoryMap[categoryName];
 
     const qs = querystring.stringify({

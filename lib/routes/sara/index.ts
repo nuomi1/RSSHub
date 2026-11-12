@@ -4,6 +4,7 @@ import pMap from 'p-map';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const typeMap = {
     dynamic: '协会动态',
@@ -11,11 +12,13 @@ const typeMap = {
     industry: '行业动态',
 };
 
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/:type',
     categories: ['government'],
     example: '/sara/announcement',
-    parameters: { type: 'dynamic | announcement | industry' },
+    parameters: { type: { description: 'dynamic | announcement | industry', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +27,11 @@ export const route: Route = {
         supportPodcast: false,
         supportScihub: false,
     },
-    description: `| 协会动态 | 通知公告     | 行业动态 |
-| -------- | ------------ | -------- |
-| dynamic  | announcement | industry |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 
     name: '新闻资讯',
     maintainers: ['HChenZi'],

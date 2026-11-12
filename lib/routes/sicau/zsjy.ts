@@ -5,13 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'bkszs', label: '本科生招生' },
+    { value: 'yjszs', label: '研究生招生' },
+    { value: 'bysxlzn', label: '毕业生选录指南' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'bkszs';
 
 export const route: Route = {
     path: '/zsjy/:category?',
     categories: ['university'],
     example: '/sicau/zsjy/bkszs',
-    parameters: { category: '分类，见下表，默认为本科生招生' },
+    parameters: { category: { description: '分类，见下表，默认为本科生招生', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,13 +37,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'dky.sicau.edu.cn/',
-    description: `| 本科生招生 | 研究生招生 | 毕业生选录指南 |
-| ---------- | ---------- | -------------- |
-| bkszs      | yjszs      | bysxlzn        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'bkszs';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://dky.sicau.edu.cn';
     const currentUrl = `${rootUrl}/${category === 'bkszs' ? 'zsxx' : 'zsjy'}/${category}.htm`;

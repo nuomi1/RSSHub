@@ -4,7 +4,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'xttz-yjs', label: '学团通知 - 研究生' },
+    { value: 'xttz-bks', label: '学团通知 - 本科生' },
+    { value: 'xttz-tx', label: '学团通知 - 团学' },
+    { value: 'xttz-xl', label: '学团通知 - 心理' },
+    { value: 'xtyw', label: '学团要闻' },
+];
+const TYPE_OPTIONS_DEFAULT = 'xtyw';
 
 const host = 'https://www.onlineqd.sdu.edu.cn/';
 
@@ -35,7 +45,7 @@ export const route: Route = {
     path: '/qd/xszxqd/:type?',
     categories: ['university'],
     example: '/sdu/qd/xszxqd/xtyw',
-    parameters: { type: '默认为`xtyw`' },
+    parameters: { type: { description: '默认为`xtyw`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -47,13 +57,15 @@ export const route: Route = {
     name: '学生在线（青岛）',
     maintainers: ['kukeya'],
     handler,
-    description: `| 学团通知 - 研究生 | 学团通知 - 本科生 | 学团通知 - 团学 | 学团通知 - 心理 | 学团要闻 |
-| ----------------- | ----------------- | --------------- | --------------- | -------- |
-| xttz-yjs          | xttz-bks          | xttz-tx         | xttz-xl         | xtyw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'xtyw';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const link = new URL(typeMap[type].url, host).href;
 
     const response = await got(link);

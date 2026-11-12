@@ -6,15 +6,22 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { joinUrl } from './utils';
+
+const CODE_OPTIONS = [
+    { value: '代码', label: '栏目' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwsd', label: '新闻速递' },
+];
 
 export const route: Route = {
     path: '/scs/:code',
     categories: ['university'],
     example: '/swpu/scs/tzgg',
-    parameters: { code: '栏目代码' },
+    parameters: { code: { description: '栏目代码', options: CODE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,9 +46,11 @@ export const route: Route = {
     maintainers: ['CYTMWIA'],
     handler,
     url: 'swpu.edu.cn/',
-    description: `| 栏目 | 通知公告 | 新闻速递 |
-| ---- | -------- | -------- |
-| 代码 | tzgg     | xwsd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'code',
+        description: '栏目代码',
+        options: CODE_OPTIONS,
+    }),
 };
 
 async function getArticle(link: string): Promise<Pick<DataItem, 'author' | 'description' | 'updated' | 'enclosure_url' | 'enclosure_type'>> {

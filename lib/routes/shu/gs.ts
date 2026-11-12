@@ -6,7 +6,15 @@ import cache from '@/utils/cache';
 import { evaluateScriptData } from '@/utils/evaluate-script';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'zhxw', label: '综合新闻' },
+    { value: 'pygl', label: '培养管理' },
+    { value: 'gjjl', label: '国际交流' },
+];
+const TYPE_OPTIONS_DEFAULT = 'zhxw';
 
 const noticeType = {
     zhxw: { title: '上海大学研究生院-综合新闻', url: 'https://gs.shu.edu.cn/xwlb/zh.htm' }, // 综合新闻
@@ -18,7 +26,7 @@ export const route: Route = {
     path: '/gs/:type?',
     categories: ['university'],
     example: '/shu/gs/zhxw',
-    parameters: { type: '分类，默认为综合新闻' },
+    parameters: { type: { description: '分类，默认为综合新闻', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,13 +45,15 @@ export const route: Route = {
     maintainers: ['GhhG123'],
     handler,
     url: 'gs.shu.edu.cn/',
-    description: `| 综合新闻 | 培养管理 | 国际交流 |
-| -------- | -------- | -------- |
-| zhxw     | pygl     | gjjl     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'zhxw';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const rootUrl = 'https://gs.shu.edu.cn';
 
     // 发起 HTTP GET 请求
