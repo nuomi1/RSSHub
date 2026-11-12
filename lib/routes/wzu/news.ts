@@ -6,7 +6,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '温大新闻' },
+    { value: '1', label: '媒体温大' },
+    { value: '2', label: '学术温大' },
+    { value: '3', label: '通知公告' },
+    { value: '4', label: '招标信息' },
+    { value: '5', label: '学术公告' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const baseUrl = 'http://www.wzu.edu.cn/index/';
 
@@ -49,10 +60,12 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/wzu/news/0',
-    parameters: { type: '分类，见下表 默认为`0`' },
-    description: `| 温大新闻 | 媒体温大 | 学术温大 | 通知公告 | 招标信息 | 学术公告 |
-| :------: | :------: | :------: | :------: | :------: | :------: |
-|     0    |     1    |     2    |     3    |     4    |     5    |`,
+    parameters: { type: { description: '分类，见下表 默认为`0`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     name: '新闻',
     maintainers: ['Chandler-Lu'],
     handler,

@@ -7,6 +7,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const cateUrlMap = {
@@ -27,11 +28,14 @@ const cateTitleMap = {
     articlelist: '轻小说列表',
 };
 
+const CATEGORY_OPTIONS = Object.entries(cateTitleMap).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'lastupdate';
+
 export const route: Route = {
     path: '/:category?',
     categories: ['reading'],
     example: '/wenku8/lastupdate',
-    parameters: { category: '首页分类，见下表，默认为今日更新' },
+    parameters: { category: { description: '首页分类，见下表，默认为今日更新', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: [
             {
@@ -42,14 +46,16 @@ export const route: Route = {
     },
     name: '首页分类',
     maintainers: ['Fatpandac'],
-    description: `|  今日更新  | 完结全本 | 新书一览 | 动画化作品 | 热门轻小说 |  轻小说列表 |
-| :--------: | :------: | :------: | :--------: | :--------: | :---------: |
-| lastupdate | fullflag | postdate |    anime   |  allvisit  | articlelist |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '首页分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'lastupdate';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     if (!Object.hasOwn(cateUrlMap, category)) {
         throw new InvalidParameterError(`Unknown category. Supported categories: ${Object.keys(cateUrlMap).join(', ')}.`);
     }

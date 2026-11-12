@@ -6,7 +6,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '新闻动态' },
+    { value: '1', label: '学术探索' },
+    { value: '2', label: '院系风采' },
+    { value: '3', label: '通知 (全部)' },
+    { value: '4', label: '通知 (招生)' },
+    { value: '5', label: '通知 (培养)' },
+    { value: '6', label: '通知 (学位)' },
+    { value: '7', label: '通知 (质量与专业学位)' },
+    { value: '8', label: '通知 (综合)' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 class ArticleAccessError extends Error {}
 function parseCalendarDate(value: string | undefined) {
@@ -31,7 +45,7 @@ export const route: Route = {
     path: '/gs/:type?',
     categories: ['university'],
     example: '/whu/gs/0',
-    parameters: { type: '分类，默认为 `0`，具体参数见下表' },
+    parameters: { type: { description: '分类，默认为 `0`，具体参数见下表', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -50,9 +64,11 @@ export const route: Route = {
     maintainers: ['Delreyaa'],
     handler,
     url: 'gs.whu.edu.cn/index.htm',
-    description: `| 公告类型 | 新闻动态 | 学术探索 | 院系风采 | 通知 (全部) | 通知 (招生) | 通知 (培养) | 通知 (学位) | 通知 (质量与专业学位) | 通知 (综合) |
-| -------- | -------- | -------- | -------- | ----------- | ----------- | ----------- | ----------- | --------------------- | ----------- |
-| 参数     | 0        | 1        | 2        | 3           | 4           | 5           | 6           | 7                     | 8           |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const host = 'https://gs.whu.edu.cn/';

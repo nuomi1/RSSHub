@@ -9,8 +9,15 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { fetchArticle, fixArticleContent, normalizeUrl } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '学院新闻' },
+    { value: '1', label: '学术科研' },
+    { value: '2', label: '通知公告' },
+];
 
 const baseUrl = 'https://swrh.whu.edu.cn';
 function parseCalendarDate(value: string | undefined) {
@@ -110,7 +117,7 @@ export const route: Route = {
             target: '/swrh/2',
         },
     ],
-    parameters: { type: '公告类型，详见表格' },
+    parameters: { type: { description: '公告类型，详见表格', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -122,9 +129,11 @@ export const route: Route = {
     name: '水利水电学院公告',
     maintainers: ['FanofZY'],
     handler,
-    description: `| 公告类型 | 学院新闻 | 学术科研 | 通知公告 |
-| -------- | -------- | -------- | -------- |
-| 参数     | 0        | 1        | 2        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '公告类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = Number.parseInt(ctx.req.param('type'));

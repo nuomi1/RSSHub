@@ -5,12 +5,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: 'All' },
+    { value: 'articles', label: 'Articles' },
+    { value: 'briefings-statements', label: 'Briefings and Statements' },
+    { value: 'presidential-actions', label: 'Presidential Actions' },
+    { value: 'remarks', label: 'Remarks' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['government'],
     example: '/whitehouse/news',
-    parameters: { category: 'Category, see below, all by default' },
+    parameters: { category: { description: 'Category, see below, all by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +38,11 @@ export const route: Route = {
     name: 'News',
     maintainers: ['nczitzk', 'hkamran80'],
     handler,
-    description: `| All | Articles | Briefings and Statements | Presidential Actions | Remarks |
-| --- | -------- | ------------------------ | -------------------- | ------- |
-|     | articles | briefings-statements     | presidential-actions | remarks |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 function parsePublicationDate(value: string | undefined) {
     if (!value?.trim()) {

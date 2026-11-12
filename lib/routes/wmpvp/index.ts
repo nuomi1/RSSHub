@@ -5,6 +5,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const parsePublicationDate = (value: string | number | undefined, format?: string) => {
     if (typeof value !== 'number' && !value) {
@@ -13,11 +14,18 @@ const parsePublicationDate = (value: string | number | undefined, format?: strin
     const date = parseDate(value, format);
     return Number.isFinite(date.getTime()) ? date : undefined;
 };
+const TYPE_MAP = {
+    '1': 'DOTA2',
+    '2': 'CS2',
+};
+
+const TYPE_OPTIONS = Object.entries(TYPE_MAP).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/news/:type',
     categories: ['game'],
     example: '/wmpvp/news/1',
-    parameters: { type: '资讯分类，见下表' },
+    parameters: { type: { description: '资讯分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +37,11 @@ export const route: Route = {
     name: '资讯列表',
     maintainers: ['tssujt'],
     handler,
-    description: `| DOTA2 | CS2 |
-| ----- | --- |
-| 1     | 2   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '资讯分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 interface News {
     newsId: string | number;
@@ -43,10 +53,7 @@ interface News {
     }>;
     thumbnail?: string;
 }
-const TYPE_MAP = {
-    '1': 'DOTA2',
-    '2': 'CS2',
-};
+
 async function handler(ctx) {
     const type = ctx.req.param('type');
     if (!Object.hasOwn(TYPE_MAP, type)) {

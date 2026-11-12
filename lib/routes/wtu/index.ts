@@ -1,7 +1,15 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '参数', label: '公告类型' },
+    { value: '1', label: '通知公告' },
+    { value: '2', label: '教务信息' },
+    { value: '3', label: '科研动态' },
+];
 
 function parseBulletinDate(value?: string) {
     if (!value?.trim()) {
@@ -29,7 +37,7 @@ export const route: Route = {
     path: '/:type',
     categories: ['university'],
     example: '/wtu/2',
-    parameters: { type: '公告类型，详见表格' },
+    parameters: { type: { description: '公告类型，详见表格', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -41,9 +49,11 @@ export const route: Route = {
     name: '信息门户公告',
     maintainers: ['loyio'],
     handler,
-    description: `| 公告类型 | 通知公告 | 教务信息 | 科研动态 |
-| -------- | -------- | -------- | -------- |
-| 参数     | 1        | 2        | 3        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '公告类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

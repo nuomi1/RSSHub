@@ -6,7 +6,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '学院新闻' },
+    { value: '1', label: '学术交流' },
+    { value: '2', label: '通知公告' },
+    { value: '3', label: '科研进展' },
+];
 
 const baseUrl = 'https://cs.whu.edu.cn';
 class ArticleAccessError extends Error {}
@@ -31,7 +39,7 @@ export const route: Route = {
     path: '/cs/:type',
     categories: ['university'],
     example: '/whu/cs/2',
-    parameters: { type: '公告类型，详见表格' },
+    parameters: { type: { description: '公告类型，详见表格', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,9 +51,11 @@ export const route: Route = {
     name: '计算机学院公告',
     maintainers: ['ttyfly'],
     handler,
-    description: `| 公告类型 | 学院新闻 | 学术交流 | 通知公告 | 科研进展 |
-| -------- | -------- | -------- | -------- | -------- |
-| 参数     | 0        | 1        | 2        | 3        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '公告类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = Number.parseInt(ctx.req.param('type'));

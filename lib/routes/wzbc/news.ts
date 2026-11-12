@@ -6,7 +6,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '校园新闻' },
+    { value: 'media', label: '媒体商院' },
+    { value: 'notice', label: '通知公告' },
+    { value: 'jobs', label: '人才招聘' },
+    { value: 'workday', label: '行事历' },
+    { value: 'activity', label: '学术动态' },
+];
 
 const host = 'https://www.wzbc.edu.cn';
 function parseSourceDate(value: string) {
@@ -60,13 +70,15 @@ export const route: Route = {
     path: '/:type?',
     categories: ['university'],
     example: '/wzbc/notice',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     name: '资讯',
     maintainers: ['howel52'],
     handler,
-    description: `| 校园新闻 | 媒体商院 | 通知公告 | 人才招聘 | 行事历  | 学术动态 |
-| -------- | -------- | -------- | -------- | ------- | -------- |
-| news     | media    | notice   | jobs     | workday | activity |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx: Context) {
     const { type } = ctx.req.param();

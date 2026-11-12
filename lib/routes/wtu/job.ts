@@ -7,7 +7,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '参数', label: '信息类型' },
+    { value: 'xxtz', label: '消息通知' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwkd', label: '新闻快递' },
+];
 
 const baseUrl = 'https://wtu.91wllm.com/';
 const typeMap = new Map([
@@ -52,7 +60,7 @@ export const route: Route = {
     path: '/job/:type',
     categories: ['university'],
     example: '/wtu/job/xxtz',
-    parameters: { type: '信息类型' },
+    parameters: { type: { description: '信息类型', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -69,9 +77,11 @@ export const route: Route = {
     name: '就业信息',
     maintainers: ['ticks-tan'],
     handler,
-    description: `| 信息类型 | 消息通知 | 通知公告 | 新闻快递 |
-| -------- | -------- | -------- | -------- |
-| 参数     | xxtz     | tzgg     | xwkd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '信息类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     // Resolve the requested information type.

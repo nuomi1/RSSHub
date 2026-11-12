@@ -6,6 +6,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const baseUrl = 'http://www.wsyu.edu.cn';
@@ -15,6 +16,9 @@ const typeMap = {
     zhxw: { name: '综合新闻', url: '/news/zhxwzl/list.htm' },
     mtjj: { name: '媒体聚焦', url: '/news/mtjjzl/list.htm' },
 };
+
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, item]) => ({ value, label: item.name }));
+const TYPE_OPTIONS_DEFAULT = 'xxyw';
 
 const parseSourceDate = (raw?: string) => {
     if (!raw) {
@@ -63,7 +67,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/wsyu/news/xxyw',
-    parameters: { type: '分类，默认为 `xxyw`' },
+    parameters: { type: { description: '分类，默认为 `xxyw`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -75,13 +79,15 @@ export const route: Route = {
     name: '新闻中心',
     maintainers: ['Derekmini'],
     handler,
-    description: `| 学校要闻 | 综合新闻 | 媒体聚焦 |
-| -------- | -------- | -------- |
-| xxyw     | zhxw     | mtjj     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const type = (ctx.req.param('type') || 'xxyw') as keyof typeof typeMap;
+    const type = (ctx.req.param('type') || TYPE_OPTIONS_DEFAULT) as keyof typeof typeMap;
     const config = typeMap[type];
     if (!config) {
         throw new Error(`Unsupported news type: ${type}`);
