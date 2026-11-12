@@ -2,6 +2,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
@@ -10,11 +11,14 @@ const titles = {
     3: '公告',
 };
 
+const CATEGORY_OPTIONS = Object.entries(titles).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = '1';
+
 export const route: Route = {
     path: '/news/:category?',
     categories: ['game'],
     example: '/gf-cn/news',
-    parameters: { category: '分类，见下表，默认为新闻' },
+    parameters: { category: { description: '分类，见下表，默认为新闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +36,15 @@ export const route: Route = {
     name: '情报局',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 新闻 | 公告 |
-| ---- | ---- |
-| 1    | 3    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? '1';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://gf-cn.sunborngame.com';
     const apiRootUrl = 'https://gfcn-webserver.sunborngame.com';

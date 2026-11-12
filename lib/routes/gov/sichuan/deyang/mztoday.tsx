@@ -7,7 +7,31 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const INFO_TYPE_OPTIONS = [
+    { value: 'zx', label: '最新' },
+    { value: 'tj', label: '推荐' },
+    { value: 'sz', label: '时政' },
+    { value: 'jy', label: '教育' },
+    { value: 'ms', label: '民生' },
+    { value: 'wl', label: '文旅' },
+    { value: 'jj', label: '经济' },
+    { value: 'wmcj', label: '文明创建' },
+    { value: 'bm', label: '部门' },
+    { value: 'zj', label: '镇（街道）' },
+    { value: 'jkmz', label: '健康绵竹' },
+    { value: 'nxjt', label: '南轩讲堂' },
+    { value: 'sp', label: '视频' },
+    { value: 'wmsj', label: '文明实践' },
+    { value: 'lhzg', label: '领航中国' },
+    { value: 'mznh', label: '绵竹年画' },
+    { value: 'mzls', label: '绵竹历史' },
+    { value: 'mzly', label: '绵竹旅游' },
+    { value: 'wmkmz', label: '外媒看绵竹' },
+];
+const INFO_TYPE_OPTIONS_DEFAULT = 'zx';
 
 function copyElements<T extends AnyNode>(selection: Cheerio<T>): Cheerio<T> {
     const copy = selection.map((_, element) => cloneNode(element, true));
@@ -140,7 +164,7 @@ export const route: Route = {
     path: '/deyang/mztoday/:infoType?',
     categories: ['government'],
     example: '/gov/sichuan/deyang/mztoday/zx',
-    parameters: { infoType: '信息栏目名称。默认最新(zx)' },
+    parameters: { infoType: { description: '信息栏目名称。默认最新(zx)', options: INFO_TYPE_OPTIONS, default: INFO_TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -159,13 +183,15 @@ export const route: Route = {
     maintainers: ['zytomorrow'],
     handler,
     url: 'www.mztoday.gov.cn/*',
-    description: `| 最新 | 推荐 | 时政 | 教育 | 民生 | 文旅 | 经济 | 文明创建 | 部门 | 镇（街道） | 健康绵竹 | 南轩讲堂 | 视频 | 文明实践 | 领航中国 | 绵竹年画 | 绵竹历史 | 绵竹旅游 | 外媒看绵竹 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | -------- | ---- | ---------- | -------- | -------- | ---- | -------- | -------- | -------- | -------- | -------- | ---------- |
-| zx   | tj   | sz   | jy   | ms   | wl   | jj   | wmcj     | bm   | zj         | jkmz     | nxjt     | sp   | wmsj     | lhzg     | mznh     | mzls     | mzly     | wmkmz      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'infoType',
+        description: '信息栏目名称',
+        options: INFO_TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const infoType = ctx.req.param('infoType') || 'zx';
+    const infoType = ctx.req.param('infoType') || INFO_TYPE_OPTIONS_DEFAULT;
     const infoBasicUrl = `${rootUrl}${basicInfoDict[infoType].url}`;
     const infoUrlList = await getInfoUrlList(infoBasicUrl);
     const items = await Promise.all(infoUrlList.map((item) => getInfoContent(item)));

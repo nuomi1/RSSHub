@@ -6,21 +6,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'gsxx', label: '公示信息' },
+];
 
 export const route: Route = {
     path: '/kjj/:caty',
     categories: ['government'],
     example: '/gov/wuhan/kjj/tzgg',
     parameters: {
-        caty: '类别',
+        caty: { description: '类别', options: CATY_OPTIONS },
     },
     name: '市科学技术局 - 新闻中心',
     maintainers: ['tudou027'],
     handler,
-    description: `| 通知公告 | 公示信息 |
-| :------: | :------: |
-|   tzgg   |   gsxx   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 const rootUrl = 'https://kjj.wuhan.gov.cn/';

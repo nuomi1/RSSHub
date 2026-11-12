@@ -5,6 +5,7 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const categories = {
@@ -13,11 +14,14 @@ const categories = {
     114: '工作动态',
 };
 
+const CATEGORY_OPTIONS = Object.entries(categories).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = '112';
+
 export const route: Route = {
     path: '/news/:category?',
     categories: ['government'],
     example: '/gov/nrta/news',
-    parameters: { category: '资讯类别，可从地址中获取，默认为总局要闻' },
+    parameters: { category: { description: '资讯类别，可从地址中获取，默认为总局要闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,13 +33,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['yuxinliu-alex'],
     handler,
-    description: `| 总局要闻 | 公告公示 | 工作动态 | 其他 |
-| -------- | -------- | -------- | ---- |
-| 112      | 113      | 114      |      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '资讯类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 112;
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://www.nrta.gov.cn';
 

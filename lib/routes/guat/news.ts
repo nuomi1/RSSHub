@@ -14,18 +14,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'ghyw', label: '桂航要闻' },
+    { value: 'zxdt', label: '最新动态' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xxgk', label: '信息公开' },
+];
+const TYPE_OPTIONS_DEFAULT = 'ghyw';
 
 export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/guat/news/ghyw',
-    parameters: { type: '资讯类型，如下表' },
+    parameters: { type: { description: '资讯类型，如下表', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '新闻资讯',
     maintainers: ['wyml'],
-    description: `| 桂航要闻 | 最新动态 | 通知公告 | 信息公开 |
-| -------- | -------- | -------- | -------- |
-| ghyw     | zxdt     | tzgg     | xxgk     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '资讯类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -39,7 +50,7 @@ const urls = {
 };
 
 async function handler(ctx: Context) {
-    const { type = 'ghyw' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(urls, type)) {
         throw new InvalidParameterError('Invalid news type. Use ghyw, zxdt, tzgg, or xxgk.');
     }

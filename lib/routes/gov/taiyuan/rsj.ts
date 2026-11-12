@@ -3,7 +3,17 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'gzdt', label: '工作动态' },
+    { value: 'tyxw', label: '太原新闻' },
+    { value: 'gggs', label: '通知公告' },
+    { value: 'xqdt', label: '县区动态' },
+    { value: 'gndt', label: '国内动态' },
+    { value: 'tpxw', label: '图片新闻' },
+];
 
 const rootURL = 'http://rsj.taiyuan.gov.cn/';
 
@@ -11,7 +21,7 @@ export const route: Route = {
     path: '/rsj/:caty/:page?',
     categories: ['government'],
     example: '/gov/taiyuan/rsj/gggs',
-    parameters: { caty: '信息类别', page: '历史兼容参数，所有值均返回第 1 页，不翻页' },
+    parameters: { caty: { description: '信息类别', options: CATY_OPTIONS }, page: '历史兼容参数，所有值均返回第 1 页，不翻页' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +40,11 @@ export const route: Route = {
     maintainers: ['2PoL'],
     handler,
     url: 'rsj.taiyuan.gov.cn/*',
-    description: `| 工作动态 | 太原新闻 | 通知公告 | 县区动态 | 国内动态 | 图片新闻 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| gzdt     | tyxw     | gggs     | xqdt     | gndt     | tpxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '信息类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

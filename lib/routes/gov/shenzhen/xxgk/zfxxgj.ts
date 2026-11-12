@@ -5,7 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'zfcg', label: '政府采购' },
+    { value: 'zjxx', label: '资金信息' },
+    { value: 'zdxm', label: '重大项目' },
+];
 
 const rootUrl = 'http://www.sz.gov.cn/cn/xxgk/zfxxgj/';
 
@@ -32,7 +40,7 @@ export const route: Route = {
     path: '/xxgk/zfxxgj/:caty',
     categories: ['government'],
     example: '/gov/shenzhen/xxgk/zfxxgj/tzgg',
-    parameters: { caty: '信息类别' },
+    parameters: { caty: { description: '信息类别', options: CATY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -44,9 +52,11 @@ export const route: Route = {
     name: '政府信息公开',
     maintainers: ['laoxua'],
     handler,
-    description: `| 通知公告 | 政府采购 | 资金信息 | 重大项目 |
-| :------: | :------: | :------: | :------: |
-|   tzgg   |   zfcg   |   zjxx   |   zdxm   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '信息类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

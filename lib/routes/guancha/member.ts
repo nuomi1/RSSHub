@@ -2,6 +2,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const titles = {
@@ -11,11 +12,14 @@ const titles = {
     huodongs: '观学院',
 };
 
+const CATEGORY_OPTIONS = Object.entries(titles).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'recommend';
+
 export const route: Route = {
     path: '/member/:category?',
     categories: ['new-media'],
     example: '/guancha/member/recommend',
-    parameters: { category: '分类，见下表' },
+    parameters: { category: { description: '分类，见下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,13 +42,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'guancha.cn/',
-    description: `| 精选      | 观书堂 | 在线课  | 观学院   |
-| --------- | ------ | ------- | -------- |
-| recommend | books  | courses | huodongs |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'recommend';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     if (!Object.hasOwn(titles, category)) {
         throw new InvalidParameterError('Invalid category. Use recommend, books, courses, or huodongs.');
     }

@@ -4,7 +4,19 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '', label: '全部' },
+    { value: '02', label: '其他' },
+    { value: '01', label: '採購公告' },
+    { value: '06', label: '新聞稿' },
+    { value: '05', label: '肅貪' },
+    { value: '04', label: '預防' },
+    { value: '03', label: '綜合' },
+    { value: '99', label: '防疫專區' },
+];
 
 const baseUrl = 'https://www.aac.moj.gov.tw';
 
@@ -21,7 +33,7 @@ export const route: Route = {
     path: '/aac/news/:type?',
     categories: ['government'],
     example: '/gov/moj/aac/news',
-    parameters: { type: '資料大類，留空為全部' },
+    parameters: { type: { description: '資料大類，留空為全部', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +45,11 @@ export const route: Route = {
     name: '最新消息',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 全部 | 其他 | 採購公告 | 新聞稿 | 肅貪 | 預防 | 綜合 | 防疫專區 |
-| ---- | ---- | -------- | ------ | ---- | ---- | ---- | -------- |
-|      | 02   | 01       | 06     | 05   | 04   | 03   | 99       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '資料大類',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

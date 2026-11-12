@@ -3,13 +3,17 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const COL_ID_OPTIONS = [{ value: '1229676740', label: '事业单位进人公告' }];
+const COL_ID_OPTIONS_DEFAULT = '1229676740';
 
 export const route: Route = {
     path: '/ningborsjnotice/:colId?',
     categories: ['government'],
     example: '/gov/zj/ningborsjnotice/1229676740',
     parameters: {
-        colId: '公告分类id、详细信息点击源网站http://rsj.ningbo.gov.cn/请求中寻找',
+        colId: { description: '公告分类id、详细信息点击源网站http://rsj.ningbo.gov.cn/请求中寻找', options: COL_ID_OPTIONS, default: COL_ID_OPTIONS_DEFAULT },
     },
     radar: [
         {
@@ -20,11 +24,13 @@ export const route: Route = {
     name: '宁波市人力资源和社会保障局-公告',
     url: 'rsj.ningbo.gov.cn',
     maintainers: ['HaoyuLee'],
-    description: `| 公告类别         | colId      |
-| ---------------- | ---------- |
-| 事业单位进人公告 | 1229676740 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'colId',
+        description: '公告分类 id',
+        options: COL_ID_OPTIONS,
+    }),
     async handler(ctx) {
-        const { colId = '1229676740' } = ctx.req.param();
+        const { colId = COL_ID_OPTIONS_DEFAULT } = ctx.req.param();
         const url = `http://rsj.ningbo.gov.cn/col/col${colId}/index.html`;
         const { data: response } = await got(url);
         const noticeCate = load(response)('.titel.bgcolor01').text();

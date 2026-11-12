@@ -5,14 +5,22 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'zuixin', label: '最新政策' },
+    { value: 'jiedu', label: '政策解读' },
+    { value: 'jiedu/tujie', label: '图解政策' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zuixin';
 
 export const route: Route = {
     path: '/:category{.+}?',
     categories: ['government'],
     example: '/gov/zhengce',
-    parameters: { category: '分类，见下表，默认为最新' },
+    parameters: { category: { description: '分类，见下表，默认为最新', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,13 +47,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'www.gov.cn/zhengce/',
-    description: `| 最新政策 | 政策解读 | 图解政策    |
-| -------- | -------- | ----------- |
-| zuixin   | jiedu    | jiedu/tujie |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 export async function handler(ctx) {
-    const { category = 'zuixin' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx);
 
     const rootUrl = 'https://www.gov.cn';

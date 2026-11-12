@@ -9,7 +9,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'executive-meeting', label: '省政府常务会议' },
+    { value: 'important-news', label: '要闻关注' },
+    { value: 'department', label: '部门资讯' },
+    { value: 'city-county', label: '地方动态' },
+    { value: 'policy-interpretation', label: '政策解读' },
+    { value: 'information-publicity', label: '政府信息公开制度' },
+    { value: 'documentation', label: '政策文件' },
+    { value: 'normative-document', label: '规范性文件' },
+    { value: 'legislative-opinion-collection', label: '立法意见征集' },
+    { value: 'opinion-collection', label: '征集调查' },
+];
 
 function copyElements<T extends AnyNode>(selection: Cheerio<T>): Cheerio<T> {
     const copy = selection.map((_, element) => cloneNode(element, true));
@@ -76,20 +90,14 @@ export const route: Route = {
     path: '/:category',
     categories: ['government'],
     example: '/gov/jiangsu/important-news',
-    parameters: { category: '分类名，见下表' },
+    parameters: { category: { description: '分类名，见下表', options: CATEGORY_OPTIONS } },
     name: '动态',
     maintainers: ['ocleo1'],
-    description: `|   省政府常务会议  |    要闻关注    |  部门资讯  |   地方动态  |        政策解读       |
-| :---------------: | :------------: | :--------: | :---------: | :-------------------: |
-| executive-meeting | important-news | department | city-county | policy-interpretation |
-
-|    政府信息公开制度   |    政策文件   |     规范性文件     |
-| :-------------------: | :-----------: | :----------------: |
-| information-publicity | documentation | normative-document |
-
-|          立法意见征集          |      征集调查      |
-| :----------------------------: | :----------------: |
-| legislative-opinion-collection | opinion-collection |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

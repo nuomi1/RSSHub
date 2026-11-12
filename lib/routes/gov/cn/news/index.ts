@@ -9,13 +9,23 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const UID_OPTIONS = [
+    { value: 'bm', label: '政务联播' },
+    { value: 'gd', label: '滚动新闻' },
+    { value: 'yw', label: '新闻要闻' },
+    { value: 'gwy', label: '国务院新闻' },
+    { value: 'gwyzzjg', label: '国务院工作会议' },
+    { value: 'zhengce', label: '政策文件' },
+];
 
 export const route: Route = {
     path: '/news/:uid',
     categories: ['government'],
     example: '/gov/cn/news/yw',
-    parameters: { uid: '分类名' },
+    parameters: { uid: { description: '分类名', options: UID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +37,11 @@ export const route: Route = {
     name: '政府新闻',
     maintainers: ['EsuRt', 'howfool'],
     handler,
-    description: `| 政务联播 | 滚动新闻 | 新闻要闻 | 国务院新闻 | 国务院工作会议 | 政策文件 |
-| :------: | :------: | :------: | :--------: | :------------: | :------: |
-|    bm    |    gd    |    yw    |     gwy    |     gwyzzjg    |  zhengce |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'uid',
+        description: '分类名',
+        options: UID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

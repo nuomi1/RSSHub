@@ -6,21 +6,35 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'kszs', label: '考试招生' },
+    { value: 'shks', label: '社会考试' },
+    { value: 'zkgs', label: '招考公示' },
+    { value: 'bkzn', label: '报考指南' },
+    { value: 'ywdt', label: '要闻动态' },
+    { value: 'gkzl', label: '公开专栏' },
+    { value: 'zcwj', label: '政策文件' },
+    { value: 'zcjd', label: '政策解读' },
+];
 
 export const route: Route = {
     path: '/eea/:caty',
     categories: ['government'],
     example: '/gov/gd/eea/kszs',
     parameters: {
-        caty: '资讯类别',
+        caty: { description: '资讯类别', options: CATY_OPTIONS },
     },
     name: '省教育考试院',
     maintainers: ['icealtria'],
     handler,
-    description: `| 考试招生 | 社会考试 | 招考公示 | 报考指南 | 要闻动态 | 公开专栏 | 政策文件 | 政策解读 |
-| :------: | :------: | :------: | :------: | :------: | :------: | :------: | :------: |
-|   kszs   |   shks   |   zkgs   |   bkzn   |   ywdt   |   gkzl   |   zcwj   |   zcjd   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '资讯类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 const rootUrl = 'https://eea.gd.gov.cn/';

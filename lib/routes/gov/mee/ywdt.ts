@@ -4,7 +4,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'szyw', label: '时政要闻' },
+    { value: 'hjywnews', label: '环境要闻' },
+    { value: 'dfnews', label: '地方快讯' },
+    { value: 'xwfb', label: '新闻发布' },
+    { value: 'spxw', label: '视频新闻' },
+    { value: 'gsgg', label: '公示公告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'szyw';
 
 const baseUrl = 'https://www.mee.gov.cn/';
 const columns = {
@@ -20,7 +31,7 @@ export const route: Route = {
     path: '/ywdt/:category?',
     categories: ['government'],
     example: '/gov/mee/ywdt/hjywnews',
-    parameters: { category: '分类名，预设 `szyw`' },
+    parameters: { category: { description: '分类名，预设 `szyw`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,13 +49,15 @@ export const route: Route = {
     name: '要闻动态',
     maintainers: ['liuxsdev'],
     handler,
-    description: `| 时政要闻 | 环境要闻 | 地方快讯 | 新闻发布 | 视频新闻 | 公示公告 |
-| :------: | :------: | :------: | :------: | :------: | :------: |
-|   szyw   | hjywnews |  dfnews  |   xwfb   |   spxw   |   gsgg   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const cate = ctx.req.param('category') ?? 'szyw';
+    const cate = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const url = `${baseUrl}ywdt/`;
     const title = `${columns[cate].name} - 要闻动态 - 中华人民共和国生态环境部`;
     const response = await got(url);

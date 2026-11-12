@@ -6,7 +6,13 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'bnxx', label: '部内信息' },
+    { value: 'zcjd', label: '政策解读' },
+];
 
 function extractPublicationText(value: string): string | undefined {
     for (const marker of value.matchAll(/时间：/g)) {
@@ -24,14 +30,16 @@ export const route: Route = {
     categories: ['government'],
     example: '/gov/mva/bnxx',
     parameters: {
-        type: '分类名',
+        type: { description: '分类名', options: TYPE_OPTIONS },
     },
     name: '资讯',
     maintainers: ['sunshinenny'],
     handler,
-    description: `| 部内信息 | 政策解读 |
-| :------: | :------: |
-|   bnxx   |   zcjd   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function loadDetail(link: string) {

@@ -4,18 +4,28 @@ import type { Context } from 'hono';
 import type { Data, DataItem, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '南京信息' },
+    { value: 'department', label: '部门动态' },
+    { value: 'district', label: '各区动态' },
+    { value: 'livelihood', label: '民生信息' },
+];
 
 export const route: Route = {
     path: '/:category',
     categories: ['government'],
     example: '/gov/nanjing/news',
     parameters: {
-        category: '分类名',
+        category: { description: '分类名', options: CATEGORY_OPTIONS },
     },
-    description: `| 南京信息 |  部门动态  | 各区动态 |  民生信息  |
-| :------: | :--------: | :------: | :--------: |
-|   news   | department | district | livelihood |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
     name: '信息公开',
     maintainers: ['ocleo1'],
     handler,

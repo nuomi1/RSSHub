@@ -3,7 +3,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'announcement', label: '通知公告' },
+    { value: 'project', label: '项目介绍' },
+];
+const CATY_OPTIONS_DEFAULT = 'announcement';
 
 const mapping = {
     '/project': {
@@ -24,18 +31,20 @@ export const route: Route = {
     path: '/bphc/:caty',
     name: '保障房中心 - 共有产权住房租赁服务平台',
     example: '/gov/beijing/bphc/announcement',
-    parameters: { caty: '类别' },
+    parameters: { caty: { description: '类别', options: CATY_OPTIONS, default: CATY_OPTIONS_DEFAULT } },
     maintainers: ['bigfei'],
     handler,
-    description: `|   通知公告   | 项目介绍 |
-| :----------: | :------: |
-| announcement |  project |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const rootUrl = 'https://gycpt.bphc.com.cn';
 
-    const { caty = 'announcement' } = ctx.req.param();
+    const { caty = CATY_OPTIONS_DEFAULT } = ctx.req.param();
     if (caty !== 'announcement' && caty !== 'project') {
         throw new InvalidParameterError('caty must be announcement or project.');
     }

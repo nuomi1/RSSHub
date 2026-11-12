@@ -1,8 +1,15 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseItem, parseList } from './utils';
+
+const CHANNEL_OPTIONS = [
+    { value: 'calendar', label: '物种日历' },
+    { value: 'institute', label: '吃货研究所' },
+    { value: 'beauty', label: '美丽也是技术活' },
+];
 
 const channelMap = {
     calendar: 'pac',
@@ -15,7 +22,7 @@ export const route: Route = {
     path: '/column/:channel',
     categories: ['new-media'],
     example: '/guokr/column/calendar',
-    parameters: { channel: '专栏类别' },
+    parameters: { channel: { description: '专栏类别', options: CHANNEL_OPTIONS } },
     radar: [
         {
             source: ['guokr.com/scientific/channel/:channel'],
@@ -26,9 +33,11 @@ export const route: Route = {
     maintainers: ['DHPO', 'hoilc'],
     handler,
     url: 'guokr.com/',
-    description: `| 物种日历 | 吃货研究所 | 美丽也是技术活 |
-| -------- | ---------- | -------------- |
-| calendar | institute  | beauty         |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '专栏类别',
+        options: CHANNEL_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

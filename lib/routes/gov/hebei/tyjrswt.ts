@@ -5,21 +5,30 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'ywgz', label: '省部要闻' },
+    { value: 'tnxx', label: '厅内信息' },
+    { value: 'sxxx', label: '市县信息' },
+];
 
 export const route: Route = {
     path: '/tyjrswt/:type',
     categories: ['government'],
     example: '/gov/hebei/tyjrswt/sxxx',
     parameters: {
-        type: '分类名',
+        type: { description: '分类名', options: TYPE_OPTIONS },
     },
     name: '退役军人事务厅',
     maintainers: ['sunshinenny'],
     handler,
-    description: `| 省部要闻 | 厅内信息 | 市县信息 |
-| :------: | :------: | :------: |
-|   ywgz   |   tnxx   |   sxxx   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const rootUrl = 'https://tyjrswt.hebei.gov.cn';

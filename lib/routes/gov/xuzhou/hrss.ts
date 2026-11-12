@@ -4,13 +4,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '通知公告' },
+    { value: '001001', label: '要闻动态' },
+    { value: '001002', label: '县区动态' },
+    { value: '001004', label: '事业招聘' },
+    { value: '001005', label: '企业招聘' },
+    { value: '001006', label: '政声传递' },
+];
 
 export const route: Route = {
     path: '/hrss/:category?',
     categories: ['government'],
     example: '/gov/xuzhou/hrss',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +32,11 @@ export const route: Route = {
     name: '人力资源和社会保障局',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 通知公告 | 要闻动态 | 县区动态 | 事业招聘 | 企业招聘 | 政声传递 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-|          | 001001   | 001002   | 001004   | 001005   | 001006   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

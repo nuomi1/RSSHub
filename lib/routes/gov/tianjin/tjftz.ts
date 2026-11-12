@@ -3,14 +3,18 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CHANNEL_ID_OPTIONS = [{ value: '6302', label: 'channelId' }];
+const CHANNEL_ID_OPTIONS_DEFAULT = '6302';
 
 export const route: Route = {
     path: '/tjftz-notice/:channelId',
     categories: ['government'],
     example: '/gov/tianjin/tjftz-notice/6302',
     parameters: {
-        channelId: '公告分类id、详细信息点击源网站https://www.tjftz.gov.cn/请求中寻找',
+        channelId: { description: '公告分类id、详细信息点击源网站https://www.tjftz.gov.cn/请求中寻找', options: CHANNEL_ID_OPTIONS, default: CHANNEL_ID_OPTIONS_DEFAULT },
     },
     radar: [
         {
@@ -21,11 +25,13 @@ export const route: Route = {
     name: '港保税区公告',
     url: 'tjftz.gov.cn',
     maintainers: ['HaoyuLee'],
-    description: `| 公告类别                            | channelId |
-| ----------------------------------- | --------- |
-| 首页 > 新闻 > 保税区要闻 > 区域聚焦 | 6302      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channelId',
+        description: '公告分类 id',
+        options: CHANNEL_ID_OPTIONS,
+    }),
     async handler(ctx) {
-        const { channelId = '6302' } = ctx.req.param();
+        const { channelId = CHANNEL_ID_OPTIONS_DEFAULT } = ctx.req.param();
         const url = `https://www.tjftz.gov.cn/channels/${channelId}.html`;
         const { data: response } = await got(url);
         const noticeCate = load(response)('.location').text().trim();

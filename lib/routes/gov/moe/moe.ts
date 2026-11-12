@@ -5,7 +5,16 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import logger from '@/utils/logger';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'policy_anal', label: '政策解读' },
+    { value: 'newest_file', label: '最新文件' },
+    { value: 'notice', label: '公告公示' },
+    { value: 'edu_ministry_news', label: '教育部简报' },
+    { value: 'edu_focus_news', label: '教育要闻' },
+];
 
 const moeUrl = 'https://www.moe.gov.cn/';
 const typesIdMap = [
@@ -20,7 +29,7 @@ export const route: Route = {
     path: '/:type',
     categories: ['government'],
     example: '/gov/moe/policy_anal',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,9 +41,11 @@ export const route: Route = {
     name: '新闻',
     maintainers: ['Crawler995'],
     handler,
-    description: `|   政策解读   |   最新文件   | 公告公示 |      教育部简报     |     教育要闻     |
-| :----------: | :----------: | :------: | :-----------------: | :--------------: |
-| policy\\_anal | newest\\_file |  notice  | edu\\_ministry\\_news | edu\\_focus\\_news |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

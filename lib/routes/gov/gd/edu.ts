@@ -6,22 +6,35 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { fixArticleContent } from '@/utils/wechat-mp';
+
+const CATY_OPTIONS = [
+    { value: 'szyw', label: '时政要闻' },
+    { value: 'gdjyxw', label: '广东教育新闻' },
+    { value: 'tpxw', label: '图片新闻' },
+    { value: 'zxlb', label: '战线联播' },
+    { value: 'gsgg', label: '公示公告' },
+    { value: 'jyzcfg', label: '教育政策法规' },
+    { value: 'zcjd', label: '政策解读' },
+];
 
 export const route: Route = {
     path: '/edu/:caty',
     categories: ['government'],
     example: '/gov/gd/edu/gdjyxw',
     parameters: {
-        caty: '资讯类别',
+        caty: { description: '资讯类别', options: CATY_OPTIONS },
     },
     name: '省教育厅',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 时政要闻 | 广东教育新闻 | 图片新闻 | 战线联播 | 公示公告 | 教育政策法规 | 政策解读 |
-| :------: | :----------: | :------: | :------: | :------: | :----------: | :------: |
-|   szyw   |    gdjyxw    |   tpxw   |   zxlb   |   gsgg   |    jyzcfg    |   zcjd   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '资讯类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 const rootUrl = 'https://edu.gd.gov.cn/';

@@ -4,13 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'gzdt', label: '财政动态' },
+    { value: 'zhxw', label: '综合新闻' },
+    { value: 'tzgg', label: '通知公告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'gzdt';
 
 export const route: Route = {
     path: '/czt/xwdt/:category?',
     categories: ['government'],
     example: '/gov/hebei/czt/xwdt',
-    parameters: { category: '分类，见下表，默认为财政动态' },
+    parameters: { category: { description: '分类，见下表，默认为财政动态', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,13 +30,15 @@ export const route: Route = {
     name: '财政厅',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 财政动态 | 综合新闻 | 通知公告 |
-| -------- | -------- | -------- |
-| gzdt     | zhxw     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'gzdt';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://czt.hebei.gov.cn';
     const currentUrl = `${rootUrl}/xwdt/${category}`;

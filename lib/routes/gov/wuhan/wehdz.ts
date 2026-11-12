@@ -5,21 +5,30 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'tz_68628', label: '通知公告' },
+    { value: 'ggxw_68629', label: '光谷要闻' },
+    { value: 'cydt_68630', label: '产业动态' },
+];
 
 export const route: Route = {
     path: '/wehdz/:caty',
     categories: ['government'],
     example: '/gov/wuhan/wehdz/tz_68628',
     parameters: {
-        caty: '类别',
+        caty: { description: '类别', options: CATY_OPTIONS },
     },
     name: '东湖新技术开发区 - 光谷新闻',
     maintainers: ['tudou027'],
     handler,
-    description: `|  通知公告 |   光谷要闻  |   产业动态  |
-| :-------: | :---------: | :---------: |
-| tz\\_68628 | ggxw\\_68629 | cydt\\_68630 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 const rootUrl = 'https://www.wehdz.gov.cn';

@@ -5,13 +5,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'c183', label: '立法' },
+    { value: 'c184', label: '监督' },
+    { value: 'c185', label: '代表' },
+    { value: 'c189', label: '理论' },
+    { value: 'c12435', label: '权威发布' },
+    { value: 'c10134', label: '滚动新闻' },
+];
 
 export const route: Route = {
     path: '/:caty',
     categories: ['government'],
     example: '/gov/npc/c183',
-    parameters: { caty: '分类名，支持形如 `http://www.npc.gov.cn/npc/c2/*/` 的网站，传入 npc 之后的参数' },
+    parameters: { caty: { description: '分类名，支持形如 `http://www.npc.gov.cn/npc/c2/*/` 的网站，传入 npc 之后的参数', options: CATY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +38,11 @@ export const route: Route = {
     name: '通用',
     maintainers: ['233yeee'],
     handler,
-    description: `| 立法 | 监督 | 代表 | 理论 | 权威发布 | 滚动新闻 |
-| ---- | ---- | ---- | ---- | -------- | -------- |
-| c183 | c184 | c185 | c189 | c12435   | c10134   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分类名',
+        options: CATY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

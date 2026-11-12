@@ -4,13 +4,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '1061', label: '科技头条' },
+    { value: '24', label: '工作动态' },
+    { value: '27', label: '基层科技' },
+    { value: '25', label: '科技博览' },
+    { value: '28', label: '媒体聚焦' },
+    { value: '221', label: '通知公告' },
+];
+const ID_OPTIONS_DEFAULT = '221';
 
 export const route: Route = {
     path: '/kjt/:id?',
     categories: ['government'],
     example: '/gov/shaanxi/kjt',
-    parameters: { id: '分类，见下表，默认为通知公告' },
+    parameters: { id: { description: '分类，见下表，默认为通知公告', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,13 +33,15 @@ export const route: Route = {
     name: '省科学技术厅',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 科技头条 | 工作动态 | 基层科技 | 科技博览 | 媒体聚焦 | 通知公告 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| 1061     | 24       | 27       | 25       | 28       | 221      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '221';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://kjt.shaanxi.gov.cn';
     const currentUrl = `${rootUrl}/view/iList.jsp?cat_id=${id}`;

@@ -5,8 +5,18 @@ import type { Route } from '@/types';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { isValidHost } from '@/utils/valid-host';
+
+const CATY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'rqgs', label: '任前公示' },
+    { value: 'zcfg', label: '政策法规' },
+    { value: 'gzdt', label: '工作动态' },
+    { value: 'xcbd', label: '部门预算决算公开' },
+    { value: 'bgxz', label: '业务表格下载' },
+];
 
 const rootURL = 'http://www.zzb.sz.gov.cn/';
 const currentCategories = {
@@ -20,7 +30,7 @@ export const route: Route = {
     path: '/zzb/:caty/:page?',
     categories: ['government'],
     example: '/gov/shenzhen/zzb/tzgg',
-    parameters: { caty: '信息类别', page: '历史兼容参数，所有值均返回第 1 页，不翻页' },
+    parameters: { caty: { description: '信息类别', options: CATY_OPTIONS }, page: '历史兼容参数，所有值均返回第 1 页，不翻页' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -51,9 +61,11 @@ export const route: Route = {
     maintainers: ['zlasd'],
     handler,
     url: 'zzb.sz.gov.cn/*',
-    description: `| 通知公告 | 任前公示 | 政策法规 | 工作动态 | 部门预算决算公开 | 业务表格下载 |
-| :------: | :------: | :------: | :------: | :--------------: | :----------: |
-|   tzgg   |   rqgs   |   zcfg   |   gzdt   |       xcbd       |     bgxz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '信息类别',
+        options: CATY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

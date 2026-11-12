@@ -5,8 +5,15 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'sggpdbqk', label: '挂牌督办' },
+    { value: 'tbzdsgdcbg', label: '调查报告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'sggpdbqk';
 
 const documentMimeTypes = {
     doc: 'application/msword',
@@ -21,7 +28,7 @@ export const route: Route = {
     path: '/gk/sgcc/:category?',
     categories: ['government'],
     example: '/gov/mem/gk/sgcc/tbzdsgdcbg',
-    parameters: { category: '分类，见下表，默认为挂牌督办' },
+    parameters: { category: { description: '分类，见下表，默认为挂牌督办', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,13 +46,15 @@ export const route: Route = {
     name: '事故及灾害查处',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 挂牌督办 | 调查报告   |
-| -------- | ---------- |
-| sggpdbqk | tbzdsgdcbg |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'sggpdbqk' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 30);
 
     const rootUrl = 'https://www.mem.gov.cn';

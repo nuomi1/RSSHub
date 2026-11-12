@@ -5,13 +5,23 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: 'note', label: '备案公示' },
+    { value: 'announce', label: '发行许可通告' },
+    { value: 'importantLixiang', label: '重大题材立项' },
+    { value: 'importantShezhi', label: '重大题材摄制' },
+    { value: 'changing', label: '变更通报' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'note';
 
 export const route: Route = {
     path: '/dsj/:category?',
     categories: ['government'],
     example: '/gov/nrta/dsj',
-    parameters: { category: '分类，见下表，默认为备案公示' },
+    parameters: { category: { description: '分类，见下表，默认为备案公示', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +33,15 @@ export const route: Route = {
     name: '电视剧政务平台',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 备案公示 | 发行许可通告 | 重大题材立项     | 重大题材摄制    | 变更通报 |
-| -------- | ------------ | ---------------- | --------------- | -------- |
-| note     | announce     | importantLixiang | importantShezhi | changing |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'note' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = Math.max(15, getRouteLimit(ctx, 15));
 
     const rootUrl = 'https://dsj.nrta.gov.cn';

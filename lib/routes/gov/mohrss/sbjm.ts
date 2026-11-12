@@ -5,18 +5,30 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'ydxw', label: '要点新闻' },
+    { value: 'zcwj', label: '政策文件' },
+    { value: 'gzdt', label: '工作动态' },
+    { value: 'mtbd', label: '媒体报道' },
+    { value: 'tpxw', label: '图片新闻' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'ydxw';
 
 export const route: Route = {
     path: '/sbjm/:category?',
     categories: ['government'],
     example: '/gov/mohrss/sbjm',
-    parameters: { category: '分类，见下表' },
+    parameters: { category: { description: '分类，见下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '社保减免',
     maintainers: ['nczitzk'],
-    description: `| 要点新闻 | 政策文件 | 工作动态 | 媒体报道 | 图片新闻 |
-| -------- | -------- | -------- | -------- | -------- |
-| ydxw     | zcwj     | gzdt     | mtbd     | tpxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
@@ -34,7 +46,7 @@ async function fetchWithAntiBot(url: string, cookie = '') {
 }
 
 async function handler(ctx: Context) {
-    const { category = 'ydxw' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const currentUrl = `${rootUrl}/SYrlzyhshbzb/rdzt/jfjf/${category}/`;
     const response = await fetchWithAntiBot(currentUrl);

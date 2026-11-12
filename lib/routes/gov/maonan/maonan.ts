@@ -4,7 +4,18 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'zwgk', label: '政务公开' },
+    { value: 'zwxw', label: '政务新闻' },
+    { value: 'mndt', label: '茂南动态' },
+    { value: 'zdhy', label: '重大会议' },
+    { value: 'tzgg', label: '公告公示' },
+    { value: 'zlxx', label: '招录信息' },
+    { value: 'zcjd', label: '政策解读' },
+];
 
 const host = 'http://www.maonan.gov.cn';
 
@@ -12,7 +23,7 @@ export const route: Route = {
     path: '/:category',
     categories: ['government'],
     example: '/gov/maonan/zwgk',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -61,9 +72,11 @@ export const route: Route = {
     name: '通用',
     maintainers: ['ShuiHuo'],
     handler,
-    description: `| 政务公开 | 政务新闻 | 茂南动态 | 重大会议 | 公告公示 | 招录信息 | 政策解读 |
-| :------: | :------: | :------: | :------: | :------: | :------: | :------: |
-|   zwgk   |   zwxw   |   mndt   |   zdhy   |   tzgg   |   zlxx   |   zcjd   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -4,26 +4,31 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const categories = {
+    'rsks-tzgg': { url: 'http://rst.shanxi.gov.cn/rsks/tzgg/', title: '通知公告' },
+    'rsks-gwyks': { url: 'http://rst.shanxi.gov.cn/rsks/gwyks/', title: '公务员考试' },
+    'rsks-sydwks': { url: 'http://rst.shanxi.gov.cn/rsks/sydwks/', title: '事业单位考试' },
+    'rsks-zyjsryzgks': { url: 'http://rst.shanxi.gov.cn/rsks/zyjsryzgks/', title: '专业技术人员资格考试' },
+    'rsks-qtks': { url: 'http://rst.shanxi.gov.cn/rsks/qtks/', title: '其他考试' },
+};
+
+const CATEGORY_OPTIONS = Object.entries(categories).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/rst/:category',
     categories: ['government'],
     example: '/gov/shanxi/rst/rsks-tzgg',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     name: '人社厅',
     maintainers: ['wolfyu1991'],
-    description: `|  通知公告 | 公务员考试 | 事业单位考试 | 专业技术人员资格考试 |  其他考试 |
-| :-------: | :--------: | :----------: | :------------------: | :-------: |
-| rsks-tzgg | rsks-gwyks |  rsks-sydwks |    rsks-zyjsryzgks   | rsks-qtks |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
-};
-
-const categories = {
-    'rsks-tzgg': { url: 'http://rst.shanxi.gov.cn/rsks/tzgg/', title: '山西人事考试专栏 - 通知公告' },
-    'rsks-gwyks': { url: 'http://rst.shanxi.gov.cn/rsks/gwyks/', title: '山西人事考试专栏 - 公务员考试' },
-    'rsks-sydwks': { url: 'http://rst.shanxi.gov.cn/rsks/sydwks/', title: '山西人事考试专栏 - 事业单位考试' },
-    'rsks-zyjsryzgks': { url: 'http://rst.shanxi.gov.cn/rsks/zyjsryzgks/', title: '山西人事考试专栏 - 专业技术人员资格考试' },
-    'rsks-qtks': { url: 'http://rst.shanxi.gov.cn/rsks/qtks/', title: '山西人事考试专栏 - 其他考试' },
 };
 
 async function handler(ctx: Context) {
@@ -38,7 +43,7 @@ async function handler(ctx: Context) {
     const $ = load(response);
 
     return {
-        title,
+        title: `山西人事考试专栏 - ${title}`,
         link: url,
         item: await Promise.all(
             $('.exam-main ul.list-items-box-inner li')

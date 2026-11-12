@@ -7,18 +7,31 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'gdyw', label: '桂电要闻' },
+    { value: 'xykx', label: '校园快讯' },
+    { value: 'mtgd', label: '媒体桂电' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xntz', label: '校内通知' },
+    { value: 'xsxx', label: '学术信息' },
+];
+const TYPE_OPTIONS_DEFAULT = 'gdyw';
 
 export const route: Route = {
     path: '/xwzx/:type?',
     categories: ['university'],
     example: '/guet/xwzx/xykx',
-    parameters: { type: '资讯类型，如下表' },
+    parameters: { type: { description: '资讯类型，如下表', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '新闻资讯',
     maintainers: ['cssxsh'],
-    description: `| 桂电要闻 | 校园快讯 | 媒体桂电 | 通知公告 | 校内通知 | 学术信息 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| gdyw     | xykx     | mtgd     | tzgg     | xntz     | xsxx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '资讯类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -82,7 +95,7 @@ async function getArticle(link: string, articleHost: string) {
 }
 
 async function handler(ctx: Context) {
-    const { type = 'gdyw' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(paths, type)) {
         throw new InvalidParameterError('Invalid news type. Use gdyw, xykx, mtgd, tzgg, xntz, or xsxx.');
     }

@@ -4,14 +4,21 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'szfgw/ggl/nav_list', label: '通知公告' },
+    { value: 'szfgw/gzdt/nav_list', label: '发改要闻' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'szfgw/ggl/nav_list';
 
 export const route: Route = {
     path: '/fg/:category{.+}?',
     name: '发展和改革委员会',
     example: '/gov/suzhou/fg/szfgw/ggl/nav_list',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['fg.suzhou.gov.cn/szfgw/ggl/nav_list.shtml'],
@@ -24,13 +31,15 @@ export const route: Route = {
     ],
     maintainers: ['nczitzk'],
     handler,
-    description: `| 通知公告            | 发改要闻             |
-| ------------------- | -------------------- |
-| szfgw/ggl/nav\\_list | szfgw/gzdt/nav\\_list |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'szfgw/ggl/nav_list' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const categoryPath = category.replace(/\.shtml$/, '');
     const limit = getRouteLimit(ctx, 30);
 

@@ -4,15 +4,24 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg_191', label: '通知公告' },
+    { value: 'gqdj', label: '国企资讯' },
+    { value: 'gqjj', label: '国企简介' },
+    { value: 'gqzp', label: '国企招聘' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg_191';
 
 export const route: Route = {
     path: '/gzw/:category{.+}?',
     categories: ['government'],
     example: '/gov/chongqing/gzw',
     parameters: {
-        category: '分类，见下表，默认为通知公告',
+        category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT },
     },
     name: '国有资产监督管理委员会',
     url: 'gzw.cq.gov.cn',
@@ -36,13 +45,15 @@ export const route: Route = {
             target: '/gzw/gqzp',
         },
     ],
-    description: `| 通知公告  | 国企资讯 | 国企简介 | 国企招聘 |
-| --------- | -------- | -------- | -------- |
-| tzgg\\_191 | gqdj     | gqjj     | gqzp     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'tzgg_191' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 15);
     // Detail timestamps can refine the calendar dates on the list page.
     const candidateLimit = ctx.req.query('sorted') === 'false' ? limit : Math.max(15, limit);
