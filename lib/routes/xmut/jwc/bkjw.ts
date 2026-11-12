@@ -5,20 +5,32 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'jxyx', label: '教学运行' },
+    { value: 'zhsw', label: '综合事务' },
+    { value: 'xwgl', label: '学务管理' },
+    { value: 'sjjx', label: '实践教学' },
+    { value: 'jyjg', label: '教研教改' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'jwxt';
 
 const xmut = 'https://jwc.xmut.edu.cn';
 export const route: Route = {
     path: '/jwc/bkjw/:category?',
     categories: ['university'],
     example: '/xmut/jwc/bkjw/jxyx',
-    parameters: { category: '分类如下表' },
+    parameters: { category: { description: '分类如下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '本科生教务处',
     maintainers: ['icecliffs'],
     handler,
-    description: `| 教学运行 | 综合事务 | 学务管理 | 实践教学 | 教研教改 |
-| :------: | :------: | :------: | :------: | :------: |
-|   jxyx   |   zhsw   |   xwgl   |   sjjx   |   jyjg   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 function parseArticleContent($: CheerioAPI, link: string) {
     const body = $('.v_news_content, #vsb_content_6').first();

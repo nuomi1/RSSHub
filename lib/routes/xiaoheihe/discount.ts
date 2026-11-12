@@ -1,13 +1,21 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { calculate } from './util';
+
+const PLATFORM_OPTIONS = [
+    { value: 'pc', label: 'PC' },
+    { value: 'switch', label: 'Switch' },
+    { value: 'psn', label: 'PSN' },
+    { value: 'xbox', label: 'Xbox' },
+];
 
 export const route: Route = {
     path: '/discount/:platform',
     categories: ['game'],
     example: '/xiaoheihe/discount/pc',
-    parameters: { platform: '平台分类，见下表' },
+    parameters: { platform: { description: '平台分类，见下表', options: PLATFORM_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,9 +27,11 @@ export const route: Route = {
     name: '游戏折扣',
     maintainers: ['tssujt'],
     handler,
-    description: `| PC | Switch | PSN | Xbox |
-| -- | ------ | --- | ---- |
-| pc | switch | psn | xbox |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'platform',
+        description: '平台分类',
+        options: PLATFORM_OPTIONS,
+    }),
 };
 
 const PLATFORM_MAP = {

@@ -5,13 +5,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xxxw', label: '学校新闻' },
+    { value: 'dzys', label: '砥志研思' },
+    { value: 'ldsr', label: '立德树人' },
+    { value: 'cdsy', label: '传道授业' },
+    { value: 'xwzz', label: '校闻周知' },
+];
 
 export const route: Route = {
     path: '/index/:category?',
     categories: ['university'],
     example: '/xaut/index/tzgg',
-    parameters: { category: '通知类别，默认为学校新闻' },
+    parameters: { category: { description: '通知类别，默认为学校新闻', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,9 +32,11 @@ export const route: Route = {
     name: '学校主页',
     maintainers: ['mocusez'],
     handler,
-    description: `| 学校新闻 | 砥志研思 | 立德树人 | 传道授业 | 校闻周知 |
-| :------: | :------: | :------: | :------: | :------: |
-|   xxxw   |   dzys   |   ldsr   |   cdsy   |   xwzz   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '通知类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 async function fetchDescription(link: string): Promise<DataItem['description']> {
     if (link.includes('://zhixing.xaut.edu.cn/') || link.includes('://xinwen.xaut.edu.cn/')) {

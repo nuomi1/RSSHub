@@ -2,20 +2,31 @@ import { load } from 'cheerio';
 import type { Context } from 'hono';
 
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchPage, generateItems } from './utils';
+
+const TIMEFRAME_OPTIONS = [
+    { value: 'hot', label: '正在流行' },
+    { value: 'pop', label: '24 小时最佳' },
+    { value: 'week', label: '本周最受欢迎' },
+    { value: 'rising', label: '新秀菜谱' },
+    { value: 'monthhonor', label: '月度最佳' },
+];
 
 export const route: Route = {
     path: '/popular/:timeframe?',
     categories: ['study'],
     example: '/xiachufang/popular/hot',
-    parameters: { timeframe: '默认最新上传' },
+    parameters: { timeframe: { description: '默认最新上传', options: TIMEFRAME_OPTIONS } },
     name: '作品动态',
     maintainers: ['xyqfer'],
     handler,
-    description: `| 正在流行 | 24 小时最佳 | 本周最受欢迎 | 新秀菜谱 | 月度最佳   |
-| -------- | ----------- | ------------ | -------- | ---------- |
-| hot      | pop         | week         | rising   | monthhonor |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'timeframe',
+        description: '类型',
+        options: TIMEFRAME_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

@@ -4,6 +4,13 @@ import pMap from 'p-map';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '通知公告', label: '分类' },
+    { value: 'tzgg', label: '参数' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 async function fetchDetails(url: string) {
     const response = await ofetch(url);
@@ -24,7 +31,7 @@ export const route: Route = {
     path: '/jyc/:type?',
     categories: ['university'],
     example: '/xupt/jyc',
-    parameters: { type: '分类，默认为 tzgg（通知公告）' },
+    parameters: { type: { description: '分类，默认为 tzgg（通知公告）', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -42,13 +49,15 @@ export const route: Route = {
     name: '教务处通知公告',
     maintainers: ['StudyingLover'],
     handler,
-    description: `| 分类     | 参数 |
-| -------- | ---- |
-| 通知公告 | tzgg |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'tzgg';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     const typeDict = {
         tzgg: ['通知公告', 'https://jyc.xupt.edu.cn/index/tzgg.htm'],
     };

@@ -6,6 +6,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const host = 'https://aerospace.xmu.edu.cn';
@@ -19,17 +20,22 @@ const titleMap = {
     bksjw: '本科生教务',
     yjsjw: '研究生教务',
 };
+
+const TYPE_OPTIONS = Object.entries(titleMap).map(([value, label]) => ({ value, label }));
+
 export const route: Route = {
     path: '/aero/:type',
     categories: ['university'],
     example: '/xmu/aero/yjsjw',
-    parameters: { type: '分类见下表' },
+    parameters: { type: { description: '分类见下表', options: TYPE_OPTIONS } },
     name: '航空航天学院',
     maintainers: ['jch12138'],
     handler,
-    description: `| 通知公告 | 本科生教务 | 研究生教务 |
-| :------: | :--------: | :--------: |
-|   tzgg   |    bksjw   |    yjsjw   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 function parseArticleContent($: CheerioAPI, link: string) {
     const body = $('.v_news_content').first();

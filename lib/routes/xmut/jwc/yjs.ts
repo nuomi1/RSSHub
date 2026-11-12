@@ -5,20 +5,31 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'xstj', label: '学术研究' },
+    { value: 'yjsjw', label: '工作简讯' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'yjsc';
 
 const xmut = 'https://yjs.xmut.edu.cn';
 export const route: Route = {
     path: '/jwc/yjjw/:category?',
     categories: ['university'],
     example: '/xmut/jwc/yjjw/tzgg',
-    parameters: { category: '分类如下表' },
+    parameters: { category: { description: '分类如下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '研究生处',
     maintainers: ['icecliffs'],
     handler,
-    description: `| 通知公告 | 新闻动态 | 学术研究 | 工作简讯 |
-| :------: | :------: | :------: | :------: |
-|   tzgg   |   xwdt   |   xstj   |   yjsjw  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 function parseArticleContent($: CheerioAPI, link: string) {
     const body = $('body .mainWrap .main_content .v_news_content').first();

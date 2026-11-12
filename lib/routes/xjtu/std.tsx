@@ -6,13 +6,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '通知公告' },
+    { value: 'zytz', label: '重要通知' },
+    { value: 'xmsb', label: '项目申报' },
+    { value: 'cgsb', label: '成果申报' },
+    { value: 'xxkx', label: '信息快讯' },
+];
 
 export const route: Route = {
     path: '/std/:category?',
     categories: ['university'],
     example: '/xjtu/std/zytz',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +33,11 @@ export const route: Route = {
     name: '科技在线',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 通知公告 | 重要通知 | 项目申报 | 成果申报 | 信息快讯 |
-| -------- | -------- | -------- | -------- | -------- |
-|          | zytz     | xmsb     | cgsb     | xxkx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const category = ctx.req.param('category') ?? '';

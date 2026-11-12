@@ -5,13 +5,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: 'xmrb', label: '厦门日报' },
+    { value: 'xmwb', label: '厦门晚报' },
+    { value: 'hxcb', label: '海西晨报' },
+    { value: 'csjb', label: '城市捷报' },
+];
+const ID_OPTIONS_DEFAULT = 'xmrb';
 
 export const route: Route = {
     path: '/epaper/:id?',
     categories: ['traditional-media'],
     example: '/xmnn/epaper/xmrb',
-    parameters: { id: '报纸 id，见下表，默认为 `xmrb`，即厦门日报' },
+    parameters: { id: { description: '报纸 id，见下表，默认为 `xmrb`，即厦门日报', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +42,11 @@ export const route: Route = {
     name: '数字媒体',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 厦门日报 | 厦门晚报 | 海西晨报 | 城市捷报 |
-| -------- | -------- | -------- | -------- |
-| xmrb     | xmwb     | hxcb     | csjb     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '报纸 id',
+        options: ID_OPTIONS,
+    }),
 };
 type ArticleLink = Pick<DataItem, 'title'> & {
     link: string;
@@ -105,7 +116,7 @@ const getArticleDetails = async (url: string): Promise<ArticleDetails> => {
     };
 };
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? 'xmrb';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const parsedLimit = Number.parseInt(ctx.req.query('limit') ?? '');
     const limit = Number.isSafeInteger(parsedLimit) && parsedLimit > 0 ? parsedLimit : 80;
     const rootUrl = 'https://epaper.xmnn.cn';

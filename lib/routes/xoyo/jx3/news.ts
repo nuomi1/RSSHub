@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const categories = {
     latest: {
@@ -42,16 +43,21 @@ const categories = {
     },
 };
 
+const CATY_OPTIONS = Object.entries(categories).map(([value, item]) => ({ value, label: item.name }));
+const CATY_OPTIONS_DEFAULT = 'latest';
+
 export const route: Route = {
     path: '/jx3/:caty?',
     categories: ['game'],
     example: '/xoyo/jx3',
-    parameters: { caty: '分类，见下表，默认为最新' },
+    parameters: { caty: { description: '分类，见下表，默认为最新', options: CATY_OPTIONS, default: CATY_OPTIONS_DEFAULT } },
     name: '剑网 3 新闻资讯',
     maintainers: ['nczitzk', 'TonyRL'],
-    description: `| 最新   | 新闻 | 活动       | 公告     |
-| ------ | ---- | ---------- | -------- |
-| latest | news | activities | announce |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分类',
+        options: CATY_OPTIONS,
+    }),
     handler,
     url: 'jx3.xoyo.com',
 };
@@ -79,7 +85,7 @@ async function fetchArticleContent(detailQuery: DetailQuery): Promise<Pick<DataI
 }
 
 async function handler(ctx: Context) {
-    const { caty = 'latest' } = ctx.req.param();
+    const { caty = CATY_OPTIONS_DEFAULT } = ctx.req.param();
     const category = categories[caty];
     const parsedLimit = Number.parseInt(ctx.req.query('limit') ?? '');
     const limit = Number.isSafeInteger(parsedLimit) && parsedLimit > 0 ? parsedLimit : 30;

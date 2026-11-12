@@ -3,18 +3,30 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const LANG_OPTIONS = [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Español' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'fr', label: 'Français' },
+    { value: 'zh', label: '中文' },
+    { value: 'jp', label: '日本語' },
+];
 
 export const route: Route = {
     path: '/mindmap/:lang?',
     categories: ['study'],
     example: '/xmind/mindmap',
-    parameters: { lang: 'language code, all languages by default' },
+    parameters: { lang: { description: 'language code, all languages by default', options: LANG_OPTIONS } },
     name: 'Mindmap Gallery',
     maintainers: ['nczitzk'],
     handler,
-    description: `| English | Español | Deutsch | Français | 中文 | 日本語 |
-| ------- | ------- | ------- | -------- | ---- | ------ |
-| en      | es      | de      | fr       | zh   | jp     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: 'Language',
+        options: LANG_OPTIONS,
+    }),
 };
 
 function parseCreated(value?: string) {
