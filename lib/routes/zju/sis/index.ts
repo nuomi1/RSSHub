@@ -5,6 +5,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '重要公告' },
+    { value: '1', label: '最新通知' },
+    { value: '2', label: '教育教学' },
+    { value: '3', label: '科学研究' },
+    { value: '4', label: '新闻动态' },
+    { value: '5', label: '联系我们' },
+    { value: '6', label: '党政管理' },
+    { value: '7', label: '组织人事' },
+    { value: '8', label: '科学研究' },
+    { value: '9', label: '本科教育' },
+    { value: '10', label: '研究生教育' },
+    { value: '11', label: '学生思政' },
+    { value: '12', label: '校友联络' },
+    { value: '13', label: '对外交流' },
+];
 
 const base = 'http://www.sis.zju.edu.cn/sischinese/';
 /**
@@ -93,7 +111,7 @@ export const route: Route = {
     path: '/sis/:type',
     categories: ['university'],
     example: '/zju/sis/0',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -103,9 +121,11 @@ export const route: Route = {
         supportScihub: false,
     },
     name: '外国语学院',
-    description: `| 重要公告 | 最新通知 | 教育教学 | 科学研究 | 新闻动态 | 联系我们 | 党政管理 | 组织人事 | 科学研究 | 本科教育 | 研究生教育 | 学生思政 | 校友联络 | 对外交流 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ---------- | -------- | -------- | -------- |
-| 0        | 1        | 2        | 3        | 4        | 5        | 6        | 7        | 8        | 9        | 10         | 11       | 12       | 13       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     maintainers: ['Alex222222222222'],
     handler: handleSisRequest,
     url: 'www.sis.zju.edu.cn',

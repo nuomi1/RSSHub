@@ -1,6 +1,15 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { logo, parseList } from './util';
+
+const SECTION_OPTIONS = [
+    { value: 'china', label: '中国' },
+    { value: 'singapore', label: '新加坡' },
+    { value: 'sea', label: '东南亚' },
+    { value: 'world', label: '国际' },
+    { value: 'sports', label: '体育' },
+];
 
 const baseUrl = 'https://www.zaobao.com';
 
@@ -8,7 +17,7 @@ export const route: Route = {
     path: '/znews/:section?',
     categories: ['traditional-media'],
     example: '/zaobao/znews/china',
-    parameters: { section: '分类，缺省为 china' },
+    parameters: { section: { description: '分类，缺省为 china', options: SECTION_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -20,9 +29,11 @@ export const route: Route = {
     name: '新闻',
     maintainers: ['shunf4'],
     handler,
-    description: `| 中国  | 新加坡    | 东南亚 | 国际  | 体育   |
-| ----- | --------- | ------ | ----- | ------ |
-| china | singapore | sea    | world | sports |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'section',
+        description: '分类',
+        options: SECTION_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

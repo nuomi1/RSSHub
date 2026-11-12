@@ -6,7 +6,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '重要通知' },
+    { value: '1', label: '本科生' },
+    { value: '2', label: '研究生' },
+    { value: '3', label: '科研' },
+    { value: '4', label: '教学' },
+    { value: '5', label: '人事' },
+    { value: '6', label: '公示' },
+];
 
 const base = 'http://www.math.zju.edu.cn/';
 type NewsItem = {
@@ -90,7 +101,7 @@ export const route: Route = {
     path: '/math/:type',
     categories: ['university'],
     example: '/zju/math/0',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -100,9 +111,11 @@ export const route: Route = {
         supportScihub: false,
     },
     name: '数学科学学院',
-    description: `| 重要通知 | 本科生 | 研究生 | 科研 | 教学 | 人事 | 公示 |
-| -------- | ------ | ------ | ---- | ---- | ---- | ---- |
-| 0        | 1      | 2      | 3    | 4    | 5    | 6    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     maintainers: ['Alex222222222222'],
     handler,
     url: 'www.math.zju.edu.cn',

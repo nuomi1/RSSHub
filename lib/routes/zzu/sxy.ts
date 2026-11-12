@@ -3,13 +3,23 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jxky', label: '教学科研' },
+    { value: 'dgtx', label: '党工团学' },
+    { value: 'jzbg', label: '讲座报告' },
+    { value: 'xzgd', label: '学者观点' },
+];
 
 export const route: Route = {
     path: '/sxy/:type',
     categories: ['university'],
     example: '/zzu/sxy/xyxw',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +36,11 @@ export const route: Route = {
     name: '商学院',
     maintainers: ['amandus1990'],
     handler,
-    description: `| 学院新闻 | 通知公告 | 教学科研 | 党工团学 | 讲座报告 | 学者观点 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| xyxw     | tzgg     | jxky     | dgtx     | jzbg     | xzgd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function parsePublishedDate(value?: string) {

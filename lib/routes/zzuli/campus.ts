@@ -5,19 +5,34 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '公告信息' },
+    { value: '1', label: '学工信息' },
+    { value: '2', label: '教学信息' },
+    { value: '3', label: '信息快递' },
+    { value: '4', label: '学术报告' },
+    { value: '5', label: '科研信息' },
+    { value: '6', label: '网络公告' },
+    { value: '7', label: '班车查询' },
+    { value: '8', label: '周会表' },
+];
 
 export const route: Route = {
     path: '/campus/:type',
     categories: ['university'],
     example: '/zzuli/campus/0',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     name: '智慧门户',
     maintainers: ['Fantasia1999'],
     handler,
-    description: `| 参数名称 | 公告信息 | 学工信息 | 教学信息 | 信息快递 | 学术报告 | 科研信息 | 网络公告 | 班车查询 | 周会表 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ------ |
-| 参数     | 0        | 1        | 2        | 3        | 4        | 5        | 6        | 7        | 8      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const map = new Map([

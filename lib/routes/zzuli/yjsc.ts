@@ -5,19 +5,30 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '公告通知' },
+    { value: '1', label: '招生工作' },
+    { value: '2', label: '新闻资讯' },
+    { value: '3', label: '培养工作' },
+    { value: '4', label: '学位工作' },
+];
 
 export const route: Route = {
     path: '/yjsc/:type',
     categories: ['university'],
     example: '/zzuli/yjsc/0',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     name: '研究生处',
     maintainers: ['Fantasia1999'],
     handler,
-    description: `| 参数名称 | 公告通知 | 招生工作 | 新闻资讯 | 培养工作 | 学位工作 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| 参数     | 0        | 1        | 2        | 3        | 4        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const map = new Map([

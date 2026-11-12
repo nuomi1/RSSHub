@@ -1,15 +1,21 @@
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import type { Articles } from './types';
 import { processImage, withZhihuClient } from './utils';
+
+const USERTYPE_OPTIONS = [
+    { value: 'people', label: '普通用户' },
+    { value: 'org', label: '机构用户' },
+];
 
 export const route: Route = {
     path: '/posts/:usertype/:id',
     categories: ['social-media'],
     example: '/zhihu/posts/people/frederchen',
-    parameters: { usertype: '用户类型usertype，参考用户主页的URL。目前有两种，见下表', id: '作者 id，可在用户主页 URL 中找到' },
+    parameters: { usertype: { description: '用户类型usertype，参考用户主页的URL。目前有两种，见下表', options: USERTYPE_OPTIONS }, id: '作者 id，可在用户主页 URL 中找到' },
     features: {
         requireConfig: [
             {
@@ -32,9 +38,11 @@ export const route: Route = {
     name: '用户文章',
     maintainers: ['whtsky', 'Colin-XKL'],
     handler,
-    description: `| 普通用户 | 机构用户 |
-| -------- | -------- |
-| people   | org      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'usertype',
+        description: '用户类型usertype',
+        options: USERTYPE_OPTIONS,
+    }),
 };
 
 function handler(ctx) {

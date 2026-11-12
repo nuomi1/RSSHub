@@ -6,6 +6,21 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '全部通知' },
+    { value: '1', label: '招生信息' },
+    { value: '2', label: '教务管理' },
+    { value: '3', label: '论文管理' },
+    { value: '4', label: '思政工作' },
+    { value: '5', label: '评奖评优' },
+    { value: '6', label: '实习就业' },
+    { value: '7', label: '国际实习' },
+    { value: '8', label: '国内合作科研' },
+    { value: '9', label: '国际合作科研' },
+    { value: '10', label: '校园服务' },
+];
 
 const host = 'http://www.cst.zju.edu.cn/';
 
@@ -48,7 +63,7 @@ export const route: Route = {
     path: '/cst/:type',
     categories: ['university'],
     example: '/zju/cst/0',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -58,9 +73,11 @@ export const route: Route = {
         supportScihub: false,
     },
     name: '软件学院',
-    description: `| 全部通知 | 招生信息 | 教务管理 | 论文管理 | 思政工作 | 评奖评优 | 实习就业 | 国际实习 | 国内合作科研 | 国际合作科研 | 校园服务 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ------------ | ------------ | -------- |
-| 0        | 1        | 2        | 3        | 4        | 5        | 6        | 7        | 8            | 9            | 10       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     maintainers: ['yonvenne', 'zwithz'],
     handler,
 };

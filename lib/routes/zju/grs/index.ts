@@ -3,7 +3,16 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '全部公告' },
+    { value: '2', label: '教学管理' },
+    { value: '3', label: '各类资助' },
+    { value: '4', label: '学科建设' },
+    { value: '5', label: '海外交流' },
+];
 
 const host = 'http://www.grs.zju.edu.cn/';
 
@@ -19,7 +28,7 @@ export const route: Route = {
     path: '/grs/:type',
     categories: ['university'],
     example: '/zju/grs/1',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +40,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['Caicailiushui'],
     handler,
-    description: `| 全部公告 | 教学管理 | 各类资助 | 学科建设 | 海外交流 |
-| -------- | -------- | -------- | -------- | -------- |
-| 1        | 2        | 3        | 4        | 5        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

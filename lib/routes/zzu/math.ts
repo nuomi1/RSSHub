@@ -3,13 +3,21 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'dgtx', label: '党工团学' },
+    { value: 'xsbg', label: '学术报告' },
+];
 
 export const route: Route = {
     path: '/math/:type',
     categories: ['university'],
     example: '/zzu/math/xyxw',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +34,11 @@ export const route: Route = {
     name: '数学与统计学院',
     maintainers: ['amandus1990'],
     handler,
-    description: `| 学院新闻 | 通知公告 | 党工团学 | 学术报告 |
-| -------- | -------- | -------- | -------- |
-| xyxw     | tzgg     | dgtx     | xsbg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function parsePublishedDate(value?: string) {

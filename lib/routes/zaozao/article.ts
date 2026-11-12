@@ -1,12 +1,23 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'recommend', label: '精品推荐' },
+    { value: 'quality', label: '技术干货' },
+    { value: 'growth', label: '职场成长' },
+    { value: 'community', label: '社区动态' },
+    { value: 'material', label: '组件物料' },
+    { value: 'industry', label: '行业动态' },
+];
+const TYPE_OPTIONS_DEFAULT = 'recommend';
 
 export const route: Route = {
     path: '/article/:type?',
     categories: ['programming'],
     example: '/zaozao/article/quality',
-    parameters: { type: '文章分类' },
+    parameters: { type: { description: '文章分类', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,12 +35,14 @@ export const route: Route = {
     name: '文章',
     maintainers: ['shaomingbo'],
     handler,
-    description: `| 精品推荐  | 技术干货 | 职场成长 | 社区动态  | 组件物料 | 行业动态 |
-| --------- | -------- | -------- | --------- | -------- | -------- |
-| recommend | quality  | growth   | community | material | industry |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '文章分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const { type = 'recommend' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const response = await got({
         method: 'put',
         url: `https://e.zaozao.run/article/page/${type}`,

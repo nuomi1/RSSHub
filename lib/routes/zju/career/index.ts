@@ -3,6 +3,14 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '新闻动态' },
+    { value: '2', label: '活动通知' },
+    { value: '3', label: '学院通知' },
+    { value: '4', label: '告示通知' },
+];
 
 const rootUrl = 'http://www.career.zju.edu.cn';
 const host = 'http://www.career.zju.edu.cn/jyxt/jygz/new/getContent.zf?minCount=0&maxCount=10&';
@@ -18,7 +26,7 @@ export const route: Route = {
     path: '/career/:type',
     categories: ['university'],
     example: '/zju/career/1',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +38,11 @@ export const route: Route = {
     name: '就业服务平台',
     maintainers: ['Caicailiushui'],
     handler,
-    description: `| 新闻动态 | 活动通知 | 学院通知 | 告示通知 |
-| -------- | -------- | -------- | -------- |
-| 1        | 2        | 3        | 4        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

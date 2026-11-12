@@ -1,6 +1,16 @@
 import type { Data, Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getDesignFeed } from '../design';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '学院新闻' },
+    { value: '2', label: '公告通知' },
+    { value: '3', label: '科研申报' },
+    { value: '4', label: '科研成果' },
+    { value: '5', label: '文件与资源' },
+    { value: '6', label: '学术交流' },
+];
 
 const categories = new Map([
     [1, { id: '16', title: '学院新闻 - 浙工大设建学院' }],
@@ -15,7 +25,7 @@ export const route: Route = {
     path: '/da/:type',
     categories: ['university'],
     example: '/zjut/da/1',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +38,11 @@ export const route: Route = {
     maintainers: ['yikZero'],
     url: 'www.design.zjut.edu.cn',
     handler,
-    description: `| 学院新闻 | 公告通知 | 科研申报 | 科研成果 | 文件与资源 | 学术交流 |
-| -------- | -------- | -------- | -------- | ---------- | -------- |
-| 1        | 2        | 3        | 4        | 5          | 6        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

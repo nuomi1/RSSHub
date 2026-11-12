@@ -6,13 +6,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: 'ywsd', label: '要闻速递' },
+    { value: 'jxky', label: '教学科研' },
+    { value: 'jcdt', label: '基层动态' },
+    { value: 'mtzd', label: '媒体郑大' },
+];
 
 export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/zzu/news/ywsd',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +37,11 @@ export const route: Route = {
     name: '新闻网',
     maintainers: ['nia3y', 'amandus1990'],
     handler,
-    description: `| 要闻速递 | 教学科研 | 基层动态 | 媒体郑大 |
-| -------- | -------- | -------- | -------- |
-| ywsd     | jxky     | jcdt     | mtzd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 class ArticleUnavailableError extends Error {
     constructor(public author?: string) {

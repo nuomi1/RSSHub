@@ -4,6 +4,16 @@ import NotFoundError from '@/errors/types/not-found';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '教务管理' },
+    { value: '2', label: '学籍管理' },
+    { value: '3', label: '考试管理' },
+    { value: '4', label: '选课管理' },
+    { value: '5', label: '排课管理' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const host = 'https://jwc.zcmu.edu.cn/';
 
@@ -19,7 +29,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/zcmu/jwc/0',
-    parameters: { type: '通知模块id' },
+    parameters: { type: { description: '通知模块id', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,13 +41,15 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['CCraftY'],
     handler,
-    description: `| 教务管理 | 学籍管理 | 考试管理 | 选课管理 | 排课管理 |
-| -------- | -------- | -------- | -------- | -------- |
-| 0        | 2        | 3        | 4        | 5        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '通知模块id',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = Number.parseInt(ctx.req.param('type') ?? '0');
+    const type = Number.parseInt(ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT);
     const channel = map.get(type);
     if (!channel) {
         throw new NotFoundError('Invalid notification type. Supported types are 0, 2, 3, 4 and 5.');

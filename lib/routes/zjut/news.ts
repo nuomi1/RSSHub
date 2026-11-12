@@ -5,6 +5,18 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '5414', label: '图片新闻' },
+    { value: '5415', label: '工大要闻' },
+    { value: '5416', label: '综合新闻' },
+    { value: '5422', label: '学术・探索' },
+    { value: '5423', label: '三创・人物' },
+    { value: '5424', label: '智库工大' },
+    { value: '5425', label: '美誉工大' },
+    { value: '5419', label: '葵园融媒' },
+];
 
 const host = 'http://www.news.zjut.edu.cn';
 
@@ -12,7 +24,7 @@ export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/zjut/news/5414',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +42,11 @@ export const route: Route = {
             source: ['www.news.zjut.edu.cn/:type/list.htm'],
         },
     ],
-    description: `| 图片新闻 | 工大要闻 | 综合新闻 | 学术・探索 | 三创・人物 | 智库工大 | 美誉工大 | 葵园融媒 |
-| -------- | -------- | -------- | ---------- | ---------- | -------- | -------- | -------- |
-| 5414     | 5415     | 5416     | 5422       | 5423       | 5424     | 5425     | 5419     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

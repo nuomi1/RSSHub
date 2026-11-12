@@ -3,13 +3,20 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'nba', label: 'NBA' },
+    { value: 'zuqiu', label: '足球' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'nba';
 
 export const route: Route = {
     path: '/luxiang/:category?',
     categories: ['multimedia'],
     example: '/zhibo8/luxiang/nba',
-    parameters: { category: '分类，见下表，默认为 `nba`' },
+    parameters: { category: { description: '分类，见下表，默认为 `nba`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['zhibo8.cc/:category/luxiang.htm'],
@@ -17,16 +24,18 @@ export const route: Route = {
         },
     ],
     name: '录像',
-    description: `| NBA | 足球  |
-| --- | ----- |
-| nba | zuqiu |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     maintainers: ['TonyRL'],
     handler,
 };
 
 async function handler(ctx) {
     const rootUrl = 'https://www.zhibo8.cc';
-    const { category = 'nba' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${rootUrl}/${category}/luxiang.htm`;
 
     const response = await got(link);

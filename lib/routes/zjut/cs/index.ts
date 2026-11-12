@@ -5,7 +5,14 @@ import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '54', label: '新闻资讯' },
+    { value: '55', label: '学术动态' },
+    { value: '53', label: '通知公告' },
+];
 
 const rootUrl = 'https://cs.zjut.edu.cn/jsp/newsclass.jsp?wcId=';
 const host = 'cs.zjut.edu.cn';
@@ -14,7 +21,7 @@ export const route: Route = {
     path: '/cs/:type',
     categories: ['university'],
     example: '/zjut/cs/54',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +34,11 @@ export const route: Route = {
     maintainers: ['zhullyb'],
     url: 'cs.zjut.edu.cn',
     handler,
-    description: `| 新闻资讯 | 学术动态 | 通知公告 |
-| -------- | -------- | -------- |
-| 54       | 55       | 53       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

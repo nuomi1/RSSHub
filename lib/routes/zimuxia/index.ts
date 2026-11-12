@@ -3,12 +3,24 @@ import { load } from 'cheerio';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: 'ALL' },
+    { value: '昆仑德语社', label: 'FIX 德语社' },
+    { value: '欧美剧集', label: '欧美剧集' },
+    { value: '欧美电影', label: '欧美电影' },
+    { value: '综艺纪录', label: '综艺 & 纪录' },
+    { value: 'fix 日语社', label: 'FIX 日语社' },
+    { value: 'fix 韩语社', label: 'FIX 韩语社' },
+    { value: 'fix 法语社', label: 'FIX 法语社' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['multimedia'],
     example: '/zimuxia',
-    parameters: { category: '分类，见下表，默认为 ALL' },
+    parameters: { category: { description: '分类，见下表，默认为 ALL', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -20,9 +32,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| ALL | FIX 德语社 | 欧美剧集 | 欧美电影 | 综艺 & 纪录 | FIX 日语社 | FIX 韩语社 | FIX 法语社 |
-| --- | ---------- | -------- | -------- | ----------- | ---------- | ---------- | ---------- |
-|     | 昆仑德语社 | 欧美剧集 | 欧美电影 | 综艺纪录    | fix 日语社 | fix 韩语社 | fix 法语社 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

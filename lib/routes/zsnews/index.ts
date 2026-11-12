@@ -7,18 +7,30 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEID_OPTIONS = [
+    { value: '35', label: '本地' },
+    { value: '36', label: '镇区' },
+    { value: '37', label: '热点' },
+    { value: '38', label: '社会' },
+    { value: '39', label: '综合' },
+];
+const CATEID_OPTIONS_DEFAULT = '35';
 
 export const route: Route = {
     path: '/index/:cateid',
     categories: ['traditional-media'],
     example: '/zsnews/index/35',
-    parameters: { cateid: '类别' },
+    parameters: { cateid: { description: '类别', options: CATEID_OPTIONS, default: CATEID_OPTIONS_DEFAULT } },
     name: '新闻',
     maintainers: ['laampui'],
-    description: `| 35   | 36   | 37   | 38   | 39   |
-| ---- | ---- | ---- | ---- | ---- |
-| 本地 | 镇区 | 热点 | 社会 | 综合 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'cateid',
+        description: '类别',
+        options: CATEID_OPTIONS,
+    }),
     handler,
 };
 class ArticleUnavailableError extends Error {}

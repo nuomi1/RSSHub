@@ -4,6 +4,18 @@ import NotFoundError from '@/errors/types/not-found';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '通知公告' },
+    { value: '1', label: '评优评奖' },
+    { value: '2', label: '文明规范' },
+    { value: '3', label: '创新创业' },
+    { value: '4', label: '校园文化' },
+    { value: '5', label: '心理驿站' },
+    { value: '6', label: '日常通知' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const host = 'https://yxy.zcmu.edu.cn/';
 
@@ -21,7 +33,7 @@ export const route: Route = {
     path: '/yxy/:type?',
     categories: ['university'],
     example: '/zcmu/yxy/0',
-    parameters: { type: '模块id' },
+    parameters: { type: { description: '模块id', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,13 +45,15 @@ export const route: Route = {
     name: '药学院',
     maintainers: ['CCraftY'],
     handler,
-    description: `| 通知公告 | 评优评奖 | 文明规范 | 创新创业 | 校园文化 | 心理驿站 | 日常通知 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 0        | 1        | 2        | 3        | 4        | 5        | 6        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '模块id',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = Number.parseInt(ctx.req.param('type') ?? '0');
+    const type = Number.parseInt(ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT);
     const channel = map.get(type);
     if (!channel) {
         throw new NotFoundError('Invalid notification type. Supported types are 0 through 6.');

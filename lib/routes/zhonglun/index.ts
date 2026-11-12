@@ -5,12 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/description';
 
+const LANGUAGE_OPTIONS = [
+    { value: 'en', label: 'ENG' },
+    { value: 'zh', label: '简体中文' },
+    { value: 'ja', label: '日本語' },
+    { value: 'kr', label: '한국어' },
+];
+const LANGUAGE_OPTIONS_DEFAULT = 'zh';
+
 export const handler = async (ctx) => {
-    const { language = 'zh' } = ctx.req.param();
+    const { language = LANGUAGE_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 30);
 
     const rootUrl = `https://${language === 'zh' ? 'www' : language.replaceAll(/[^\dA-Z-]/gi, '')}.zhonglun.com`;
@@ -89,10 +98,12 @@ export const route: Route = {
     maintainers: ['snipersteve', 'nczitzk'],
     handler,
     example: '/zhonglun/research/article/zh',
-    parameters: { language: '语言，默认为 zh，即简体中文，可在对应分类页 URL 中找到' },
-    description: `| ENG | 简体中文 | 日本語 | 한국어 |
-| --- | -------- | ------ | ------ |
-| en  | zh       | ja     | kr     |`,
+    parameters: { language: { description: '语言，默认为 zh，即简体中文，可在对应分类页 URL 中找到', options: LANGUAGE_OPTIONS, default: LANGUAGE_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: '语言',
+        options: LANGUAGE_OPTIONS,
+    }),
     categories: ['new-media'],
 
     features: {

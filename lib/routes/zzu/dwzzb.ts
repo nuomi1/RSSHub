@@ -1,13 +1,21 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: 'djgz', label: '党建工作' },
+    { value: 'gbgz', label: '干部工作' },
+    { value: 'rcgz', label: '人才工作' },
+    { value: 'fpgz', label: '乡村振兴工作' },
+];
 
 export const route: Route = {
     path: '/dwzzb/:type',
     categories: ['university'],
     example: '/zzu/dwzzb/djgz',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +32,11 @@ export const route: Route = {
     name: '党委组织部',
     maintainers: ['amandus1990'],
     handler,
-    description: `| 党建工作 | 干部工作 | 人才工作 | 乡村振兴工作 |
-| -------- | -------- | -------- | ------------ |
-| djgz     | gbgz     | rcgz     | fpgz         |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 function parsePublishedDate(value?: string) {

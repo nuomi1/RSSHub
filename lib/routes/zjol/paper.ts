@@ -6,13 +6,24 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const ID_OPTIONS = [
+    { value: 'zjrb', label: '浙江日报' },
+    { value: 'qjwb', label: '钱江晚报' },
+    { value: 'msb', label: '美术报' },
+    { value: 'zjlnb', label: '浙江老年报' },
+    { value: 'zjfzb', label: '浙江法制报' },
+    { value: 'jnyb', label: '江南游报' },
+];
+const ID_OPTIONS_DEFAULT = 'zjrb';
 
 export const route: Route = {
     path: '/paper/:id?',
     categories: ['traditional-media'],
     example: '/zjol/paper/zjrb',
-    parameters: { id: '报纸 id，见下表，默认为 `zjrb`，即浙江日报' },
+    parameters: { id: { description: '报纸 id，见下表，默认为 `zjrb`，即浙江日报', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,13 +35,15 @@ export const route: Route = {
     name: '浙报集团系列报刊',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 浙江日报 | 钱江晚报 | 美术报 | 浙江老年报 | 浙江法制报 | 江南游报 |
-| -------- | -------- | ------ | ---------- | ---------- | -------- |
-| zjrb     | qjwb     | msb    | zjlnb      | zjfzb      | jnyb     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '报纸 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? 'zjrb';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 100);
 
     const allowedId = ['zjrb', 'qjwb', 'msb', 'zjlnb', 'zjfzb', 'jnyb'];

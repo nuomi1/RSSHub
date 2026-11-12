@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'nba', label: 'NBA' },
+    { value: 'zuqiu', label: '足球' },
+    { value: 'dianjing', label: '电竞' },
+    { value: 'zonghe', label: '综合' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'nba';
 
 const categories = {
     nba: 'NBA',
@@ -17,7 +26,7 @@ export const route: Route = {
     path: '/more/:category?',
     categories: ['bbs'],
     example: '/zhibo8/more/nba',
-    parameters: { category: '分类，见下表，默认为 NBA' },
+    parameters: { category: { description: '分类，见下表，默认为 NBA', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,14 +42,16 @@ export const route: Route = {
         },
     ],
     name: '滚动新闻',
-    description: `| NBA | 足球  | 电竞     | 综合   |
-| --- | ----- | -------- | ------ |
-| nba | zuqiu | dianjing | zonghe |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     maintainers: ['nczitzk'],
     handler,
 };
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'nba';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const requestedLimit = ctx.req.query('limit');
     const parsedLimit = requestedLimit && /^\d+$/.test(requestedLimit) ? Number(requestedLimit) : NaN;
     const limit = Number.isSafeInteger(parsedLimit) && parsedLimit > 0 ? parsedLimit : 100;

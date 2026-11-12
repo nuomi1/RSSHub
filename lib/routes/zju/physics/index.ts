@@ -3,6 +3,13 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '本院动态' },
+    { value: '2', label: '科研进展' },
+    { value: '3', label: '研究生教育最新消息' },
+];
 
 // const host = 'http://physics.zju.edu.cn/redir.php?catalog_id=';
 const host = 'https://physics.zju.edu.cn';
@@ -28,7 +35,7 @@ export const route: Route = {
     path: '/physics/:type',
     categories: ['university'],
     example: '/zju/physics/1',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -40,9 +47,11 @@ export const route: Route = {
     name: '物理学院',
     maintainers: ['Caicailiushui'],
     handler,
-    description: `| 本院动态 | 科研进展 | 研究生教育最新消息 |
-| -------- | -------- | ------------------ |
-| 1        | 2        | 3                  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

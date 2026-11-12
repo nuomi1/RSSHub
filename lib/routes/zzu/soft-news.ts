@@ -7,18 +7,28 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '参数', label: '参数名称' },
+    { value: 'xyxw', label: '学院动态' },
+    { value: 'tzgg', label: '通知公告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'xyxw';
 
 export const route: Route = {
     path: '/soft/news/:type?',
     categories: ['university'],
     example: '/zzu/soft/news/xyxw',
-    parameters: { type: '可选，默认为 `xyxw`' },
+    parameters: { type: { description: '可选，默认为 `xyxw`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '计算机与人工智能学院（软件学院）',
     maintainers: ['nia3y'],
     handler,
-    description: `| 参数名称 | 学院动态 | 通知公告 |
-| -------- | -------- | -------- |
-| 参数     | xyxw     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '可选',
+        options: TYPE_OPTIONS,
+    }),
 };
 const baseUrl = 'https://www7.zzu.edu.cn/csai/';
 const config = {
@@ -52,7 +62,7 @@ function parsePublishedDate(value?: string) {
     return Number.isFinite(date.getTime()) ? date : undefined;
 }
 async function handler(ctx: Context) {
-    const { type = 'xyxw' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const { title, url } = config[type];
     const response = await ofetch(url);
     const $ = load(response);

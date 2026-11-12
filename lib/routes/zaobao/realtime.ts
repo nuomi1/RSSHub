@@ -1,6 +1,15 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { logo, parseList } from './util';
+
+const SECTION_OPTIONS = [
+    { value: 'china', label: '中国' },
+    { value: 'singapore', label: '新加坡' },
+    { value: 'world', label: '国际' },
+    { value: 'zfinance', label: '财经' },
+];
+const SECTION_OPTIONS_DEFAULT = 'china';
 
 const baseUrl = 'https://www.zaobao.com';
 
@@ -8,17 +17,19 @@ export const route: Route = {
     path: '/realtime/:section?',
     categories: ['traditional-media'],
     example: '/zaobao/realtime/china',
-    parameters: { section: '分类，缺省为 china' },
+    parameters: { section: { description: '分类，缺省为 china', options: SECTION_OPTIONS, default: SECTION_OPTIONS_DEFAULT } },
     name: '即时新闻',
     maintainers: ['shunf4'],
     handler,
-    description: `| 中国  | 新加坡    | 国际  | 财经     |
-| ----- | --------- | ----- | -------- |
-| china | singapore | world | zfinance |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'section',
+        description: '分类',
+        options: SECTION_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const section = ctx.req.param('section') ?? 'china';
+    const section = ctx.req.param('section') ?? SECTION_OPTIONS_DEFAULT;
 
     let name;
     let sectionLink;
