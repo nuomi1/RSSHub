@@ -4,6 +4,14 @@ import { renderToString } from 'hono/jsx/dom/server';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'mens', label: "Men's" },
+    { value: 'womens', label: "Women's" },
+    { value: 'kids', label: "Kids' & Baby" },
+    { value: 'luggage', label: 'Packs & Gear' },
+];
 
 const host = 'https://www.patagonia.com';
 const categoryMap = {
@@ -22,7 +30,7 @@ export const route: Route = {
     path: '/new-arrivals/:category',
     categories: ['shopping'],
     example: '/patagonia/new-arrivals/mens',
-    parameters: { category: 'category, see below' },
+    parameters: { category: { description: 'category, see below', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -34,9 +42,11 @@ export const route: Route = {
     name: 'New Arrivals',
     maintainers: ['IvanWng97'],
     handler,
-    description: `| Men's | Women's | Kids' & Baby | Packs & Gear |
-| ----- | ------- | ------------ | ------------ |
-| mens  | womens  | kids         | luggage      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

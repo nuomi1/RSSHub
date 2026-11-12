@@ -6,7 +6,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xwrd', label: '新闻热点' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'zpxx', label: '招聘信息' },
+    { value: 'sxxx', label: '实习信息' },
+    { value: 'cyxx', label: '创业信息' },
+];
+const TYPE_OPTIONS_DEFAULT = 'zpxx';
 
 const newsCategories = {
     xwrd: { id: 12, name: '新闻热点' },
@@ -114,7 +124,7 @@ export const route: Route = {
     path: '/scc/recruit/:type?',
     categories: ['university'],
     example: '/pku/scc/recruit/zpxx',
-    parameters: { type: '分区，见下表，默认请求 `zpxx`' },
+    parameters: { type: { description: '分区，见下表，默认请求 `zpxx`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -126,13 +136,11 @@ export const route: Route = {
     name: '学生就业指导服务中心',
     maintainers: ['DylanXie123'],
     handler,
-    description: `| xwrd     | tzgg     | zpxx     | sxxx     | cyxx     |
-| -------- | -------- | -------- | -------- | -------- |
-| 新闻热点 | 通知公告 | 招聘信息 | 实习信息 | 创业信息 |`,
+    description: renderOptionsMarkdownTable({ parameter: 'type', description: '分区', options: TYPE_OPTIONS }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'zpxx';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (type === 'zpxx' || type === 'sxxx') {
         return await getRecruitmentItems(type === 'zpxx' ? 1 : 2);
     }

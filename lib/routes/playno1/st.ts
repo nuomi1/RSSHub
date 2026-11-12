@@ -4,9 +4,18 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { cookieJar, processArticle } from './utils';
+
+const CATID_OPTIONS = [
+    { value: 'all', label: '全部文章' },
+    { value: 'experience', label: '情趣體驗報告' },
+    { value: 'news', label: '情趣新聞' },
+    { value: 'graduate', label: '情趣研究所' },
+];
+const CATID_OPTIONS_DEFAULT = 'all';
 
 const baseUrl = 'http://stno1.playno1.com';
 
@@ -14,7 +23,7 @@ export const route: Route = {
     path: '/st/:catid?',
     categories: ['bbs'],
     example: '/playno1/st',
-    parameters: { catid: '分类，见下表，默认为全部文章' },
+    parameters: { catid: { description: '分类，见下表，默认为全部文章', options: CATID_OPTIONS, default: CATID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +41,15 @@ export const route: Route = {
     name: '情趣',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 全部文章 | 情趣體驗報告 | 情趣新聞 | 情趣研究所 |
-| -------- | ------------ | -------- | ---------- |
-| all      | experience   | news     | graduate   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'catid',
+        description: '分类',
+        options: CATID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { catid = 'all' } = ctx.req.param();
+    const { catid = CATID_OPTIONS_DEFAULT } = ctx.req.param();
     const url = `${baseUrl}/stno1/${catid}/`;
     const response = await got(url, {
         cookieJar,

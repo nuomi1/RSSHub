@@ -3,14 +3,21 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl, get } from './utils';
+
+const SORT_OPTIONS = [
+    { value: 'new', label: '最新' },
+    { value: 'recommend', label: '推荐' },
+    { value: 'hot', label: '热门' },
+];
 
 export const route: Route = {
     path: '/category/:category?/:sort?',
     categories: ['bbs'],
     example: '/pincong/category/1/new',
-    parameters: { category: '分类，与官网分类 URL `category-` 后的数字对应，默认为全部', sort: '排序方式，参数可见下表，默认为推荐' },
+    parameters: { category: '分类，与官网分类 URL `category-` 后的数字对应，默认为全部', sort: { description: '排序方式，参数可见下表，默认为推荐', options: SORT_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -22,9 +29,11 @@ export const route: Route = {
     name: '发现',
     maintainers: ['zphw'],
     handler,
-    description: `| 最新 | 推荐      | 热门 |
-| ---- | --------- | ---- |
-| new  | recommend | hot  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'sort',
+        description: '排序方式',
+        options: SORT_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

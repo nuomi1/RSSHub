@@ -2,14 +2,20 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import utils from './utils';
+
+const MEDIA_OPTIONS = [
+    { value: 'mv', label: '电影' },
+    { value: 'tv', label: '剧集' },
+];
 
 export const route: Route = {
     path: '/index/:media?',
     categories: ['multimedia'],
     example: '/pianyuan/index',
-    parameters: { media: '类别，见下表，默认为首页' },
+    parameters: { media: { description: '类别，见下表，默认为首页', options: MEDIA_OPTIONS } },
     features: {
         requireConfig: [
             {
@@ -33,9 +39,11 @@ export const route: Route = {
     maintainers: ['greatcodeeer', 'jerry1119'],
     handler,
     url: 'pianyuan.org/',
-    description: `| 电影 | 剧集 |
-| ---- | ---- |
-| mv   | tv   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'media',
+        description: '类别',
+        options: MEDIA_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
