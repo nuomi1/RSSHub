@@ -69,6 +69,50 @@ const THEBLOCKBEATS_DESCRIPTION = `|    快讯   |   文章  |
 | :--: | :--: | :--: | :------: |
 |   0  |   1  |   2  |     3    |`;
 
+/** The three 5-column transposed tables that 10000link/info.ts shipped with: labels in the header, values in the single data row. */
+const INFO_10000LINK_TABLES = `| 金融科技      | 物流          | 供应链金融风控 | 区块链         | B2B       |
+| ------------- | ------------- | -------------- | -------------- | --------- |
+| newsFinancial | newslogistics | newsRisk       | newsBlockChain | newsBTwoB |
+
+| 跨境电商        | 投融资         | 供应链管理     | 供应链创新     | 数据          |
+| --------------- | -------------- | -------------- | -------------- | ------------- |
+| newsCrossborder | newsInvestment | newsManagement | newsInnovation | newslists/A02 |
+
+| 政策          | 规划          | 案例           | 职场         | 供应链票据 |
+| ------------- | ------------- | -------------- | ------------ | ---------- |
+| newslists/A03 | newslists/A04 | newslists/GL03 | newslists/ZC | newsBill   |`;
+
+/** Options recovered from those three tables, i.e. the constant the migration is expected to write. */
+const INFO_10000LINK_OPTIONS = [
+    { label: '金融科技', value: 'newsFinancial' },
+    { label: '物流', value: 'newslogistics' },
+    { label: '供应链金融风控', value: 'newsRisk' },
+    { label: '区块链', value: 'newsBlockChain' },
+    { label: 'B2B', value: 'newsBTwoB' },
+    { label: '跨境电商', value: 'newsCrossborder' },
+    { label: '投融资', value: 'newsInvestment' },
+    { label: '供应链管理', value: 'newsManagement' },
+    { label: '供应链创新', value: 'newsInnovation' },
+    { label: '数据', value: 'newslists/A02' },
+    { label: '政策', value: 'newslists/A03' },
+    { label: '规划', value: 'newslists/A04' },
+    { label: '案例', value: 'newslists/GL03' },
+    { label: '职场', value: 'newslists/ZC' },
+    { label: '供应链票据', value: 'newsBill' },
+];
+
+const INFO_10000LINK_TIP = `::: tip
+若订阅 [天下大势](https://info.10000link.com/newslists.aspx?chid=My01)，请截取 \`newslists\` 作为 \`category\` 参数填入。
+:::`;
+
+const infoOptionRows = (): string[][] => INFO_10000LINK_OPTIONS.map(({ value, label }) => [value, label]);
+
+/** Reads a transposed table (labels in the header, values in the single data row) as `(value, label)` pairs. */
+const readTransposedTable = (table: MarkdownNode): string[][] => {
+    const [labels, values] = tableShape(table).rows;
+    return values.map((value, index) => [value, labels[index]]);
+};
+
 // ============================================================
 // renderMarkdownTable
 // ============================================================
@@ -319,6 +363,51 @@ describe('renderMarkdownTable', () => {
 
             expect(migrated).toHaveLength(2);
             expect(migrated.map((table) => tableShape(table))).toEqual(original.map((table) => tableShape(table)));
+        });
+    });
+
+    describe('parameter option table convention', () => {
+        it('renders two unaligned columns for a parameter', () => {
+            const markdown = renderMarkdownTable({
+                headers: ['category', '分类'],
+                rows: infoOptionRows(),
+            });
+            const lines = markdown.split('\n');
+
+            expect(lines[0]).toBe('| category | 分类 |');
+            expect(lines[1]).toBe('| --- | --- |');
+            expect(lines).toHaveLength(INFO_10000LINK_OPTIONS.length + 2);
+
+            const table = parseTables(markdown)[0];
+            expect(tableShape(table).align).toEqual([null, null]);
+            expect(tableShape(table).rows.every((row) => row.length === 2)).toBe(true);
+        });
+
+        it('turns three transposed tables into one two-column table without losing an option', () => {
+            const originalPairs = parseTables(INFO_10000LINK_TABLES).flatMap((table) => readTransposedTable(table));
+
+            expect(originalPairs).toEqual(infoOptionRows());
+
+            const markdown = renderMarkdownTable({
+                headers: ['category', '分类'],
+                rows: infoOptionRows(),
+            });
+            const tables = parseTables(markdown);
+
+            expect(tables).toHaveLength(1);
+            expect(tableShape(tables[0]).rows).toEqual([['category', '分类'], ...originalPairs]);
+        });
+
+        it('keeps the tip block untouched when only the table is replaced', () => {
+            const table = renderMarkdownTable({
+                headers: ['category', '分类'],
+                rows: infoOptionRows(),
+            });
+            const description = `${INFO_10000LINK_TIP}\n\n${table}`;
+
+            expect(description.startsWith(INFO_10000LINK_TIP)).toBe(true);
+            expect(description.slice(INFO_10000LINK_TIP.length)).toBe(`\n\n${table}`);
+            expect(parseTables(description)).toHaveLength(1);
         });
     });
 });
