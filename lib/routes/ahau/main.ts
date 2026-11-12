@@ -5,19 +5,27 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xnyw', label: '校内要闻' },
+    { value: 'ybdt', label: '院部动态' },
+];
 
 export const route: Route = {
     path: '/main/:type',
     categories: ['university'],
     example: '/ahau/main/xnyw',
-    parameters: { type: '类型名' },
+    parameters: { type: { description: '类型名', options: TYPE_OPTIONS } },
     name: '安农大官网新闻',
     maintainers: ['SimonHu-HN'],
     handler,
-    description: `| 校内要闻 | 院部动态 |
-| -------- | -------- |
-| xnyw     | ybdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

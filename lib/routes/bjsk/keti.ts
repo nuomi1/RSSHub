@@ -4,14 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '402881027cbb8c6f017cbb8e17710002', label: '通知公告' },
+    { value: '2c908aee818e04f401818e08645c0002', label: '资料下载' },
+];
+const ID_OPTIONS_DEFAULT = '402881027cbb8c6f017cbb8e17710002';
 
 export const route: Route = {
     path: '/keti/:id?',
     categories: ['government'],
     example: '/bjsk/keti',
-    parameters: { id: '分类 id，见下表，默认为通知公告' },
+    parameters: { id: { description: '分类 id，见下表，默认为通知公告', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,13 +37,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'keti.bjsk.org.cn/indexAction!to_index.action',
-    description: `| 通知公告                         | 资料下载                         |
-| -------------------------------- | -------------------------------- |
-| 402881027cbb8c6f017cbb8e17710002 | 2c908aee818e04f401818e08645c0002 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '402881027cbb8c6f017cbb8e17710002';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 100);
 
     const rootUrl = 'https://keti.bjsk.org.cn';

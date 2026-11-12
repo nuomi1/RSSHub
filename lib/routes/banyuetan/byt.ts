@@ -5,24 +5,33 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const TIME_OPTIONS = [
+    { value: 'shishidashiku', label: '每周' },
+    { value: 'yiyue', label: '每月' },
+];
+const TIME_OPTIONS_DEFAULT = 'shishidashiku';
 
 export const route: Route = {
     path: '/byt/:time?',
     categories: ['new-media'],
     example: '/banyuetan/byt',
-    parameters: { time: '时间，见下表，默认为每周' },
+    parameters: { time: { description: '时间，见下表，默认为每周', options: TIME_OPTIONS, default: TIME_OPTIONS_DEFAULT } },
     name: '时事大事库',
     maintainers: ['nczitzk'],
-    description: `| 每周          | 每月  |
-| ------------- | ----- |
-| shishidashiku | yiyue |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'time',
+        description: '时间',
+        options: TIME_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { time = 'shishidashiku' } = ctx.req.param();
+    const { time = TIME_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 10);
 
     const rootUrl = 'http://www.banyuetan.org';

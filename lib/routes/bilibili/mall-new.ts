@@ -1,5 +1,15 @@
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '0', label: '全部' },
+    { value: '1', label: '手办' },
+    { value: '7', label: '魔力赏' },
+    { value: '3', label: '周边' },
+    { value: '6', label: '游戏' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '0';
 
 const resolveImageUrl = (imageUrl: string) => (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl);
 
@@ -7,7 +17,7 @@ export const route: Route = {
     path: '/mall/new/:category?',
     categories: ['social-media'],
     example: '/bilibili/mall/new/1',
-    parameters: { category: '分类，默认全部，见下表' },
+    parameters: { category: { description: '分类，默认全部，见下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,13 +29,15 @@ export const route: Route = {
     name: '会员购新品上架',
     maintainers: ['DIYgod'],
     handler,
-    description: `| 全部 | 手办 | 魔力赏 | 周边 | 游戏 |
-| ---- | ---- | ------ | ---- | ---- |
-| 0    | 1    | 7      | 3    | 6    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') || 0;
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
 
     const response = await got({
         method: 'get',

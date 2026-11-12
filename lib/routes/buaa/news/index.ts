@@ -5,13 +5,25 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'zhxw', label: '综合新闻' },
+    { value: 'xxgg_new', label: '信息公告' },
+    { value: 'xsjwhhd_new', label: '学术文化' },
+    { value: 'xyfc_new', label: '校园风采' },
+    { value: 'kjzx_new', label: '科教在线' },
+    { value: 'mtbh_new', label: '媒体北航' },
+    { value: 'ztxw', label: '专题新闻' },
+    { value: 'bhrw', label: '北航人物' },
+];
 
 export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/buaa/news/zhxw',
-    parameters: { type: '新闻版块' },
+    parameters: { type: { description: '新闻版块', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,9 +35,11 @@ export const route: Route = {
     name: '新闻网',
     maintainers: ['AlanDecode'],
     handler,
-    description: `| 综合新闻 | 信息公告  | 学术文化     | 校园风采  | 科教在线  | 媒体北航  | 专题新闻 | 北航人物 |
-| -------- | --------- | ------------ | --------- | --------- | --------- | -------- | -------- |
-| zhxw     | xxgg\\_new | xsjwhhd\\_new | xyfc\\_new | kjzx\\_new | mtbh\\_new | ztxw     | bhrw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '新闻版块',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context): Promise<Data> {

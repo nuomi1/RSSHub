@@ -4,15 +4,24 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import util from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'jwkx', label: '教务快讯' },
+    { value: 'ksxx', label: '考试信息' },
+    { value: 'kcxx', label: '课程信息' },
+    { value: 'jgdt', label: '教改动态' },
+    { value: 'tpxw', label: '图片新闻' },
+];
 
 export const route: Route = {
     path: '/jwc/:type',
     categories: ['university'],
     example: '/bjfu/jwc/jwkx',
-    parameters: { type: '通知类别' },
+    parameters: { type: { description: '通知类别', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +38,11 @@ export const route: Route = {
     name: '教务处通知公告',
     maintainers: ['markmingjie'],
     handler,
-    description: `| 教务快讯 | 考试信息 | 课程信息 | 教改动态 | 图片新闻 |
-| -------- | -------- | -------- | -------- | -------- |
-| jwkx     | ksxx     | kcxx     | jgdt     | tpxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '通知类别',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

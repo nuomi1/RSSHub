@@ -4,6 +4,15 @@ import type { Route } from '@/types';
 import { ViewType } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'weekly', label: '每周一书' },
+    { value: 'skills', label: '使用技巧' },
+    { value: 'books', label: '图书推荐' },
+    { value: 'news', label: '新闻速递' },
+    { value: 'essay', label: '精选短文' },
+];
 
 export const route: Route = {
     path: '/:category',
@@ -33,9 +42,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['OdinZhang'],
     handler,
-    description: `| 每周一书 | 使用技巧 | 图书推荐 | 新闻速递 | 精选短文 |
-| -------- | -------- | -------- | -------- | -------- |
-| weekly   | skills   | books    | news     | essay    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

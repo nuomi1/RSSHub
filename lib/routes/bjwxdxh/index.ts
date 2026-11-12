@@ -4,13 +4,34 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '86', label: '协会活动' },
+    { value: '99', label: '公告通知' },
+    { value: '102', label: '会议情况' },
+    { value: '103', label: '简报' },
+    { value: '106', label: '政策法规' },
+    { value: '107', label: '学习园地' },
+    { value: '108', label: '业余无线电服务中心' },
+    { value: '111', label: '经验交流' },
+    { value: '112', label: '新技术推介' },
+    { value: '114', label: '活动通知' },
+    { value: '115', label: '爱好者园地' },
+    { value: '116', label: '结果查询' },
+    { value: '118', label: '资料下载' },
+    { value: '119', label: '会员之家' },
+    { value: '120', label: '会员简介' },
+    { value: '121', label: '会员风采' },
+    { value: '122', label: '活动报道' },
+];
 
 export const route: Route = {
     path: '/:type?',
     categories: ['government'],
     example: '/bjwxdxh/114',
-    parameters: { type: '类型，见下表，默认为全部' },
+    parameters: { type: { description: '类型，见下表，默认为全部', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +43,11 @@ export const route: Route = {
     name: '最新资讯',
     maintainers: ['Misaka13514'],
     handler,
-    description: `| 协会活动 | 公告通知 | 会议情况 | 简报 | 政策法规 | 学习园地 | 业余无线电服务中心 | 经验交流 | 新技术推介 | 活动通知 | 爱好者园地 | 结果查询 | 资料下载 | 会员之家 | 会员简介 | 会员风采 | 活动报道 |
-| -------- | -------- | -------- | ---- | -------- | -------- | ------------------ | -------- | ---------- | -------- | ---------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 86       | 99       | 102      | 103  | 106      | 107      | 108                | 111      | 112        | 114      | 115        | 116      | 118      | 119      | 120      | 121      | 122      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

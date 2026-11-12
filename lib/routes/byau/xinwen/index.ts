@@ -4,13 +4,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_ID_OPTIONS = [
+    { value: '3674', label: '学校要闻' },
+    { value: '3676', label: '校园动态' },
+];
 
 export const route: Route = {
     path: '/news/:type_id',
     categories: ['university'],
     example: '/byau/news/3674',
-    parameters: { type_id: '栏目类型(从菜单栏获取对应 ID)' },
+    parameters: { type_id: { description: '栏目类型(从菜单栏获取对应 ID)', options: TYPE_ID_OPTIONS } },
     radar: [
         {
             source: ['xinwen.byau.edu.cn/:type_id/list.htm'],
@@ -21,9 +27,11 @@ export const route: Route = {
     maintainers: ['ueiu'],
     handler,
     url: 'xinwen.byau.edu.cn',
-    description: `| 学校要闻 | 校园动态 |
-| -------- | -------- |
-| 3674     | 3676     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type_id',
+        description: '栏目类型',
+        options: TYPE_ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

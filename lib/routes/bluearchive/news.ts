@@ -2,31 +2,17 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
-
-// type id => display name
-type Mapping = Record<string, string>;
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const JP = {
     '0': '全て',
     '1': 'イベント',
     '2': 'お知らせ',
     '3': 'メンテナンス',
-} satisfies Mapping;
-
-// render into MD table
-const mkTable = (mapping: Mapping): string => {
-    const heading: string[] = [],
-        separator: string[] = [],
-        body: string[] = [];
-
-    for (const key in mapping) {
-        heading.push(mapping[key]);
-        separator.push(':--:');
-        body.push(key);
-    }
-
-    return [heading.join(' | '), separator.join(' | '), body.join(' | ')].map((s) => `| ${s} |`).join('\n');
 };
+
+const TYPE_OPTIONS = Object.entries(JP).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const handler: Route['handler'] = async (ctx) => {
     const { server } = ctx.req.param();
@@ -40,7 +26,7 @@ const handler: Route['handler'] = async (ctx) => {
 };
 
 const ja: Route['handler'] = async (ctx) => {
-    const { type = '0' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(JP, type)) {
         throw new InvalidParameterError('Unsupported news type. Use 0 (all), 1 (events), 2 (news), or 3 (maintenance).');
     }
@@ -77,7 +63,7 @@ export const route: Route = {
     example: '/bluearchive/news/jp',
     parameters: {
         server: 'game server (ISO 3166 two-letter country code, case-insensitive), only `JP` is supported for now',
-        type: 'news type, checkout the table below for details',
+        type: { description: 'news type, checkout the table below for details', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT },
     },
     features: {
         requireConfig: false,
@@ -88,5 +74,9 @@ export const route: Route = {
         supportScihub: false,
     },
     handler,
-    description: [JP].map((el) => mkTable(el)).join('\n\n'),
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };

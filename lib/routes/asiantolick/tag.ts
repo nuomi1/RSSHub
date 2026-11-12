@@ -1,13 +1,66 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { handler } from './index';
+
+const ID_OPTIONS = [
+    { value: '2310', label: 'Aidol' },
+    { value: '2233', label: 'Anal' },
+    { value: '1385', label: 'Babe' },
+    { value: '1106', label: 'Big Boobs' },
+    { value: '1722', label: 'Big Pussy' },
+    { value: '1206', label: 'Bikini' },
+    { value: '2244', label: 'Blonde' },
+    { value: '2167', label: 'blowjob' },
+    { value: '2267', label: 'Close Up' },
+    { value: '1117', label: 'Creamy Pussy' },
+    { value: '2163', label: 'cum' },
+    { value: '1090', label: 'Cute Girl' },
+    { value: '1082', label: 'Dildo' },
+    { value: '2245', label: 'Ebony' },
+    { value: '1323', label: 'Feet' },
+    { value: '2219', label: 'fetish' },
+    { value: '2197', label: 'fingers' },
+    { value: '1540', label: 'Fox Tail' },
+    { value: '1268', label: 'Glasses' },
+    { value: '1099', label: 'Hairy Pussy' },
+    { value: '2284', label: 'Interracial' },
+    { value: '1080', label: 'Lesbian' },
+    { value: '2208', label: 'licked' },
+    { value: '1045', label: 'Loli' },
+    { value: '1072', label: 'Maid' },
+    { value: '1081', label: 'Masturbate' },
+    { value: '1705', label: 'Milf' },
+    { value: '2307', label: 'non-nude' },
+    { value: '1393', label: 'Nude' },
+    { value: '1552', label: 'Nurse' },
+    { value: '1724', label: 'Office' },
+    { value: '2176', label: 'oiled' },
+    { value: '2250', label: 'Outdoor' },
+    { value: '1161', label: 'Pink Pussy' },
+    { value: '1498', label: 'Pink Tits' },
+    { value: '1277', label: 'Public' },
+    { value: '1046', label: 'School Girl' },
+    { value: '1160', label: 'Short Hair' },
+    { value: '2159', label: 'skirt' },
+    { value: '1103', label: 'Small Girl' },
+    { value: '2256', label: 'Socks' },
+    { value: '2199', label: 'sucking' },
+    { value: '1593', label: 'Tattoo' },
+    { value: '1036', label: 'Teen' },
+    { value: '2251', label: 'Tiny Tits' },
+    { value: '1324', label: 'Underwear' },
+    { value: '1084', label: 'Uniform' },
+    { value: '2179', label: 'wet' },
+    { value: '1098', label: 'Young' },
+];
 
 export const route: Route = {
     path: '/tag/:id',
     categories: ['picture'],
     example: '/asiantolick/tag/1045',
     parameters: {
-        id: 'Tag id, can be found in URL',
+        id: { description: 'Tag id, can be found in URL', options: ID_OPTIONS },
     },
     features: {
         nsfw: true,
@@ -22,43 +75,9 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'asiantolick.com/',
-    description: `| Aidol | Anal | Babe | Big Boobs | Big Pussy |
-| ----- | ---- | ---- | --------- | --------- |
-| 2310  | 2233 | 1385 | 1106      | 1722      |
-
-| Bikini | Blonde | blowjob | Close Up | Creamy Pussy |
-| ------ | ------ | ------- | -------- | ------------ |
-| 1206   | 2244   | 2167    | 2267     | 1117         |
-
-| cum  | Cute Girl | Dildo | Ebony | Feet |
-| ---- | --------- | ----- | ----- | ---- |
-| 2163 | 1090      | 1082  | 2245  | 1323 |
-
-| fetish | fingers | Fox Tail | Glasses | Hairy Pussy |
-| ------ | ------- | -------- | ------- | ----------- |
-| 2219   | 2197    | 1540     | 1268    | 1099        |
-
-| Interracial | Lesbian | licked | Loli | Maid |
-| ----------- | ------- | ------ | ---- | ---- |
-| 2284        | 1080    | 2208   | 1045 | 1072 |
-
-| Masturbate | Milf | non-nude | Nude | Nurse |
-| ---------- | ---- | -------- | ---- | ----- |
-| 1081       | 1705 | 2307     | 1393 | 1552  |
-
-| Office | oiled | Outdoor | Pink Pussy | Pink Tits |
-| ------ | ----- | ------- | ---------- | --------- |
-| 1724   | 2176  | 2250    | 1161       | 1498      |
-
-| Public | School Girl | Short Hair | skirt | Small Girl |
-| ------ | ----------- | ---------- | ----- | ---------- |
-| 1277   | 1046        | 1160       | 2159  | 1103       |
-
-| Socks | sucking | Tattoo | Teen | Tiny Tits |
-| ----- | ------- | ------ | ---- | --------- |
-| 2256  | 2199    | 1593   | 1036 | 2251      |
-
-| Underwear | Uniform | wet  | Young |
-| --------- | ------- | ---- | ----- |
-| 1324      | 1084    | 2179 | 1098  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: 'Tag id',
+        options: ID_OPTIONS,
+    }),
 };

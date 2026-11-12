@@ -4,14 +4,22 @@ import iconv from 'iconv-lite';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import util from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'kydt', label: '科研动态' },
+    { value: 'pydt', label: '本科生培养' },
+    { value: 'pydt2', label: '研究生培养' },
+];
 
 export const route: Route = {
     path: '/it/:type',
     categories: ['university'],
     example: '/bjfu/it/xyxw',
-    parameters: { type: '通知类别' },
+    parameters: { type: { description: '通知类别', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +36,11 @@ export const route: Route = {
     name: '信息学院通知',
     maintainers: ['wzc-blog'],
     handler,
-    description: `| 学院新闻 | 科研动态 | 本科生培养 | 研究生培养 |
-| -------- | -------- | ---------- | ---------- |
-| xyxw     | kydt     | pydt       | pydt2      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '通知类别',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

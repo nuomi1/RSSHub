@@ -4,6 +4,17 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const BOARD_OPTIONS = [
+    { value: 'realtime', label: '热搜榜' },
+    { value: 'novel', label: '小说榜' },
+    { value: 'movie', label: '电影榜' },
+    { value: 'teleplay', label: '电视剧榜' },
+    { value: 'car', label: '汽车榜' },
+    { value: 'game', label: '游戏榜' },
+];
+const BOARD_OPTIONS_DEFAULT = 'realtime';
 
 const renderDescription = (item) =>
     renderToString(
@@ -30,7 +41,7 @@ export const route: Route = {
     path: '/top/:board?',
     categories: ['other'],
     example: '/baidu/top',
-    parameters: { board: '榜单，默认为 `realtime`' },
+    parameters: { board: { description: '榜单，默认为 `realtime`', options: BOARD_OPTIONS, default: BOARD_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -42,13 +53,15 @@ export const route: Route = {
     name: '热搜榜单',
     maintainers: ['xyqfer'],
     handler,
-    description: `| 热搜榜   | 小说榜 | 电影榜 | 电视剧榜 | 汽车榜 | 游戏榜 |
-| -------- | ------ | ------ | -------- | ------ | ------ |
-| realtime | novel  | movie  | teleplay | car    | game   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'board',
+        description: '榜单',
+        options: BOARD_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { board = 'realtime' } = ctx.req.param();
+    const { board = BOARD_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `https://top.baidu.com/board?tab=${board}`;
     const { data: response } = await got(link);
 

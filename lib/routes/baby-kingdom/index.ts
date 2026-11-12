@@ -4,15 +4,26 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ORDER_OPTIONS = [
+    { value: 'dateline', label: '发帖时间' },
+    { value: 'reply', label: '回复 / 查看' },
+    { value: 'view', label: '查看' },
+    { value: 'lastpost', label: '最后发表' },
+    { value: 'heat', label: '热门' },
+];
 
 export const route: Route = {
     path: '/:id/:order?',
     categories: ['other'],
     example: '/baby-kingdom/19/view',
-    parameters: { id: '板块id，可在 URL 中找到', order: '排序方式' },
-    description: `| 发帖时间 | 回复 / 查看 | 查看 | 最后发表 | 热门 |
-| -------- | ----------- | ---- | -------- | ---- |
-| dateline | reply       | view | lastpost | heat |`,
+    parameters: { id: '板块id，可在 URL 中找到', order: { description: '排序方式', options: ORDER_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'order',
+        description: '排序方式',
+        options: ORDER_OPTIONS,
+    }),
     name: '板块',
     maintainers: ['LogicJake'],
     handler,

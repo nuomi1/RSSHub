@@ -4,13 +4,23 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'week', label: '360 网络安全周报' },
+    { value: 'activity', label: '活动' },
+    { value: 'knowledge', label: '知识' },
+    { value: 'news', label: '资讯' },
+    { value: 'job', label: '招聘' },
+    { value: 'tool', label: '工具' },
+];
 
 export const route: Route = {
     path: '/:category/:fulltext?',
     categories: ['programming'],
     example: '/anquanke/week',
-    parameters: { category: '分类订阅', fulltext: '是否获取全文，如需获取全文参数传入 `quanwen` 或 `fulltext`' },
+    parameters: { category: { description: '分类订阅', options: CATEGORY_OPTIONS }, fulltext: '是否获取全文，如需获取全文参数传入 `quanwen` 或 `fulltext`' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +32,11 @@ export const route: Route = {
     name: '分类订阅',
     maintainers: ['qwertyuiop6'],
     handler,
-    description: `| 360 网络安全周报 | 活动     | 知识      | 资讯 | 招聘 | 工具 |
-| ---------------- | -------- | --------- | ---- | ---- | ---- |
-| week             | activity | knowledge | news | job  | tool |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类订阅',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

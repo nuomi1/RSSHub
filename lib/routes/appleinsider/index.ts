@@ -4,14 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import parser from '@/utils/rss-parser';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: 'News' },
+    { value: 'reviews', label: 'Reviews' },
+    { value: 'how-to', label: 'How-tos' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/appleinsider',
-    parameters: { category: 'Category, see below, News by default' },
+    parameters: { category: { description: 'Category, see below, News by default', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +36,11 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['nczitzk'],
     handler,
-    description: `| News | Reviews | How-tos |
-| ---- | ------- | ------- |
-|      | reviews | how-to  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

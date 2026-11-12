@@ -9,13 +9,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'bjeeagg', label: '通知公告' },
+    { value: 'zkzc', label: '招考政策' },
+    { value: 'zkkd', label: '自考快递' },
+];
+const TYPE_OPTIONS_DEFAULT = 'bjeeagg';
 
 export const route: Route = {
     path: '/:type',
     categories: ['government'],
     example: '/bjeea/bjeeagg',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['www.bjeea.cn/html/bjeeagg/:path?', 'www.bjeea.cn/html/bjeeagg'],
@@ -33,9 +41,11 @@ export const route: Route = {
     name: '通知公告',
     maintainers: ['gavin-k'],
     handler,
-    description: `| 通知公告 | 招考政策 | 自考快递 |
-| :------: | :------: | :------: |
-|  bjeeagg |   zkzc   |   zkkd   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const baseUrl = 'https://www.bjeea.cn/';
@@ -70,7 +80,7 @@ async function getArticle(item: DataItem & { link: string }) {
 }
 
 async function handler(ctx: Context) {
-    const { type = 'bjeeagg' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(categoryMap, type)) {
         throw new InvalidParameterError(`Unknown category: ${type}. Available categories: ${Object.keys(categoryMap).join(', ')}.`);
     }

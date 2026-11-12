@@ -2,8 +2,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
-
-type Mapping = Record<string, string>;
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const JP = {
     '0': 'すべて',
@@ -11,21 +10,10 @@ const JP = {
     '2': 'イベント',
     '3': 'メインテナンス',
     '4': '重要',
-} satisfies Mapping;
-
-const mkTable = (mapping: Mapping): string => {
-    const heading: string[] = [];
-    const separator: string[] = [];
-    const body: string[] = [];
-
-    for (const key in mapping) {
-        heading.push(mapping[key]);
-        separator.push(':--:');
-        body.push(key);
-    }
-
-    return [heading.join(' | '), separator.join(' | '), body.join(' | ')].map((s) => `| ${s} |`).join('\n');
 };
+
+const TYPE_OPTIONS = Object.entries(JP).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = '0';
 
 const handler: Route['handler'] = async (ctx) => {
     const { server } = ctx.req.param();
@@ -39,7 +27,7 @@ const handler: Route['handler'] = async (ctx) => {
 };
 
 const ja: Route['handler'] = async (ctx) => {
-    const { type = '0' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(JP, type)) {
         throw new InvalidParameterError('Invalid news type. Use 0 (all), 1 (notices), 2 (events), 3 (maintenance), or 4 (important).');
     }
@@ -79,7 +67,7 @@ export const route: Route = {
     example: '/azurlane/news/jp/0',
     parameters: {
         server: 'game server (ISO 3166 two-letter country code, case-insensitive), only `JP` is supported for now',
-        type: 'news type, see the table below, `0` by default',
+        type: { description: 'news type, see the table below, `0` by default', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT },
     },
     features: {
         requireConfig: false,
@@ -90,5 +78,9 @@ export const route: Route = {
         supportScihub: false,
     },
     handler,
-    description: mkTable(JP),
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };

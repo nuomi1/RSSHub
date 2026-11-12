@@ -4,13 +4,23 @@ import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const categoryNames = {
+    ow: '守望先锋',
+    hs: '炉石传说',
+    wow: '魔兽世界',
+};
+
+const CATEGORY_OPTIONS = Object.entries(categoryNames).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'ow';
 
 export const route: Route = {
     path: '/news-cn/:category?',
     categories: ['game'],
     example: '/blizzard/news-cn/ow',
-    parameters: { category: '游戏类别, 默认为 ow' },
+    parameters: { category: { description: '游戏类别, 默认为 ow', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,16 +45,12 @@ export const route: Route = {
     ],
     name: '暴雪游戏国服新闻',
     maintainers: ['zhangpeng2k'],
-    description: `| 守望先锋 | 炉石传说 | 魔兽世界 |
-| -------- | -------- | -------- |
-| ow       | hs       | wow      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '游戏类别',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
-};
-
-const categoryNames = {
-    ow: '守望先锋',
-    hs: '炉石传说',
-    wow: '魔兽世界',
 };
 
 // List parsers.
@@ -122,7 +128,7 @@ async function fetchDetail(item, category) {
 }
 
 async function handler(ctx): Promise<Data> {
-    const category = ctx.req.param('category') || 'ow';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     if (!Object.hasOwn(categoryNames, category)) {
         throw new Error('Invalid category');
     }

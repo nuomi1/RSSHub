@@ -4,12 +4,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'zydt', label: '资源动态' },
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'xljz1', label: '系列讲座' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zydt';
 
 export const route: Route = {
     path: '/lib/:category?',
     categories: ['university'],
     example: '/bnu/lib/zydt',
-    parameters: { category: '分类，见下表，默认为 `zydt`' },
+    parameters: { category: { description: '分类，见下表，默认为 `zydt`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['www.lib.bnu.edu.cn/:category/index.htm'],
@@ -19,14 +27,16 @@ export const route: Route = {
     name: '图书馆通知',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 资源动态 | 新闻动态 | 系列讲座 |
-| -------- | -------- | -------- |
-| zydt     | xwdt     | xljz1    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const baseUrl = 'http://www.lib.bnu.edu.cn';
-    const { category = 'zydt' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${baseUrl}/${category}/index.htm`;
 
     const { data: response } = await got(link);

@@ -4,13 +4,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xw', label: '学院新闻' },
+    { value: 'zytzyyg', label: '通知公告' },
+    { value: 'xzcg', label: '学术成果' },
+    { value: 'xzjz', label: '学术讲座' },
+    { value: 'xz', label: '教师观点' },
+    { value: 'bshzs', label: '人才招聘' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xw';
 
 export const route: Route = {
     path: '/bs/:category?',
     categories: ['university'],
     example: '/bnu/bs',
-    parameters: { category: '分类，见下表，默认为学院新闻' },
+    parameters: { category: { description: '分类，见下表，默认为学院新闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +39,15 @@ export const route: Route = {
     name: '经济与工商管理学院',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 学院新闻 | 通知公告 | 学术成果 | 学术讲座 | 教师观点 | 人才招聘 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| xw       | zytzyyg  | xzcg     | xzjz     | xz       | bshzs    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'xw';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://bs.bnu.edu.cn';
     const currentUrl = `${rootUrl}/${category}/index.html`;

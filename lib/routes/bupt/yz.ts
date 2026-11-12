@@ -5,13 +5,32 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '综合' },
+    { value: 'sice', label: '信息与通信工程学院' },
+    { value: 'see', label: '电子工程学院' },
+    { value: 'scs', label: '计算机学院' },
+    { value: 'scss', label: '网络空间安全学院' },
+    { value: 'ai', label: '人工智能学院' },
+    { value: 'iea', label: '智能工程与自动化学院' },
+    { value: 'ic', label: '集成电路学院' },
+    { value: 'sem', label: '经济管理学院' },
+    { value: 'math', label: '数学科学学院' },
+    { value: 'spst', label: '物理科学与技术学院' },
+    { value: 'gce', label: '卓越工程师学院' },
+    { value: 'sh', label: '人文学院' },
+    { value: 'sdmda', label: '数字媒体与设计艺术学院' },
+    { value: 'mtri', label: '马克思主义学院' },
+];
 
 export const route: Route = {
     path: '/yz/:type',
     categories: ['university'],
     example: '/bupt/yz/all',
-    parameters: { type: '学院英文缩写' },
+    parameters: { type: { description: '学院英文缩写', options: TYPE_OPTIONS } },
     features: {
         requirePuppeteer: true,
         antiCrawler: true,
@@ -19,9 +38,11 @@ export const route: Route = {
     name: '硕士研究生招生通知',
     maintainers: ['ihewro'],
     handler,
-    description: `| 综合 | 信息与通信工程学院 | 电子工程学院 | 计算机学院 | 网络空间安全学院 | 人工智能学院 | 智能工程与自动化学院 | 集成电路学院 | 经济管理学院 | 数学科学学院 | 物理科学与技术学院 | 卓越工程师学院 | 人文学院 | 数字媒体与设计艺术学院 | 马克思主义学院 |
-| ---- | ------------------ | ------------ | ---------- | ---------------- | ------------ | -------------------- | ------------ | ------------ | ------------ | ------------------ | -------------- | -------- | ---------------------- | -------------- |
-| all  | sice               | see          | scs        | scss             | ai           | iea                  | ic           | sem          | math         | spst               | gce            | sh       | sdmda                  | mtri           |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '学院英文缩写',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

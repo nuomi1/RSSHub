@@ -6,15 +6,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 import { isValidHost } from '@/utils/valid-host';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xxkd', label: '信息快递' },
+    { value: 'gzdt', label: '工作动态' },
+    { value: 'ztfx', label: '专题分析' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xxkd';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['other'],
     example: '/auto-stats',
-    parameters: { category: '分类，见下表，默认为信息快递' },
+    parameters: { category: { description: '分类，见下表，默认为信息快递', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +34,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 信息快递 | 工作动态 | 专题分析 |
-| -------- | -------- | -------- |
-| xxkd     | gzdt     | ztfx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'xxkd' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     if (!isValidHost(category)) {
         throw new InvalidParameterError('Invalid category');
     }

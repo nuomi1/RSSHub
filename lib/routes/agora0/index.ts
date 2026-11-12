@@ -4,13 +4,23 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: 'initium', label: 'muitinⒾ' },
+    { value: 'inmedia', label: 'aidemnⒾ' },
+    { value: 'matters', label: 'srettaⓂ' },
+    { value: 'pq', label: 'qⓅ' },
+    { value: 'vocus', label: 'sucoⓋ' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'initium';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/agora0/initium',
-    parameters: { category: '分类，见下表，默认为 initium，即端传媒' },
+    parameters: { category: { description: '分类，见下表，默认为 initium，即端传媒', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +38,15 @@ export const route: Route = {
     name: '零博客',
     maintainers: ['nczitzk'],
     handler,
-    description: `| muitinⒾ | aidemnⒾ | srettaⓂ | qⓅ | sucoⓋ |
-| ------- | ------- | ------- | -- | ----- |
-| initium | inmedia | matters | pq | vocus |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'initium';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://agora0.gitlab.io';
     const currentUrl = `${rootUrl}/blog/${category}`;

@@ -4,6 +4,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const categories = {
@@ -16,11 +17,14 @@ const categories = {
     bnt008000000: 'Now',
 };
 
+const CATEGORY_OPTIONS = Object.entries(categories).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'bnt008000000';
+
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/bntnews/bnt003000000',
-    parameters: { category: 'Category ID, see table below, default to Now (bnt008000000)' },
+    parameters: { category: { description: 'Category ID, see table below, default to Now (bnt008000000)', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +36,15 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['iamsnn'],
     handler,
-    description: `| Beauty       | Fashion      | Star         | Style+       | Photo        | Life         | Now          |
-| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
-| bnt003000000 | bnt002000000 | bnt004000000 | bnt007000000 | bnt009000000 | bnt005000000 | bnt008000000 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category ID',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') || 'bnt008000000';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     const rootUrl = 'https://www.bntnews.co.kr';
     const currentUrl = `${rootUrl}/article/list/${category}`;
 

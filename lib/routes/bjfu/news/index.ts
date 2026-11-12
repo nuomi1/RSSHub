@@ -4,15 +4,24 @@ import iconv from 'iconv-lite';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import util from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'lsyw', label: '绿色要闻' },
+    { value: 'xydt', label: '校园动态' },
+    { value: 'jxky', label: '教学科研' },
+    { value: 'djsz', label: '党建思政' },
+    { value: 'yzph', label: '一周排行' },
+];
 
 export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/bjfu/news/lsyw',
-    parameters: { type: '新闻栏目' },
+    parameters: { type: { description: '新闻栏目', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +38,11 @@ export const route: Route = {
     name: '绿色新闻网',
     maintainers: ['markmingjie'],
     handler,
-    description: `| 绿色要闻 | 校园动态 | 教学科研 | 党建思政 | 一周排行 |
-| -------- | -------- | -------- | -------- | -------- |
-| lsyw     | xydt     | jxky     | djsz     | yzph     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '新闻栏目',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

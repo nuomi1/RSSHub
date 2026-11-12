@@ -2,14 +2,24 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'note', label: 'Boss 笔记' },
+    { value: 'computer-skills', label: '电脑日志' },
+    { value: 'design-resources', label: '素材资源' },
+    { value: 'design-software', label: '设计师神器' },
+    { value: 'design-tutorial', label: '设计教程' },
+    { value: 'design_information', label: '设计资讯' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['design'],
     example: '/bossdesign',
-    parameters: { category: '分类，可在对应分类页 URL 中找到，留空为全部' },
+    parameters: { category: { description: '分类，可在对应分类页 URL 中找到，留空为全部', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,9 +31,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['TonyRL'],
     handler,
-    description: `| Boss 笔记 | 电脑日志        | 素材资源         | 设计师神器      | 设计教程        | 设计资讯            |
-| --------- | --------------- | ---------------- | --------------- | --------------- | ------------------- |
-| note      | computer-skills | design-resources | design-software | design-tutorial | design\\_information |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

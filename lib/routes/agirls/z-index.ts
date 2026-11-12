@@ -3,14 +3,25 @@ import { load } from 'cheerio';
 import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl, parseArticle } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '最新文章' },
+    { value: 'app', label: 'App 评测' },
+    { value: 'phone', label: '手机开箱' },
+    { value: 'computer', label: '笔电开箱' },
+    { value: 'accessories', label: '3C 周边' },
+    { value: 'tutorial', label: '教学小技巧' },
+    { value: 'techlife', label: '科技情报' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/agirls/app',
-    parameters: { category: '分类，默认为最新文章，可在对应主题页的 URL 中找到，下表仅列出部分' },
+    parameters: { category: { description: '分类，默认为最新文章，可在对应主题页的 URL 中找到，下表仅列出部分', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,9 +39,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['TonyRL'],
     handler,
-    description: `| App 评测 | 手机开箱 | 笔电开箱 | 3C 周边     | 教学小技巧 | 科技情报 |
-| -------- | -------- | -------- | ----------- | ---------- | -------- |
-| app      | phone    | computer | accessories | tutorial   | techlife |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

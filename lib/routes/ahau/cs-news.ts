@@ -5,13 +5,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyyw', label: '学院要闻' },
+    { value: 'tzgg', label: '通知公告' },
+];
 
 export const route: Route = {
     path: '/cs_news/:type',
     categories: ['university'],
     example: '/ahau/cs_news/tzgg',
-    parameters: { type: '类型名' },
+    parameters: { type: { description: '类型名', options: TYPE_OPTIONS } },
     radar: [
         {
             source: ['xzxy.ahau.edu.cn/index/:type.htm'],
@@ -22,9 +28,11 @@ export const route: Route = {
     maintainers: ['SimonHu-HN'],
     handler,
     url: 'xzxy.ahau.edu.cn',
-    description: `| 学院要闻 | 通知公告 |
-| -------- | -------- |
-| xyyw     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

@@ -2,6 +2,16 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [
+    { value: 'android', label: '安卓版' },
+    { value: 'iphone', label: 'iPhone 版' },
+    { value: 'ipad', label: 'iPad HD 版' },
+    { value: 'win', label: 'UWP 版' },
+    { value: 'android_tv_yst', label: 'TV 版' },
+];
+const ID_OPTIONS_DEFAULT = 'android';
 
 const config = {
     android: '安卓版',
@@ -23,7 +33,7 @@ export const route: Route = {
     path: '/app/:id?',
     categories: ['program-update'],
     example: '/bilibili/app/android',
-    parameters: { id: '客户端 id，见下表，默认为安卓版' },
+    parameters: { id: { description: '客户端 id，见下表，默认为安卓版', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,13 +45,15 @@ export const route: Route = {
     name: '更新情报',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 安卓版  | iPhone 版 | iPad HD 版 | UWP 版 | TV 版            |
-| ------- | --------- | ---------- | ------ | ---------------- |
-| android | iphone    | ipad       | win    | android\\_tv\\_yst |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '客户端 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') || 'android';
+    const id = ctx.req.param('id') || ID_OPTIONS_DEFAULT;
     if (!Object.hasOwn(config, id)) {
         throw new InvalidParameterError(`Client id must be one of ${Object.keys(config).join(', ')}`);
     }
