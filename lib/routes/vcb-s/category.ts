@@ -2,9 +2,16 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/post';
+
+const CATE_OPTIONS = [
+    { value: 'works', label: '作品项目' },
+    { value: 'kb', label: '科普系列' },
+    { value: 'planlog', label: '计划与日志' },
+];
 
 const rootUrl = 'https://vcb-s.com';
 const cateAPIUrl = `${rootUrl}/wp-json/wp/v2/categories`;
@@ -14,7 +21,7 @@ export const route: Route = {
     path: '/category/:cate',
     categories: ['anime'],
     example: '/vcb-s/category/works',
-    parameters: { cate: '分类' },
+    parameters: { cate: { description: '分类', options: CATE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,9 +39,11 @@ export const route: Route = {
     maintainers: ['cxfksword'],
     handler,
     url: 'vcb-s.com/',
-    description: `| 作品项目 | 科普系列 | 计划与日志 |
-| -------- | -------- | ---------- |
-| works    | kb       | planlog    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'cate',
+        description: '分类',
+        options: CATE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

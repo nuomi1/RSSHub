@@ -5,6 +5,16 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const LANG_OPTIONS = [
+    { value: 'en', label: 'English' },
+    { value: 'ja', label: '日本語' },
+    { value: 'mn', label: 'Монгол' },
+    { value: 'ru', label: 'Русский' },
+    { value: 'zh', label: '简体中文' },
+];
+const LANG_OPTIONS_DEFAULT = 'mn';
 
 const baseUrl = 'http://www.vom.mn';
 const languages = {
@@ -21,7 +31,7 @@ export const route: Route = {
     path: '/featured/:lang?',
     categories: ['traditional-media'],
     example: '/vom/featured',
-    parameters: { lang: 'Language, see the table below, `mn` by default' },
+    parameters: { lang: { description: 'Language, see the table below, `mn` by default', options: LANG_OPTIONS, default: LANG_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,13 +49,15 @@ export const route: Route = {
     name: 'News',
     maintainers: ['TonyRL'],
     handler,
-    description: `| English | 日本語 | Монгол | Русский | 简体中文 |
-| ------- | ------ | ------ | ------- | -------- |
-| en      | ja     | mn     | ru      | zh       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: 'Language',
+        options: LANG_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { lang = 'mn' } = ctx.req.param();
+    const { lang = LANG_OPTIONS_DEFAULT } = ctx.req.param();
     const { data: response } = await got(`${baseUrl}/${lang}`);
 
     const $ = load(response);

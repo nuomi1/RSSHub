@@ -3,6 +3,17 @@ import type { Context } from 'hono';
 import NotFoundError from '@/errors/types/not-found';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'featured', label: 'Featured' },
+    { value: 'trending', label: 'Trending Weekly' },
+    { value: 'trending_m', label: 'Trending Monthly' },
+    { value: 'trending_d', label: 'Trending Daily' },
+    { value: 'popular', label: 'Most Popular' },
+    { value: 'new', label: 'Recently Added' },
+];
+const TYPE_OPTIONS_DEFAULT = 'featured';
 
 const categories = {
     featured: { section: 'Featured' },
@@ -19,17 +30,19 @@ export const route: Route = {
     path: '/marketplace/:type?',
     categories: ['programming'],
     example: '/visualstudio/marketplace',
-    parameters: { type: 'Category' },
+    parameters: { type: { description: 'Category', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: 'Code Extensions Marketplace',
     maintainers: ['SeanChao'],
     handler,
-    description: `| Featured | Trending Weekly | Trending Monthly | Trending Daily | Most Popular | Recently Added |
-| -------- | --------------- | ---------------- | -------------- | ------------ | -------------- |
-| featured | trending        | trending\\_m      | trending\\_d    | popular      | new            |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
-    const { type = 'featured' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
 
     const category = isCategory(type) ? categories[type] : undefined;
     if (!category) {
