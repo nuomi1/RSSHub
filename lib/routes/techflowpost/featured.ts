@@ -1,8 +1,25 @@
 import type { Route } from '@/types';
 import { ViewType } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getArticleItems, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '全部' },
+    { value: '2040', label: '行业 & 项目观察' },
+    { value: '2046', label: '项目简介' },
+    { value: '2047', label: '项目动态' },
+    { value: '2045', label: '赛道解读' },
+    { value: '2044', label: '播客笔记' },
+    { value: '2043', label: '交易观察' },
+    { value: '2042', label: 'VC 洞察' },
+    { value: '2041', label: '实用教程' },
+    { value: '2039', label: '人物故事 & 访谈' },
+    { value: '2033', label: '法律 & 监管动态' },
+    { value: '2032', label: '活动动态' },
+    { value: '2031', label: '交易所动态' },
+];
 
 export const route: Route = {
     path: '/featured/:category?',
@@ -10,7 +27,7 @@ export const route: Route = {
     view: ViewType.Articles,
     example: '/techflowpost/featured',
     parameters: {
-        category: '分类，见下表，默认为全部',
+        category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS },
     },
     features: {
         requireConfig: false,
@@ -29,9 +46,11 @@ export const route: Route = {
     maintainers: ['zhenlohuang'],
     handler,
     url: 'techflowpost.com/zh-CN/article',
-    description: `| 全部 | 行业 & 项目观察 | 项目简介 | 项目动态 | 赛道解读 | 播客笔记 | 交易观察 | VC 洞察 | 实用教程 | 人物故事 & 访谈 | 法律 & 监管动态 | 活动动态 | 交易所动态 |
-| ---- | --------------- | -------- | -------- | -------- | -------- | -------- | ------- | -------- | --------------- | --------------- | -------- | ---------- |
-|      | 2040            | 2046     | 2047     | 2045     | 2044     | 2043     | 2042    | 2041     | 2039            | 2033            | 2032     | 2031       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const categoryMap = {

@@ -4,9 +4,18 @@ import pMap from 'p-map';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { parseArticle } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '最新资讯' },
+    { value: 'review', label: '游戏评测' },
+    { value: 'video', label: '游戏视频' },
+    { value: 'special', label: '巴士首页特稿' },
+    { value: 'hardware', label: '硬件资讯' },
+];
 
 type Category = 'news' | 'review' | 'video' | 'special' | 'hardware';
 
@@ -21,7 +30,7 @@ const categories = {
 export const route: Route = {
     path: '/list/:category',
     parameters: {
-        category: '列表分类，见下表',
+        category: { description: '列表分类，见下表', options: CATEGORY_OPTIONS },
     },
     categories: ['game'],
     example: '/tgbus/list/news',
@@ -34,9 +43,11 @@ export const route: Route = {
     name: '文章列表',
     maintainers: ['Xzonn'],
     handler,
-    description: `| 最新资讯 | 游戏评测 | 游戏视频 | 巴士首页特稿 | 硬件资讯 |
-| -------- | -------- | -------- | ------------ | -------- |
-| news     | review   | video    | special      | hardware |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '列表分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

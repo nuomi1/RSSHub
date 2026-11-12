@@ -1,6 +1,13 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { handler } from './common/review';
+
+const LANG_OPTIONS = [
+    { value: 'new', label: '最新' },
+    { value: 'hot', label: '综合' },
+];
+const LANG_OPTIONS_DEFAULT = 'zh_CN';
 
 export const route: Route = {
     path: '/review/:id/:order?/:lang?',
@@ -9,7 +16,7 @@ export const route: Route = {
     parameters: {
         id: '游戏 ID，游戏主页 URL 中获取',
         order: '排序方式，空为综合，可选如下',
-        lang: '语言，`zh_CN` 或 `zh_TW`，默认为 `zh_CN`',
+        lang: { description: '语言，`zh_CN` 或 `zh_TW`，默认为 `zh_CN`', options: LANG_OPTIONS, default: LANG_OPTIONS_DEFAULT },
     },
     features: {
         requireConfig: false,
@@ -28,7 +35,9 @@ export const route: Route = {
     name: '游戏评价',
     maintainers: ['hoilc', 'TonyRL'],
     handler,
-    description: `| 最新 | 综合 |
-| ---- | ---- |
-| new  | hot  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: '语言',
+        options: LANG_OPTIONS,
+    }),
 };

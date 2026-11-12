@@ -2,15 +2,24 @@ import { load } from 'cheerio';
 import pMap from 'p-map';
 
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getPage, renderPostDetail, rootUrl } from './util';
+
+const CATEGORY_OPTIONS = [
+    { value: 'bbs', label: '淘股论坛' },
+    { value: 'zongban', label: '社区总版' },
+    { value: 'jinghua', label: '精华加油' },
+    { value: 'dianzan', label: '网友点赞' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zongban';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['finance'],
     example: '/taoguba',
-    parameters: { category: '分类，见下表，默认为社区总版' },
+    parameters: { category: { description: '分类，见下表，默认为社区总版', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: [
             {
@@ -23,13 +32,15 @@ export const route: Route = {
     name: '淘股论坛',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 淘股论坛 | 社区总版 | 精华加油 | 网友点赞 |
-| -------- | -------- | -------- | -------- |
-| bbs      | zongban  | jinghua  | dianzan  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'zongban';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const currentUrl = `${rootUrl}/${category}/`;
 

@@ -5,8 +5,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { finishArticleItem } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: 'News' },
+    { value: 'notification', label: 'Notification' },
+];
 
 const oaa_base_url = 'http://oaa.tju.edu.cn/';
 
@@ -39,7 +45,7 @@ export const route: Route = {
     path: '/oaa/:type?',
     categories: ['university'],
     example: '/tju/oaa/news',
-    parameters: { type: 'default `news`' },
+    parameters: { type: { description: 'default `news`', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -51,9 +57,11 @@ export const route: Route = {
     name: 'The Office of Academic Affairs',
     maintainers: ['AlanZeng423', 'AmosChenYQ', 'SuperPung'],
     handler,
-    description: `| News | Notification |
-| :--: | :----------: |
-| news | notification |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

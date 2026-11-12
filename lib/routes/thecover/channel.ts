@@ -5,7 +5,27 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '3892', label: '天下' },
+    { value: '3560', label: '四川' },
+    { value: '3909', label: '辟谣' },
+    { value: '3686', label: '国际' },
+    { value: '11', label: '云招考' },
+    { value: '3902', label: '30 秒' },
+    { value: '3889', label: '拍客' },
+    { value: '3689', label: '体育' },
+    { value: '1', label: '国内' },
+    { value: '4002', label: '帮扶铁军' },
+    { value: '12', label: '文娱' },
+    { value: '46', label: '宽窄' },
+    { value: '4', label: '商业' },
+    { value: '21', label: '千面' },
+    { value: '17', label: '封面号' },
+];
+const ID_OPTIONS_DEFAULT = '3892';
 
 const rootUrl = 'https://www.thecover.cn';
 
@@ -31,7 +51,7 @@ export const route: Route = {
     path: '/channel/:id?',
     categories: ['new-media'],
     example: '/thecover/channel/3560',
-    parameters: { id: '对应id,可在频道链接中获取，默认为3892' },
+    parameters: { id: { description: '对应id,可在频道链接中获取，默认为3892', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,13 +63,15 @@ export const route: Route = {
     name: '频道',
     maintainers: ['yuxinliu-alex'],
     handler,
-    description: `| 天下 | 四川 | 辟谣 | 国际 | 云招考 | 30 秒 | 拍客 | 体育 | 国内 | 帮扶铁军 | 文娱 | 宽窄 | 商业 | 千面 | 封面号 |
-| ---- | ---- | ---- | ---- | ------ | ----- | ---- | ---- | ---- | -------- | ---- | ---- | ---- | ---- | ------ |
-| 3892 | 3560 | 3909 | 3686 | 11     | 3902  | 3889 | 3689 | 1    | 4002     | 12   | 46   | 4    | 21   | 17     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '对应id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {
-    const id = ctx.req.param('id') ?? '3892';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const targetUrl = rootUrl + `/channel_${id}`;
     const resp = await got({
         method: 'get',

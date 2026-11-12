@@ -2,15 +2,25 @@ import { load } from 'cheerio';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [
+    { value: '2', label: '视频' },
+    { value: '4', label: '交互' },
+    { value: '3', label: '信息图' },
+    { value: '453', label: '数据故事' },
+];
 
 export const route: Route = {
     path: '/839studio/:id',
     categories: ['traditional-media'],
     example: '/thepaper/839studio/2',
-    parameters: { id: '分类 id，可在分类页 URL 的 cat 参数中找到；全部作品使用 /thepaper/839studio' },
-    description: `| 视频 | 交互 | 信息图 | 数据故事 |
-| ---- | ---- | ------ | -------- |
-| 2    | 4    | 3      | 453      |`,
+    parameters: { id: { description: '分类 id，可在分类页 URL 的 cat 参数中找到；全部作品使用 /thepaper/839studio', options: ID_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
     radar: [
         {
             source: ['thepaper.cn/'],

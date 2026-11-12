@@ -5,10 +5,8 @@ import ConfigNotFoundError from '@/errors/types/config-not-found';
 import type { DataItem, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
-
-// type id => display name
-type Mapping = Record<string, string>;
 
 const TYPE = {
     '403': '720P',
@@ -18,20 +16,7 @@ const TYPE = {
     '5815': 'AV1',
 };
 
-// render into MD table
-const mkTable = (mapping: Mapping): string => {
-    const heading: string[] = [],
-        separator: string[] = [],
-        body: string[] = [];
-
-    for (const key in mapping) {
-        heading.push(mapping[key]);
-        separator.push(':--:');
-        body.push(key);
-    }
-
-    return [heading.join(' | '), separator.join(' | '), body.join(' | ')].map((s) => `| ${s} |`).join('\n');
-};
+const TYPE_OPTIONS = Object.entries(TYPE).map(([value, label]) => ({ value, label }));
 
 const handler: Route['handler'] = async (ctx) => {
     const { type } = ctx.req.param();
@@ -83,7 +68,10 @@ export const route: Route = {
     maintainers: ['equt'],
     example: '/tsdm39/bd',
     parameters: {
-        type: 'BD type, checkout the table below for details',
+        type: {
+            description: 'BD type, checkout the table below for details',
+            options: TYPE_OPTIONS,
+        },
     },
     features: {
         requireConfig: [
@@ -100,5 +88,9 @@ export const route: Route = {
         supportScihub: false,
     },
     handler,
-    description: [TYPE].map((el) => mkTable(el)).join('\n\n'),
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };

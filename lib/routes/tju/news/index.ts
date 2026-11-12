@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'focus', label: 'Cover News' },
+    { value: 'general', label: 'General News' },
+    { value: 'internal', label: 'Campus News' },
+    { value: 'media', label: 'Media Report' },
+    { value: 'picture', label: 'Pictures of TJU' },
+];
 
 const newsBaseUrl = 'http://news.tju.edu.cn/';
 const getArticle = async (link: string) => {
@@ -58,7 +67,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/tju/news/focus',
-    parameters: { type: 'default `focus`' },
+    parameters: { type: { description: 'default `focus`', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -70,9 +79,11 @@ export const route: Route = {
     name: 'News',
     maintainers: ['AlanZeng423', 'SuperPung'],
     handler,
-    description: `| Cover News | General News | Campus News | Media Report | Pictures of TJU |
-| :--------: | :----------: | :---------: | :----------: | :-------------: |
-|    focus   |    general   |   internal  |     media    |     picture     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = ctx.req.param('type');

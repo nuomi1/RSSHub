@@ -3,14 +3,26 @@ import pMap from 'p-map';
 // Warning: The author still knows nothing about javascript!
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getArticle, getNotifByPage } from './_utils';
+
+const TYPE_OPTIONS = [
+    { value: 'notice', label: '学院通知' },
+    { value: 'enrollment', label: '招生通知' },
+    { value: 'academic-paper', label: '学术观点' },
+    { value: 'news', label: '新闻' },
+    { value: 'events', label: '活动' },
+    { value: 'focus', label: '视点' },
+    { value: 'collegerecruitment', label: '教师与行政人员招聘' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 export const route: Route = {
     path: '/sem/:type?',
     categories: ['university'],
     example: '/tongji/sem/notice',
-    parameters: { type: '通知类型，默认为 `notice`' },
+    parameters: { type: { description: '通知类型，默认为 `notice`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +35,15 @@ export const route: Route = {
     maintainers: ['sitdownkevin'],
     url: 'sem.tongji.edu.cn/semch',
     handler,
-    description: `| 学院通知 | 招生通知   | 学术观点       | 新闻 | 活动   | 视点  | 教师与行政人员招聘 |
-| -------- | ---------- | -------------- | ---- | ------ | ----- | ------------------ |
-| notice   | enrollment | academic-paper | news | events | focus | collegerecruitment |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '通知类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'notice';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     const subtype = new Set(['enrollment', 'academic-paper', 'news', 'events', 'focus', 'collegerecruitment']);
     const subtypeName = {
         notice: '学院通知',

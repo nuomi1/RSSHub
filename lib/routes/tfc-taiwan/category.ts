@@ -1,9 +1,18 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Data, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { baseUrl, parseItem, parsePost } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'rumor-mill', label: '謠言風向球' },
+    { value: 'issue-observatory', label: '議題觀察室' },
+    { value: 'weekly-top-ten-rumors', label: 'TOP10' },
+    { value: 'expert-columns', label: '名家專欄' },
+    { value: 'research-and-updates', label: '國際視野' },
+];
 
 const handler = async (ctx): Promise<Data> => {
     const { category } = ctx.req.param();
@@ -46,11 +55,13 @@ export const route: Route = {
     example: '/tfc-taiwan/category/weekly-top-ten-rumors',
     path: '/category/:category',
     parameters: {
-        category: '分類，見下表',
+        category: { description: '分類，見下表', options: CATEGORY_OPTIONS },
     },
     handler,
     url: 'tfc-taiwan.org.tw/category/rumor-mill/',
-    description: `| 謠言風向球 | 議題觀察室        | TOP10                 | 名家專欄       | 國際視野             |
-| ---------- | ----------------- | --------------------- | -------------- | -------------------- |
-| rumor-mill | issue-observatory | weekly-top-ten-rumors | expert-columns | research-and-updates |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分類',
+        options: CATEGORY_OPTIONS,
+    }),
 };

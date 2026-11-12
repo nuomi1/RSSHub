@@ -5,7 +5,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: 'College News' },
+    { value: 'notification', label: 'Notification' },
+    { value: 'forum', label: 'TJU Forum for CIC' },
+];
 
 const cic_base_url = 'http://cic.tju.edu.cn/';
 
@@ -35,7 +42,7 @@ export const route: Route = {
     path: '/cic/:type?',
     categories: ['university'],
     example: '/tju/cic/news',
-    parameters: { type: 'default `news`' },
+    parameters: { type: { description: 'default `news`', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -47,9 +54,11 @@ export const route: Route = {
     name: 'College of Intelligence and Computing',
     maintainers: ['AlanZeng423', 'SuperPung'],
     handler,
-    description: `| College News | Notification | TJU Forum for CIC |
-| :----------: | :----------: | :---------------: |
-|     news     | notification |       forum       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -6,7 +6,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notice', label: 'School-level Notice' },
+    { value: 'master', label: 'Master' },
+    { value: 'doctor', label: 'Doctor' },
+    { value: 'job', label: 'On-the-job Degree' },
+];
 
 const yzb_base_url = 'http://yzb.tju.edu.cn/';
 
@@ -37,7 +45,7 @@ export const route: Route = {
     path: '/yzb/:type?',
     categories: ['university'],
     example: '/tju/yzb/notice',
-    parameters: { type: 'default `notice`' },
+    parameters: { type: { description: 'default `notice`', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -49,9 +57,11 @@ export const route: Route = {
     name: 'Admission Office of Graduate',
     maintainers: ['SuperPung'],
     handler,
-    description: `| School-level Notice | Master | Doctor | On-the-job Degree |
-| :-----------------: | :----: | :----: | :---------------: |
-|        notice       | master | doctor |        job        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

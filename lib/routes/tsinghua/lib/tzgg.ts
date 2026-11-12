@@ -5,7 +5,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '留空', label: '全部' },
+    { value: 'kgtz', label: '开馆通知' },
+    { value: 'sgwx', label: '施工维修' },
+    { value: 'fwtz', label: '服务通知' },
+    { value: 'wgtb', label: '违规通报' },
+    { value: 'qtkx', label: '清图快讯' },
+    { value: 'gjtz', label: '馆际通知' },
+];
 
 type ArticleDetails = Pick<DataItem, 'description' | 'author' | 'updated'>;
 type XiumiDocument = {
@@ -58,10 +69,12 @@ export const route: Route = {
     url: 'lib.tsinghua.edu.cn',
     categories: ['university'],
     example: '/tsinghua/lib/tzgg/qtkx',
-    parameters: { category: '分类，可在对应分类页 URL 中找到，留空则获取全局通知公告' },
-    description: `| 全部 | 开馆通知 | 施工维修 | 服务通知 | 违规通报 | 清图快讯 | 馆际通知 |
-| ---- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 留空 | kgtz     | sgwx     | fwtz     | wgtb     | qtkx     | gjtz     |`,
+    parameters: { category: { description: '分类，可在对应分类页 URL 中找到，留空则获取全局通知公告', options: CATEGORY_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     features: {
         requireConfig: false,
         requirePuppeteer: false,

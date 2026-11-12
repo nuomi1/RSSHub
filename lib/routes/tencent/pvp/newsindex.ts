@@ -5,6 +5,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'rm', label: '热门' },
+    { value: 'xw', label: '新闻' },
+    { value: 'gg', label: '公告' },
+    { value: 'hd', label: '活动' },
+    { value: 'ss', label: '赛事' },
+    { value: 'yh', label: '优化' },
+];
 
 const map = new Map([
     ['rm', { name: '热门', channelid: 1760 }],
@@ -51,7 +62,7 @@ export const route: Route = {
     path: '/pvp/newsindex/:type',
     categories: ['game'],
     example: '/tencent/pvp/newsindex/all',
-    parameters: { type: '栏目分类，见下表' },
+    parameters: { type: { description: '栏目分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -63,9 +74,11 @@ export const route: Route = {
     name: '新闻中心',
     maintainers: ['Jeason0228', 'HenryQW'],
     handler,
-    description: `| 全部 | 热门 | 新闻 | 公告 | 活动 | 赛事 | 优化 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| all  | rm   | xw   | gg   | hd   | ss   | yh   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
     const type = ctx.req.param('type');

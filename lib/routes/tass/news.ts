@@ -5,12 +5,26 @@ import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'politics', label: 'Russian Politics & Diplomacy' },
+    { value: 'world', label: 'World' },
+    { value: 'economy', label: 'Business & Economy' },
+    { value: 'defense', label: 'Military & Defense' },
+    { value: 'science', label: 'Science & Space' },
+    { value: 'emergencies', label: 'Emergencies' },
+    { value: 'society', label: 'Society & Culture' },
+    { value: 'pressreview', label: 'Press Review' },
+    { value: 'sports', label: 'Sports' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'politics';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['traditional-media'],
     example: '/tass/politics',
-    parameters: { category: 'Category, can be found in URL, `politics` by default' },
+    parameters: { category: { description: 'Category, can be found in URL, `politics` by default', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,15 +42,17 @@ export const route: Route = {
     name: 'News',
     maintainers: ['TonyRL'],
     handler,
-    description: `| Russian Politics & Diplomacy | World | Business & Economy | Military & Defense | Science & Space | Emergencies | Society & Culture | Press Review | Sports |
-| ---------------------------- | ----- | ------------------ | ------------------ | --------------- | ----------- | ----------------- | ------------ | ------ |
-| politics                     | world | economy            | defense            | science         | emergencies | society           | pressreview  | sports |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const language: Language = 'en';
 
 async function handler(ctx) {
-    const { category = 'politics' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const link = `https://tass.com/${category}`;
     const { data: categoryPage } = await got(link);

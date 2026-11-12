@@ -4,6 +4,13 @@ import { renderToString } from 'hono/jsx/dom/server';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Language, Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'today', label: "Today's Featured Trope" },
+    { value: 'newest', label: 'Newest Trope' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'today';
 
 const categories = {
     today: 'left',
@@ -14,7 +21,7 @@ export const route: Route = {
     path: '/featured/:category?',
     categories: ['other'],
     example: '/tvtropes/featured/today',
-    parameters: { category: "Category, see below, Today's Featured Trope by default" },
+    parameters: { category: { description: "Category, see below, Today's Featured Trope by default", options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +33,15 @@ export const route: Route = {
     name: 'Featured',
     maintainers: ['nczitzk'],
     handler,
-    description: `| Today's Featured Trope | Newest Trope |
-| ---------------------- | ------------ |
-| today                  | newest       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'today' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(categories, category)) {
         throw new InvalidParameterError(`Unsupported category "${category}", please choose from: ${Object.keys(categories).join(', ')}`);
     }

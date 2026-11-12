@@ -9,7 +9,18 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import logger from '@/utils/logger';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CHANNEL_OPTIONS = [
+    { value: '1', label: '最新 500 个主题帖' },
+    { value: '2', label: '最新 500 个回复帖' },
+    { value: '3', label: '最新精华帖' },
+    { value: '4', label: '最新精华帖' },
+    { value: '5', label: '一周热帖' },
+    { value: '6', label: '本月热帖' },
+];
+const CHANNEL_OPTIONS_DEFAULT = '1';
 
 const rootUrl = 'https://www.txrjy.com';
 
@@ -29,7 +40,7 @@ export const route: Route = {
     path: '/fornumtopic/:channel?',
     categories: ['bbs'],
     example: '/txrjy/fornumtopic',
-    parameters: { channel: '频道的 id，见下表，默认为最新500个主题帖' },
+    parameters: { channel: { description: '频道的 id，见下表，默认为最新500个主题帖', options: CHANNEL_OPTIONS, default: CHANNEL_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -41,13 +52,15 @@ export const route: Route = {
     name: '论坛 频道',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 最新 500 个主题帖 | 最新 500 个回复帖 | 最新精华帖 | 最新精华帖 | 一周热帖 | 本月热帖 |
-| :---------------: | :---------------: | :--------: | :--------: | :------: | :------: |
-|         1         |         2         |      3     |      4     |     5    |     6    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '频道的 id',
+        options: CHANNEL_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const channel = ctx.req.param('channel') ?? '1';
+    const channel = ctx.req.param('channel') ?? CHANNEL_OPTIONS_DEFAULT;
     const url = `${rootUrl}/c114-listnewtopic.php?typeid=${channel}`;
 
     const response = await got(url, {

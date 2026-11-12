@@ -6,7 +6,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xstd', label: '学生活动' },
+    { value: 'jsfc', label: '教师风采' },
+    { value: 'xwdt', label: '新闻动态' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg';
 
 /*
  * Dictionary of supported text-based categories.
@@ -33,7 +42,7 @@ export const route: Route = {
     path: '/thuhs/:category?',
     categories: ['university'],
     example: '/tsinghua/thuhs/tzgg',
-    parameters: { category: '分类，见下表，留空则默认获取通知公告' },
+    parameters: { category: { description: '分类，见下表，留空则默认获取通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -63,14 +72,16 @@ export const route: Route = {
     name: '附属中学',
     maintainers: ['Aquarius-Situla'],
     handler,
-    description: `| 通知公告 | 学生活动 | 教师风采 | 新闻动态 |
-| -------- | -------- | -------- | -------- |
-| tzgg     | xstd     | jsfc     | xwdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {
     /* Determine the target URL based on the provided category */
-    const category = ctx.req.param('category') || 'tzgg';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     const host = 'https://www.qhfz.edu.cn';
     const targetUrl = `${host}/${category}.htm`;
 

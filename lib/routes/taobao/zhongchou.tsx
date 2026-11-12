@@ -2,12 +2,28 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'tech', label: '科技' },
+    { value: 'agriculture', label: '食品' },
+    { value: 'acg', label: '动漫' },
+    { value: 'design', label: '设计' },
+    { value: 'love', label: '公益' },
+    { value: 'tele', label: '娱乐' },
+    { value: 'music', label: '影音' },
+    { value: 'book', label: '书籍' },
+    { value: 'game', label: '游戏' },
+    { value: 'other', label: '其他' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/zhongchou/:type?',
     categories: ['shopping'],
     example: '/taobao/zhongchou/all',
-    parameters: { type: '类型, 默认为 `all` 全部' },
+    parameters: { type: { description: '类型, 默认为 `all` 全部', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,13 +35,15 @@ export const route: Route = {
     name: '众筹项目',
     maintainers: ['xyqfer', 'Fatpandac'],
     handler,
-    description: `| 全部 | 科技 | 食品        | 动漫 | 设计   | 公益 | 娱乐 | 影音  | 书籍 | 游戏 | 其他  |
-| ---- | ---- | ----------- | ---- | ------ | ---- | ---- | ----- | ---- | ---- | ----- |
-| all  | tech | agriculture | acg  | design | love | tele | music | book | game | other |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { type = 'all' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const map = {
         all: '',
         tech: '121288001',
