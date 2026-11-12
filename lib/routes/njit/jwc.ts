@@ -7,6 +7,15 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'jx', label: '教学' },
+    { value: 'ks', label: '考试' },
+    { value: 'xx', label: '信息' },
+    { value: 'sj', label: '实践' },
+];
+const TYPE_OPTIONS_DEFAULT = 'jx';
 
 const host = 'https://jwc.njit.edu.cn';
 
@@ -14,7 +23,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/njit/jwc/jx',
-    parameters: { type: '默认为 `jx`' },
+    parameters: { type: { description: '默认为 `jx`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +35,15 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['zefengdaguo'],
     handler,
-    description: `| 教学 | 考试 | 信息 | 实践 |
-| ---- | ---- | ---- | ---- |
-| jx   | ks   | xx   | sj   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'jx';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!['jx', 'ks', 'xx', 'sj'].includes(type)) {
         throw new InvalidParameterError('Unsupported type. Use jx, ks, xx, or sj.');
     }

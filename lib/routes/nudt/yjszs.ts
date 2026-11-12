@@ -6,7 +6,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const KEY_ID_OPTIONS = [
+    { value: '2', label: '通知公告' },
+    { value: '1', label: '首页' },
+    { value: '8', label: '招生简章' },
+    { value: '12', label: '学校政策' },
+    { value: '16', label: '硕士招生' },
+    { value: '17', label: '博士招生' },
+    { value: '23', label: '院所发文' },
+    { value: '25', label: '数据统计' },
+];
+const KEY_ID_OPTIONS_DEFAULT = '2';
 
 /* 研究生院 */
 const host = 'https://yjszs.nudt.edu.cn';
@@ -37,7 +50,7 @@ export const route: Route = {
     path: '/yjszs/:keyId?',
     categories: ['university'],
     example: '/nudt/yjszs/2',
-    parameters: { keyId: '分类，见下表，默认为通知公告' },
+    parameters: { keyId: { description: '分类，见下表，默认为通知公告', options: KEY_ID_OPTIONS, default: KEY_ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -55,13 +68,15 @@ export const route: Route = {
     maintainers: ['nczitzk', 'Blank0120'],
     handler,
     url: 'yjszs.nudt.edu.cn/',
-    description: `| 通知公告 | 首页 | 招生简章 | 学校政策 | 硕士招生 | 博士招生 | 院所发文 | 数据统计 |
-| -------- | ---- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 2        | 1    | 8        | 12       | 16       | 17       | 23       | 25       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'keyId',
+        description: '分类',
+        options: KEY_ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const keyId = ctx.req.param('keyId') ?? '2';
+    const keyId = ctx.req.param('keyId') ?? KEY_ID_OPTIONS_DEFAULT;
     const info = yjszs.get(keyId);
     if (!info) {
         throw new InvalidParameterError('invalid keyId');

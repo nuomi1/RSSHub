@@ -4,12 +4,19 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'xxfb', label: '信息发布' },
+    { value: 'jylgw', label: '教研类岗位' },
+    { value: 'gllgw', label: '管理岗位及其他' },
+];
 
 export const route: Route = {
     path: '/rczp/:type',
     categories: ['university'],
     example: '/nju/rczp/xxfb',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +33,11 @@ export const route: Route = {
     name: '人才招聘网',
     maintainers: ['ret-1'],
     handler,
-    description: `| 信息发布 | 教研类岗位 | 管理岗位及其他 |
-| -------- | ---------- | -------------- |
-| xxfb     | jylgw      | gllgw          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

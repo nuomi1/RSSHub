@@ -2,12 +2,18 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'news', label: '新闻通知' },
+    { value: 'proj', label: '交换生项目' },
+];
 
 export const route: Route = {
     path: '/exchangesys/:type',
     categories: ['university'],
     example: '/nju/exchangesys/proj',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -19,9 +25,11 @@ export const route: Route = {
     name: '本科生交换生系统',
     maintainers: ['cqjjjzr'],
     handler,
-    description: `| 新闻通知 | 交换生项目 |
-| -------- | ---------- |
-| news     | proj       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

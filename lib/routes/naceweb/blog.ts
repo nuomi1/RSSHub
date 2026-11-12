@@ -6,18 +6,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const SORT_OPTIONS = [
+    { value: '', label: 'Most Recent' },
+    { value: 'top-blogs', label: 'Top Rated' },
+    { value: 'mostreadblogs', label: 'Most Read' },
+];
 
 export const route: Route = {
     path: '/blog/:sort?',
     categories: ['new-media'],
     example: '/naceweb/blog',
-    parameters: { sort: 'Sort, see below, Most Recent by default' },
+    parameters: { sort: { description: 'Sort, see below, Most Recent by default', options: SORT_OPTIONS } },
     name: 'Blog',
     maintainers: ['nczitzk'],
     handler,
-    description: `| Most Recent | Top Rated | Most Read     |
-| ----------- | --------- | ------------- |
-|             | top-blogs | mostreadblogs |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'sort',
+        description: 'Sort',
+        options: SORT_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

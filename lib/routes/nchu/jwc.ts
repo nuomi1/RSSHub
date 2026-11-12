@@ -5,7 +5,14 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Data, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notice', label: '教务公告' },
+    { value: 'news', label: '教务新闻' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 const host = 'https://jwc.nchu.edu.cn';
 
@@ -18,7 +25,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/nchu/jwc/notice',
-    parameters: { type: '默认为 `notice`' },
+    parameters: { type: { description: '默认为 `notice`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['jwc.nchu.edu.cn/xwzx/gg'],
@@ -31,14 +38,16 @@ export const route: Route = {
     ],
     name: '教务处公告与新闻',
     maintainers: ['Sg4Dylan'],
-    description: `| 教务公告 | 教务新闻 |
-| -------- | -------- |
-| notice   | news     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context): Promise<Data> {
-    const { type = 'notice' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid type. Use notice or news.');
     }

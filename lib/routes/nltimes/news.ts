@@ -4,26 +4,30 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const map = new Map([
-    ['top-stories', { title: 'NL Times -- Top Stories', suffix: '/top-stories' }],
-    ['health', { title: 'NL Times -- Health', suffix: '/categories/health' }],
-    ['crime', { title: 'NL Times -- Crime', suffix: '/categories/crime' }],
-    ['politics', { title: 'NL Times -- Politics', suffix: '/categories/politics' }],
-    ['business', { title: 'NL Times -- Business', suffix: '/categories/business' }],
-    ['tech', { title: 'NL Times -- Tech', suffix: '/categories/tech' }],
-    ['culture', { title: 'NL Times -- Culture', suffix: '/categories/culture' }],
-    ['sports', { title: 'NL Times -- Sports', suffix: '/categories/sports' }],
-    ['weird', { title: 'NL Times -- Weird', suffix: '/categories/weird' }],
-    ['1-1-2', { title: 'NL Times -- 1-1-2', suffix: '/categories/1-1-2' }],
+    ['top-stories', { title: 'Top Stories', suffix: '/top-stories' }],
+    ['health', { title: 'Health', suffix: '/categories/health' }],
+    ['crime', { title: 'Crime', suffix: '/categories/crime' }],
+    ['politics', { title: 'Politics', suffix: '/categories/politics' }],
+    ['business', { title: 'Business', suffix: '/categories/business' }],
+    ['tech', { title: 'Tech', suffix: '/categories/tech' }],
+    ['culture', { title: 'Culture', suffix: '/categories/culture' }],
+    ['sports', { title: 'Sports', suffix: '/categories/sports' }],
+    ['weird', { title: 'Weird', suffix: '/categories/weird' }],
+    ['1-1-2', { title: '1-1-2', suffix: '/categories/1-1-2' }],
 ]);
+
+const CATEGORY_OPTIONS = [...map].map(([value, item]) => ({ value, label: item.title }));
+const CATEGORY_OPTIONS_DEFAULT = 'top-stories';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['new-media'],
     example: '/nltimes/news/top-stories',
-    parameters: { category: 'category' },
+    parameters: { category: { description: 'category', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -41,13 +45,15 @@ export const route: Route = {
     name: 'News',
     maintainers: ['Hivol'],
     handler,
-    description: `| Top Stories (default) | Health | Crime | Politics | Business | Tech | Culture | Sports | Weird | 1-1-2 |
-| --------------------- | ------ | ----- | -------- | -------- | ---- | ------- | ------ | ----- | ----- |
-| top-stories           | health | crime | politics | business | tech | culture | sports | weird | 1-1-2 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: 'Category',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'top-stories';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const selectedCategory = map.get(category);
     if (!selectedCategory) {
         throw new Error(`Unknown NL Times category: ${category}. Expected one of: ${map.keys().toArray().join(', ')}.`);
@@ -114,10 +120,10 @@ async function handler(ctx) {
     );
 
     return {
-        title: map.get(category)!.title,
+        title: `NL Times -- ${selectedCategory.title}`,
         language: 'en' as const,
         link: apiUrl,
-        description: map.get(category)!.title,
+        description: `NL Times -- ${selectedCategory.title}`,
         item: items,
     };
 }

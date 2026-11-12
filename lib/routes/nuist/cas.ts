@@ -3,8 +3,19 @@ import pMap from 'p-map';
 
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import got, { parseCampusDate } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xxgg', label: '信息公告' },
+    { value: 'xwkx', label: '新闻快讯' },
+    { value: 'kxyj', label: '科学研究' },
+    { value: 'wsgs', label: '网上公示' },
+    { value: 'bkjy', label: '本科教育' },
+    { value: 'yjsjy', label: '研究生教育' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xxgg';
 
 const baseTitle = 'NUIST AS（南信大大气科学学院）';
 const baseUrl = 'https://cas.nuist.edu.cn';
@@ -13,7 +24,7 @@ export const route: Route = {
     path: '/cas/:category?',
     categories: ['university'],
     example: '/nuist/cas/xxgg',
-    parameters: { category: '默认为信息公告' },
+    parameters: { category: { description: '默认为信息公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,13 +36,15 @@ export const route: Route = {
     name: 'NUIST AS（南信大大气科学学院）',
     maintainers: ['gylidian'],
     handler,
-    description: `| 信息公告 | 新闻快讯 | 科学研究 | 网上公示 | 本科教育 | 研究生教育 |
-| -------- | -------- | -------- | -------- | -------- | ---------- |
-| xxgg     | xwkx     | kxyj     | wsgs     | bkjy     | yjsjy      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'xxgg' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${baseUrl}/index/${category}.htm`;
 
     const response = await got(link);

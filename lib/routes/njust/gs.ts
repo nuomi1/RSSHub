@@ -4,9 +4,20 @@ import pMap from 'p-map';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { getContent } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'sytzgg_4568', label: '首页通知公告' },
+    { value: 'sytzgg', label: '首页新闻动态' },
+    { value: '14686', label: '最新通知' },
+    { value: '14687', label: '招生信息' },
+    { value: '14688', label: '培养信息' },
+    { value: 'xshdggl', label: '学术活动' },
+];
+const TYPE_OPTIONS_DEFAULT = 'sytzgg_4568';
 
 const host = 'https://gs.njust.edu.cn';
 
@@ -14,7 +25,7 @@ export const route: Route = {
     path: '/gs/:type?',
     categories: ['university'],
     example: '/njust/gs/sytzgg_4568',
-    parameters: { type: '分类 ID，部分示例参数见下表，默认为首页通知公告，其他分类 ID 可以从网站 URL Path 中找到，如国际交流为 `gjjl`' },
+    parameters: { type: { description: '分类 ID，部分示例参数见下表，默认为首页通知公告，其他分类 ID 可以从网站 URL Path 中找到，如国际交流为 `gjjl`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +43,15 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['MilkShakeYoung', 'jasongzy'],
     handler,
-    description: `| 首页通知公告 | 首页新闻动态 | 最新通知 | 招生信息 | 培养信息 | 学术活动 |
-| ------------ | ------------ | -------- | -------- | -------- | -------- |
-| sytzgg\\_4568 | sytzgg       | 14686    | 14687    | 14688    | xshdggl  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类 ID',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'sytzgg_4568';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const id = '/' + type;
     const siteUrl = host + id + '/list.htm';
 

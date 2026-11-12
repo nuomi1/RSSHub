@@ -4,13 +4,28 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news-policy', label: '時事。政策' },
+    { value: 'food-safety', label: '食安' },
+    { value: 'knowledge', label: '新知' },
+    { value: 'country-life', label: '愛地方' },
+    { value: 'good-farming', label: '種好田' },
+    { value: 'good-food-fun', label: '好吃。好玩' },
+    { value: 'food-education', label: '食農教育' },
+    { value: 'people-and-history', label: '人物' },
+    { value: 'raising-and-breeding', label: '漁業。畜牧' },
+    { value: 'living-green-travel', label: '綠生活。國際' },
+    { value: 'opinion', label: '評論' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/newsmarket',
-    parameters: { category: '分类，见下表，默认为首页' },
+    parameters: { category: { description: '分类，见下表，默认为首页', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,13 +42,11 @@ export const route: Route = {
     name: '分類',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 時事。政策  | 食安        | 新知      | 愛地方       | 種好田       | 好吃。好玩    |
-| ----------- | ----------- | --------- | ------------ | ------------ | ------------- |
-| news-policy | food-safety | knowledge | country-life | good-farming | good-food-fun |
-
-| 食農教育       | 人物               | 漁業。畜牧           | 綠生活。國際        | 評論    |
-| -------------- | ------------------ | -------------------- | ------------------- | ------- |
-| food-education | people-and-history | raising-and-breeding | living-green-travel | opinion |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -5,8 +5,17 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import getCookie from '../utils/pypasswaf';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jxfw', label: '教学服务' },
+    { value: 'jxjs', label: '教学建设' },
+    { value: 'xspy', label: '学生培养' },
+    { value: 'jxzy', label: '教学资源' },
+];
 
 const host = 'https://aao.nuaa.edu.cn/';
 
@@ -22,7 +31,7 @@ export const route: Route = {
     path: '/jwc/:type/:getDescription?',
     categories: ['university'],
     example: '/nuaa/jwc/tzgg/getDescription',
-    parameters: { type: '分类名，见下表', getDescription: '是否获取全文' },
+    parameters: { type: { description: '分类名，见下表', options: TYPE_OPTIONS }, getDescription: '是否获取全文' },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -34,9 +43,11 @@ export const route: Route = {
     name: '教务处',
     maintainers: ['arcosx', 'Seiry', 'qrzbing', 'Xm798'],
     handler,
-    description: `| 通知公告 | 教学服务 | 教学建设 | 学生培养 | 教学资源 |
-| -------- | -------- | -------- | -------- | -------- |
-| tzgg     | jxfw     | jxjs     | xspy     | jxzy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 class ArticlePermissionError extends Error {}

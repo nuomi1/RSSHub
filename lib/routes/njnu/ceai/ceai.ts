@@ -3,14 +3,21 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import util from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'xygg', label: '学院公告' },
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'xszx', label: '学生资讯' },
+];
 
 export const route: Route = {
     path: '/ceai/:type',
     categories: ['university'],
     example: '/njnu/ceai/xszx',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +29,11 @@ export const route: Route = {
     name: '计算机与电子信息学院 - 人工智能学院',
     maintainers: ['Shujakuinkuraudo'],
     handler,
-    description: `| 学院公告 | 学院新闻 | 学生资讯 |
-| -------- | -------- | -------- |
-| xygg     | xyxw     | xszx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

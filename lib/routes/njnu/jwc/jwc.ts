@@ -3,14 +3,21 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { ProcessFeed } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'jstz', label: '教师通知' },
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'xstz', label: '学生通知' },
+];
 
 export const route: Route = {
     path: '/jwc/:type',
     categories: ['university'],
     example: '/njnu/jwc/xstz',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +29,11 @@ export const route: Route = {
     name: '教务通知',
     maintainers: ['Shujakuinkuraudo'],
     handler,
-    description: `| 教师通知 | 新闻动态 | 学生通知 |
-| -------- | -------- | -------- |
-| jstz     | xwdt     | xstz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

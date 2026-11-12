@@ -6,12 +6,26 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'Politics', label: '政治' },
+    { value: 'Economy', label: '财经' },
+    { value: 'Society', label: '社会' },
+    { value: 'Culture', label: '日本文化' },
+    { value: 'In-depth', label: '深度报道' },
+    { value: 'japan-data', label: '日本信息库' },
+    { value: 'japan-glances', label: '日本一瞥' },
+    { value: 'People', label: '人物' },
+    { value: 'Announcements', label: '编辑部通知' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'Politics';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['travel'],
     example: '/nippon/Politics',
-    parameters: { category: '默认政治，可选如下' },
+    parameters: { category: { description: '默认政治，可选如下', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +47,11 @@ export const route: Route = {
         { source: ['www.nippon.com/cn/announcements'], target: '/Announcements' },
     ],
     name: '政治外交',
-    description: `| 政治     | 财经    | 社会    | 日本文化 | 深度报道 | 日本信息库 | 日本一瞥      | 人物   | 编辑部通知    |
-| -------- | ------- | ------- | -------- | -------- | ---------- | ------------- | ------ | ------------- |
-| Politics | Economy | Society | Culture  | In-depth | japan-data | japan-glances | People | Announcements |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '默认政治',
+        options: CATEGORY_OPTIONS,
+    }),
     maintainers: ['laampui'],
     handler,
 };
@@ -54,7 +70,7 @@ const categoryPaths = {
 } satisfies Record<string, string>;
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'Politics';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const categoryPath = categoryPaths[category];
     if (!categoryPath) {
         throw new InvalidParameterError(`Unknown category ${category}. Choose one of: ${Object.keys(categoryPaths).join(', ')}.`);

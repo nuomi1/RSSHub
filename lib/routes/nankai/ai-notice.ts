@@ -5,13 +5,28 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'zxdt', label: '最新动态' },
+    { value: 'xygg', label: '学院公告' },
+    { value: 'xszc', label: '学生之窗' },
+    { value: 'kyxx', label: '科研信息' },
+    { value: 'bksjx', label: '本科生教学' },
+    { value: 'dtyd', label: '党团园地' },
+    { value: 'yjszs', label: '研究生招生' },
+    { value: 'yjsjx', label: '研究生教学' },
+    { value: 'jyxx', label: '就业信息' },
+    { value: 'gjjl', label: '国际交流' },
+];
+const TYPE_OPTIONS_DEFAULT = 'zxdt';
 
 export const route: Route = {
     path: '/ai/:type?',
     categories: ['university'],
     example: '/nankai/ai/zxdt',
-    parameters: { type: '栏目类型（若为空则默认为"最新动态"）' },
+    parameters: { type: { description: '栏目类型（若为空则默认为"最新动态"）', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +43,15 @@ export const route: Route = {
     ],
     name: '人工智能学院',
     maintainers: ['LMark'],
-    description: `| 最新动态 | 学院公告 | 学生之窗 | 科研信息 | 本科生教学 | 党团园地 | 研究生招生 | 研究生教学 | 就业信息 | 国际交流 |
-| -------- | -------- | -------- | -------- | ---------- | -------- | ---------- | ---------- | -------- | -------- |
-| zxdt     | xygg     | xszc     | kyxx     | bksjx      | dtyd     | yjszs      | yjsjx      | jyxx     | gjjl     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目类型',
+        options: TYPE_OPTIONS,
+    }),
     url: 'ai.nankai.edu.cn',
     handler: async (ctx) => {
         // Read the notice category from the route path.
-        const { type = 'zxdt' } = ctx.req.param();
+        const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
         const baseUrl = 'https://ai.nankai.edu.cn';
         const { data: response } = await got(`${baseUrl}/xwzx/${type}.htm`);
         const $ = load(response);

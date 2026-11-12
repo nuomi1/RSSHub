@@ -6,7 +6,15 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '参数', label: '类型' },
+    { value: 'zsxx', label: '硕士招生信息' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'pyxx', label: '研究生培养信息' },
+];
 
 function extractAuthor(value: string): string | undefined {
     for (const marker of value.matchAll(/作者：/g)) {
@@ -42,7 +50,7 @@ export const route: Route = {
     path: '/master/:type',
     categories: ['university'],
     example: '/ncepu/master/tzgg',
-    parameters: { type: '类型参数' },
+    parameters: { type: { description: '类型参数', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -54,9 +62,11 @@ export const route: Route = {
     name: '北京校区研究生院',
     maintainers: ['nilleo'],
     handler,
-    description: `| 类型 | 硕士招生信息 | 通知公告 | 研究生培养信息 |
-| ---- | ------------ | -------- | -------------- |
-| 参数 | zsxx         | tzgg     | pyxx           |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型参数',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

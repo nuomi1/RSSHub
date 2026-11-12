@@ -6,8 +6,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { finishArticleItem } from '@/utils/wechat-mp';
+
+const TYPE_OPTIONS = [
+    { value: 'notice', label: '通知公告' },
+    { value: 'news', label: '教务快讯' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notice';
 
 const host = 'https://jwc.njupt.edu.cn';
 
@@ -20,7 +27,7 @@ export const route: Route = {
     path: '/jwc/:type?',
     categories: ['university'],
     example: '/njupt/jwc/notice',
-    parameters: { type: '默认为 `notice`' },
+    parameters: { type: { description: '默认为 `notice`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +39,15 @@ export const route: Route = {
     name: '教务处通知与新闻',
     maintainers: ['shaoye'],
     handler,
-    description: `| 通知公告 | 教务快讯 |
-| -------- | -------- |
-| notice   | news     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'notice';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Unsupported type. Use notice or news.');
     }

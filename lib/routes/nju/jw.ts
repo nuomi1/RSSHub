@@ -4,13 +4,19 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { DataItem, Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'ggtz', label: '公告通知' },
+    { value: 'jxdt', label: '教学动态' },
+];
 
 export const route: Route = {
     path: '/jw/:type',
     categories: ['university'],
     example: '/nju/jw/ggtz',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,9 +33,11 @@ export const route: Route = {
     name: '本科生院',
     maintainers: ['cqjjjzr'],
     handler,
-    description: `| 公告通知 | 教学动态 |
-| -------- | -------- |
-| ggtz     | jxdt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -4,6 +4,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 const baseUrl = 'https://jwc.njfu.edu.cn/sy/';
 
@@ -14,21 +15,26 @@ const map = {
     xzzq: '下载专区',
 };
 
+const CATEGORY_OPTIONS = Object.entries(map).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg';
+
 export const route: Route = {
     path: '/jwc/:category?',
     categories: ['university'],
     example: '/njfu/jwc/tzgg',
-    parameters: { category: '省略则默认为 tzgg' },
+    parameters: { category: { description: '省略则默认为 tzgg', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '教务处',
     maintainers: ['kiusiudeng'],
-    description: `| 校级发文 | 通知公告 | 上级发文 | 下载专区 |
-| -------- | -------- | -------- | -------- |
-| xjfw     | tzgg     | sjfw     | xzzq     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { category = 'tzgg' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, category)) {
         throw new InvalidParameterError('Unsupported category. Use xjfw, tzgg, sjfw, or xzzq.');
     }

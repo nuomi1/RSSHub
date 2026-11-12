@@ -5,8 +5,19 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import getCookie from '../utils/pypasswaf';
+
+const GET_DESCRIPTION_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'rdxw', label: '热点新闻' },
+    { value: 'xkky', label: '学科科研' },
+    { value: 'jxdt', label: '教学动态' },
+    { value: 'be', label: '本科生培养' },
+    { value: 'me', label: '研究生培养' },
+    { value: 'xsgz', label: '学生工作' },
+];
 
 const host = 'https://cs.nuaa.edu.cn/';
 
@@ -24,7 +35,7 @@ export const route: Route = {
     path: '/cs/:type/:getDescription?',
     categories: ['university'],
     example: '/nuaa/cs/jxdt',
-    parameters: { type: '分类名，见下表', getDescription: '是否获取全文' },
+    parameters: { type: '分类名，见下表', getDescription: { description: '是否获取全文', options: GET_DESCRIPTION_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -36,9 +47,11 @@ export const route: Route = {
     name: '计算机科学与技术学院',
     maintainers: ['LogicJake', 'Seiry', 'qrzbing', 'Xm798'],
     handler,
-    description: `| 通知公告 | 热点新闻 | 学科科研 | 教学动态 | 本科生培养 | 研究生培养 | 学生工作 |
-| -------- | -------- | -------- | -------- | ---------- | ---------- | -------- |
-| tzgg     | rdxw     | xkky     | jxdt     | be         | me         | xsgz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'getDescription',
+        description: '是否获取全文',
+        options: GET_DESCRIPTION_OPTIONS,
+    }),
 };
 
 interface ArticleSummary {

@@ -5,8 +5,16 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import getCookie from '../utils/pypasswaf';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'xsxx', label: '学术信息' },
+    { value: 'ssfc', label: '师生风采' },
+];
 
 const host = 'http://www.graduate.nuaa.edu.cn/';
 
@@ -21,7 +29,7 @@ export const route: Route = {
     path: '/yjsy/:type/:getDescription?',
     categories: ['university'],
     example: '/nuaa/yjsy/tzgg/getDescription',
-    parameters: { type: '分类名，见下表', getDescription: '是否获取全文' },
+    parameters: { type: { description: '分类名，见下表', options: TYPE_OPTIONS }, getDescription: '是否获取全文' },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -33,9 +41,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['junfengP', 'Seiry', 'Xm798'],
     handler,
-    description: `| 通知公告 | 新闻动态 | 学术信息 | 师生风采 |
-| -------- | -------- | -------- | -------- |
-| tzgg     | xwdt     | xsxx     | ssfc     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

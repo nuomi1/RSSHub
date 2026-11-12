@@ -7,7 +7,16 @@ import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '2', label: '头条' },
+    { value: '3', label: '要闻' },
+    { value: '4', label: '图片新闻' },
+    { value: '5', label: '推荐' },
+];
+const ID_OPTIONS_DEFAULT = '3';
 
 async function settleQueueRequest(request: Promise<unknown>): Promise<void> {
     try {
@@ -96,7 +105,7 @@ export const route: Route = {
     path: '/:id?',
     categories: ['finance'],
     example: '/nbd',
-    parameters: { id: '分类 id，见下表，默认为要闻' },
+    parameters: { id: { description: '分类 id，见下表，默认为要闻', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -114,13 +123,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'nbd.com.cn/',
-    description: `| 头条 | 要闻 | 图片新闻 | 推荐 |
-| ---- | ---- | -------- | ---- |
-| 2    | 3    | 4        | 5    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '3';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://www.nbd.com.cn';
     const currentUrl = `${rootUrl}/columns/${id}/`;

@@ -3,18 +3,30 @@ import type { Context } from 'hono';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATY_OPTIONS = [
+    { value: 'physics', label: 'Physics' },
+    { value: 'chemistry', label: 'Chemistry' },
+    { value: 'physiology-or-medicine', label: 'Physiology or Medicine' },
+    { value: 'literature', label: 'Literature' },
+    { value: 'peace', label: 'Peace' },
+    { value: 'economic-sciences', label: 'Economic Science' },
+];
 
 export const route: Route = {
     path: '/:caty?',
     categories: ['other'],
     example: '/nobelprize',
-    parameters: { caty: 'Category, see below, all by default' },
+    parameters: { caty: { description: 'Category, see below, all by default', options: CATY_OPTIONS } },
     name: 'List',
     maintainers: ['nczitzk'],
     handler,
-    description: `| Physics | Chemistry | Physiology or Medicine | Literature | Peace | Economic Science  |
-| ------- | --------- | ---------------------- | ---------- | ----- | ----------------- |
-| physics | chemistry | physiology-or-medicine | literature | peace | economic-sciences |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: 'category',
+        options: CATY_OPTIONS,
+    }),
 };
 
 const categoryPaths = {

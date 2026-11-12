@@ -5,13 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '5509', label: '硕士招生' },
+    { value: '2552', label: '博士招生' },
+    { value: '2562', label: '港澳台研究生最新信息' },
+];
+const TYPE_OPTIONS_DEFAULT = '5509';
 
 export const route: Route = {
     path: '/yzb/:type?',
     categories: ['university'],
     example: '/nankai/yzb/5509',
-    parameters: { type: '栏目名（若为空则默认为“硕士招生”）' },
+    parameters: { type: { description: '栏目名（若为空则默认为“硕士招生”）', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +36,15 @@ export const route: Route = {
     ],
     name: '研究生招生网',
     maintainers: ['sddzhyc'],
-    description: `| 硕士招生 | 博士招生 | 港澳台研究生最新信息 |
-| -------- | -------- | -------------------- |
-| 5509     | 2552     | 2562                 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目名',
+        options: TYPE_OPTIONS,
+    }),
     url: 'yzb.nankai.edu.cn',
     handler: async (ctx) => {
         // Read the notice category from the route path.
-        const { type = '5509' } = ctx.req.param();
+        const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
         const baseUrl = 'https://yzb.nankai.edu.cn';
         const { data: response } = await got(`${baseUrl}/${type}/list.htm`);
         const $ = load(response);

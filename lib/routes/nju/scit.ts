@@ -4,13 +4,19 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'kydt', label: '科研动态' },
+];
 
 export const route: Route = {
     path: '/scit/:type',
     categories: ['university'],
     example: '/nju/scit/tzgg',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +28,11 @@ export const route: Route = {
     name: '科学技术处',
     maintainers: ['ret-1'],
     handler,
-    description: `| 通知公告 | 科研动态 |
-| -------- | -------- |
-| tzgg     | kydt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

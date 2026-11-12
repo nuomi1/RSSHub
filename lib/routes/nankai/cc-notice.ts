@@ -5,13 +5,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '13291', label: '最新动态' },
+    { value: '13292', label: '学院公告' },
+    { value: '13293', label: '学生工作通知' },
+    { value: '13294', label: '科研信息' },
+    { value: '13295', label: '本科生教学' },
+    { value: '13296', label: '党团园地' },
+    { value: '13297', label: '研究生招生' },
+    { value: '13298', label: '研究生教学' },
+    { value: '13299', label: '境外交流' },
+];
+const TYPE_OPTIONS_DEFAULT = '13291';
 
 export const route: Route = {
     path: '/cc/:type?',
     categories: ['university'],
     example: '/nankai/cc/13291',
-    parameters: { type: '栏目编号（若为空则默认为"最新动态"）' },
+    parameters: { type: { description: '栏目编号（若为空则默认为"最新动态"）', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +42,15 @@ export const route: Route = {
     ],
     name: '计算机学院',
     maintainers: ['vicguo0724'],
-    description: `| 最新动态 | 学院公告 | 学生工作通知 | 科研信息 | 本科生教学 | 党团园地 | 研究生招生 | 研究生教学 | 境外交流 |
-| -------- | -------- | ------------ | -------- | ---------- | -------- | ---------- | ---------- | -------- |
-| 13291    | 13292    | 13293        | 13294    | 13295      | 13296    | 13297      | 13298      | 13299    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目编号',
+        options: TYPE_OPTIONS,
+    }),
     url: 'cc.nankai.edu.cn',
     handler: async (ctx) => {
         // Read the notice category from the route path.
-        const { type = '13291' } = ctx.req.param();
+        const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
         const baseUrl = 'https://cc.nankai.edu.cn';
         const { data: response } = await got(`${baseUrl}/${type}/list.htm`);
         const $ = load(response);

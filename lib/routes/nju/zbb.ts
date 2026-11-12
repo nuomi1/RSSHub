@@ -4,13 +4,20 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'cgxx', label: '采购信息' },
+    { value: 'cjgs', label: '成交公示' },
+    { value: 'zfcgyxgk', label: '政府采购意向公开' },
+];
 
 export const route: Route = {
     path: '/zbb/:type',
     categories: ['university'],
     example: '/nju/zbb/cgxx',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +29,11 @@ export const route: Route = {
     name: '招标办公室',
     maintainers: ['ret-1'],
     handler,
-    description: `| 采购信息 | 成交公示 | 政府采购意向公开 |
-| -------- | -------- | ---------------- |
-| cgxx     | cjgs     | zfcgyxgk         |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

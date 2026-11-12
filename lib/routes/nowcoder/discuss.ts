@@ -4,7 +4,15 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ORDER_OPTIONS = [
+    { value: '0', label: '最新回复' },
+    { value: '3', label: '最新发表' },
+    { value: '1', label: '最新' },
+    { value: '4', label: '精华' },
+];
 
 const host = 'https://www.nowcoder.com';
 
@@ -12,7 +20,7 @@ export const route: Route = {
     path: '/discuss/:type/:order',
     categories: ['bbs'],
     example: '/nowcoder/discuss/2/4',
-    parameters: { type: '讨论区分区id 在 URL 中可以找到', order: '排序方式' },
+    parameters: { type: '讨论区分区id 在 URL 中可以找到', order: { description: '排序方式', options: ORDER_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +32,11 @@ export const route: Route = {
     name: '讨论区',
     maintainers: ['LogicJake'],
     handler,
-    description: `| 最新回复 | 最新发表 | 最新 | 精华 |
-| -------- | -------- | ---- | ---- |
-| 0        | 3        | 1    | 4    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'order',
+        description: '排序方式',
+        options: ORDER_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -5,13 +5,25 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'zxdt', label: '最新动态' },
+    { value: '82', label: '综合信息' },
+    { value: '83', label: '招生工作' },
+    { value: '72', label: '培养管理' },
+    { value: '73', label: '国际交流' },
+    { value: 'xkjs', label: '学科建设' },
+    { value: 'xwgl', label: '学位管理' },
+];
+const TYPE_OPTIONS_DEFAULT = 'zxdt';
 
 export const route: Route = {
     path: '/graduate/:type?',
     categories: ['university'],
     example: '/nankai/graduate/zxdt',
-    parameters: { type: '栏目编号（若为空则默认为"zxdt"）' },
+    parameters: { type: { description: '栏目编号（若为空则默认为"zxdt"）', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +40,15 @@ export const route: Route = {
     ],
     name: '研究生院',
     maintainers: ['ladeng07'],
-    description: `| 最新动态 | 综合信息 | 招生工作 | 培养管理 | 国际交流 | 学科建设 | 学位管理 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| zxdt     | 82       | 83       | 72       | 73       | xkjs     | xwgl     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '栏目编号',
+        options: TYPE_OPTIONS,
+    }),
     url: 'graduate.nankai.edu.cn',
     handler: async (ctx) => {
         // Read the notice category from the route path.
-        const { type = 'zxdt' } = ctx.req.param();
+        const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
         const baseUrl = 'https://graduate.nankai.edu.cn';
         const { data: response } = await got(`${baseUrl}/${type}/list.htm`);
         const $ = load(response);

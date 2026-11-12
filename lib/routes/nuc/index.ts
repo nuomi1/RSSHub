@@ -7,6 +7,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const types = {
@@ -27,6 +28,8 @@ const types = {
         url: 'http://jwc.nuc.edu.cn/index/jwtz.htm',
     },
 };
+
+const TYPE_OPTIONS = Object.entries(types).map(([value, item]) => ({ value, label: item.name }));
 
 const config = {
     jwtz: {
@@ -53,13 +56,15 @@ export const route: Route = {
     path: '/:type',
     categories: ['university'],
     example: '/nuc/zbxw',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     name: '各种新闻通知',
     maintainers: ['Dreace'],
     handler,
-    description: `| 中北新闻 | 通知公告 | 学术活动 | 教务通知 |
-| -------- | -------- | -------- | -------- |
-| zbxw     | tzgg     | xshd     | jwtz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

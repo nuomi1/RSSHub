@@ -3,8 +3,18 @@ import pMap from 'p-map';
 
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import got, { parseCampusDate } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xwkx', label: '新闻快讯' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jwxx', label: '教务信息' },
+    { value: 'kydt', label: '科研动态' },
+    { value: 'xzfc', label: '学子风采' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xwkx';
 
 const baseTitle = 'NUIST CS（南信大计软院）';
 const baseUrl = 'https://scs.nuist.edu.cn';
@@ -13,7 +23,7 @@ export const route: Route = {
     path: '/scs/:category?',
     categories: ['university'],
     example: '/nuist/scs/xwkx',
-    parameters: { category: '默认为新闻快讯' },
+    parameters: { category: { description: '默认为新闻快讯', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,13 +41,15 @@ export const route: Route = {
     name: 'NUIST CS（南信大计软院）',
     maintainers: ['gylidian'],
     handler,
-    description: `| 新闻快讯 | 通知公告 | 教务信息 | 科研动态 | 学子风采 |
-| -------- | -------- | -------- | -------- | -------- |
-| xwkx     | tzgg     | jwxx     | kydt     | xzfc     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'xwkx' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${baseUrl}/${category}/list.htm`;
 
     const response = await got(link);
