@@ -3,14 +3,22 @@ import { load } from 'cheerio';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getInfo, processItems, rootUrl } from './util';
+
+const RANGE_OPTIONS = [
+    { value: '0', label: '24 小时最热' },
+    { value: '1', label: '本周最热' },
+    { value: '2', label: '本月最热' },
+];
+const RANGE_OPTIONS_DEFAULT = '0';
 
 export const route: Route = {
     path: '/rank/:range?',
     categories: ['new-media'],
     example: '/mydrivers/rank',
-    parameters: { range: '时间范围，见下表，默认为24小时最热' },
+    parameters: { range: { description: '时间范围，见下表，默认为24小时最热', options: RANGE_OPTIONS, default: RANGE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,13 +37,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'm.mydrivers.com/newsclass.aspx',
-    description: `| 24 小时最热 | 本周最热 | 本月最热 |
-| ----------- | -------- | -------- |
-| 0           | 1        | 2        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'range',
+        description: '时间范围',
+        options: RANGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { range = '0' } = ctx.req.param();
+    const { range = RANGE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!['0', '1', '2'].includes(range)) {
         throw new InvalidParameterError('Invalid ranking range. Use 0 for the last 24 hours, 1 for this week, or 2 for this month.');
     }

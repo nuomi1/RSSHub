@@ -4,7 +4,16 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'latest', label: '最新' },
+    { value: 'news', label: '新闻' },
+    { value: 'notice', label: '公告' },
+    { value: 'activity', label: '活动' },
+    { value: 'info', label: '资讯' },
+];
 
 const config = {
     latest: {
@@ -33,12 +42,14 @@ export const route: Route = {
     path: '/bh3/:type',
     categories: ['game'],
     example: '/mihoyo/bh3/latest',
-    parameters: { type: '公告种类' },
+    parameters: { type: { description: '公告种类', options: TYPE_OPTIONS } },
     name: '崩坏 3 - 游戏公告',
     maintainers: ['deepred5', 'nczitzk'],
-    description: `| 最新   | 新闻 | 公告   | 活动     | 资讯 |
-| ------ | ---- | ------ | -------- | ---- |
-| latest | news | notice | activity | info |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '公告种类',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 

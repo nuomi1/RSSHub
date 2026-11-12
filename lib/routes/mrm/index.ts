@@ -5,12 +5,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'zonghezixun3', label: '交易通知' },
+    { value: 'zhengceguiding_list', label: '政策规定' },
+    { value: 'yewutongzhi_list', label: '业务通知' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'zonghezixun3';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['finance'],
     example: '/mrm',
-    parameters: { category: 'N' },
+    parameters: { category: { description: 'N', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,13 +30,15 @@ export const route: Route = {
     name: '通知',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 交易通知     | 政策规定             | 业务通知          |
-| ------------ | -------------------- | ----------------- |
-| zonghezixun3 | zhengceguiding\\_list | yewutongzhi\\_list |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'zonghezixun3' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'http://www.mrm.com.cn';
     const link = `${baseUrl}/${category}.html`;
 

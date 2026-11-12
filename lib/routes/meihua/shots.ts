@@ -7,6 +7,13 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATY_OPTIONS = [
+    { value: 'latest', label: '最新' },
+    { value: 'hot', label: '热门' },
+    { value: 'recommend', label: '推荐' },
+];
 
 const config = {
     recommend: {
@@ -27,12 +34,14 @@ export const route: Route = {
     path: '/shots/:caty',
     categories: ['new-media'],
     example: '/meihua/shots/latest',
-    parameters: { caty: '分类，见下表' },
+    parameters: { caty: { description: '分类，见下表', options: CATY_OPTIONS } },
     name: '作品',
     maintainers: ['nczitzk'],
-    description: `| 最新   | 热门 | 推荐      |
-| ------ | ---- | --------- |
-| latest | hot  | recommend |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分类',
+        options: CATY_OPTIONS,
+    }),
     handler,
 };
 

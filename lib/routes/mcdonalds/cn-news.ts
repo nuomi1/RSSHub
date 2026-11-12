@@ -6,22 +6,36 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'news_list', label: '全部分类' },
+    { value: 'responsibility', label: '社会责任' },
+    { value: 'brand', label: '人员品牌' },
+    { value: 'product', label: '产品故事' },
+    { value: 'sales', label: '优惠' },
+    { value: 'culture', label: '品牌文化' },
+    { value: 'event', label: '活动速报' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'news_list';
 
 export const route: Route = {
     path: '/cn/:category',
     categories: ['shopping'],
     example: '/mcdonalds/cn/sales+event',
-    parameters: { category: '分类名（可用 + 连接多个分类）' },
+    parameters: { category: { description: '分类名（可用 + 连接多个分类）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '活动资讯',
     maintainers: ['huyyi'],
-    description: `| 全部分类   | 社会责任       | 人员品牌 | 产品故事 | 优惠  | 品牌文化 | 活动速报 |
-| ---------- | -------------- | -------- | -------- | ----- | -------- | -------- |
-| news\\_list | responsibility | brand    | product  | sales | culture  | event    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { category = 'news_list' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const categories = category.split('+');
     const baseUrl = 'https://www.mcdonalds.com.cn/news/';
 

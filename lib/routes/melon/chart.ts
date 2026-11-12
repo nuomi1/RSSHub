@@ -3,17 +3,27 @@ import type { Context } from 'hono';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '24H' },
+    { value: 'day', label: '일간' },
+    { value: 'week', label: '주간' },
+    { value: 'month', label: '월간' },
+];
 
 export const route: Route = {
     path: '/chart/:category?',
     categories: ['multimedia'],
     example: '/melon/chart',
-    parameters: { category: 'Category, see below, 24H by default' },
+    parameters: { category: { description: 'Category, see below, 24H by default', options: CATEGORY_OPTIONS } },
     name: 'Chart',
     maintainers: ['nczitzk'],
-    description: `| 24H | 일간 | 주간 | 월간  |
-| --- | ---- | ---- | ----- |
-|     | day  | week | month |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

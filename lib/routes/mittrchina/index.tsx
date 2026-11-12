@@ -7,13 +7,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const TYPE_OPTIONS = [
+    { value: 'breaking', label: '快讯' },
+    { value: 'hot', label: '本周热文' },
+    { value: 'index', label: '首页资讯' },
+    { value: 'video', label: '视频' },
+];
+const TYPE_OPTIONS_DEFAULT = 'index';
 
 export const route: Route = {
     path: '/:type?',
     categories: ['new-media'],
     example: '/mittrchina/index',
-    parameters: { type: '类型，见下表，默认为首页资讯' },
+    parameters: { type: { description: '类型，见下表，默认为首页资讯', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,9 +34,11 @@ export const route: Route = {
     name: '首页',
     maintainers: ['EsuRt', 'queensferryme'],
     handler,
-    description: `| 快讯     | 本周热文 | 首页资讯 | 视频  |
-| -------- | -------- | -------- | ----- |
-| breaking | hot      | index    | video |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
@@ -50,7 +61,7 @@ async function handler(ctx) {
         },
     };
 
-    const { type = 'index' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(typeMap, type)) {
         throw new InvalidParameterError(`Invalid article type: ${type}. Use breaking, hot, index, or video.`);
     }

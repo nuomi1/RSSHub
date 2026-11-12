@@ -4,12 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'bqym', label: '本期要目' },
+    { value: 'wlsf', label: '网络首发' },
+    { value: 'xshd', label: '学术活动' },
+    { value: 'tzgg', label: '通知公告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'bqym';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['journal'],
     example: '/mwm',
-    parameters: { category: '分类，见下表，默认为本期要目' },
+    parameters: { category: { description: '分类，见下表，默认为本期要目', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +35,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 本期要目 | 网络首发 | 学术活动 | 通知公告 |
-| -------- | -------- | -------- | -------- |
-| bqym     | wlsf     | xshd     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'bqym';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const requestedLimit = Number(ctx.req.query('limit'));
     const limit = Number.isSafeInteger(requestedLimit) && requestedLimit > 0 ? requestedLimit : 100;

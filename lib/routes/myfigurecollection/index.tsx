@@ -5,7 +5,14 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { isValidHost } from '@/utils/valid-host';
+
+const CATEGORY_OPTIONS = [
+    { value: 'potd', label: '每日圖片' },
+    { value: 'potw', label: '每週圖片' },
+    { value: 'potm', label: '每月圖片' },
+];
 
 const shortcuts = {
     potd: 'picture/browse/potd/',
@@ -17,7 +24,7 @@ export const route: Route = {
     path: '/:category?/:language?',
     categories: ['shopping'],
     example: '/myfigurecollection/potd',
-    parameters: { category: '分类，默认为每日圖片', language: '语言，见上表，默认为空，即 `en`' },
+    parameters: { category: { description: '分类，默认为每日圖片', options: CATEGORY_OPTIONS }, language: '语言，见上表，默认为空，即 `en`' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -35,9 +42,11 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'zh.myfigurecollection.net/browse',
-    description: `| 每日圖片 | 每週圖片 | 每月圖片 |
-| -------- | -------- | -------- |
-| potd     | potw     | potm     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

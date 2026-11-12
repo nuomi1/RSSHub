@@ -4,18 +4,30 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'new', label: '最新公告' },
+    { value: 'version', label: '版本信息' },
+    { value: 'gach', label: '祈愿信息' },
+    { value: 'event', label: '活动介绍' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/bh2/:type?',
     categories: ['game'],
     example: '/mihoyo/bh2/gach',
-    parameters: { type: '公告种类，默认为 `all`' },
+    parameters: { type: { description: '公告种类，默认为 `all`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '崩坏 2 - 游戏公告',
     maintainers: ['deepred5'],
-    description: `| 全部 | 最新公告 | 版本信息 | 祈愿信息 | 活动介绍 |
-| ---- | -------- | -------- | -------- | -------- |
-| all  | new      | version  | gach     | event    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '公告种类',
+        options: TYPE_OPTIONS,
+    }),
     handler,
     url: 'www.benghuai.com/index/',
 };
@@ -23,7 +35,7 @@ export const route: Route = {
 const typeArr = ['new', 'version', 'gach', 'event'];
 
 async function handler(ctx: Context) {
-    const { type = 'all' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://www.benghuai.com';
 
     const response = await ofetch(`${baseUrl}/main/getIndexNotice`, {

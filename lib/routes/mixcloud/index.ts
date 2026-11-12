@@ -5,8 +5,17 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getObjectFields, MIXCLOUD_CONFIG, TYPE_CONFIG, TYPE_NAMES } from './config';
+
+const TYPE_OPTIONS = [
+    { value: 'uploads', label: 'Shows' },
+    { value: 'reposts', label: 'Reposts' },
+    { value: 'favorites', label: 'Favorites' },
+    { value: 'listens', label: 'History' },
+    { value: 'stream', label: 'Stream' },
+];
 
 export const route: Route = {
     path: '/:username/:type?',
@@ -14,7 +23,7 @@ export const route: Route = {
     example: '/mixcloud/dholbach/uploads',
     parameters: {
         username: 'Username, can be found in URL',
-        type: 'Type, see below, uploads by default',
+        type: { description: 'Type, see below, uploads by default', options: TYPE_OPTIONS },
     },
     features: {
         requireConfig: false,
@@ -35,9 +44,11 @@ export const route: Route = {
     name: 'User',
     maintainers: ['Misaka13514'],
     handler,
-    description: `| Shows   | Reposts | Favorites | History | Stream |
-| ------- | ------- | --------- | ------- | ------ |
-| uploads | reposts | favorites | listens | stream |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: 'Type',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function callApi(objectType: string, objectFields: string, username: string, slug?: string) {

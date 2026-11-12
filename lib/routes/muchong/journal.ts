@@ -4,20 +4,28 @@ import pMap from 'p-map';
 
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { ContentFetcher } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: '', label: 'SCI 期刊' },
+    { value: 'cn', label: '中文期刊' },
+];
 
 export const route: Route = {
     path: '/journal/:type?',
     categories: ['bbs'],
     example: '/muchong/journal',
-    parameters: { type: '类型，见下表' },
+    parameters: { type: { description: '类型，见下表', options: TYPE_OPTIONS } },
     features: { requirePuppeteer: true, antiCrawler: true },
     name: '期刊点评',
     maintainers: ['nczitzk'],
-    description: `| SCI 期刊 | 中文期刊 |
-| -------- | -------- |
-|          | cn       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
