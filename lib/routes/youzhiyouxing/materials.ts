@@ -6,6 +6,7 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 const columns: Array<{ value: string; label: string }> = [
@@ -88,7 +89,11 @@ export const route: Route = {
     maintainers: ['broven', 'Fatpandac', 'nczitzk'],
     handler,
     url: 'youzhiyouxing.cn/materials',
-    description: ['| 编号 | 栏目 |', '| :--: | :--- |', ...columns.map(({ value, label }) => `| ${value} | ${label} |`)].join('\n'),
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: columns,
+    }),
 };
 
 async function handler(ctx) {

@@ -4,23 +4,35 @@ import type { Context } from 'hono';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { processPages } from '../utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '1', label: '招生工作' },
+    { value: '2', label: '研究生培养' },
+    { value: '3', label: '质量管理' },
+    { value: '4', label: '学位工作' },
+    { value: '5', label: '综合办公室' },
+    { value: '6', label: '相关下载' },
+];
 
 export const route: Route = {
     path: '/grs/qttz/:category',
     categories: ['university'],
     example: '/ynu/grs/qttz/2',
-    parameters: { category: '研究生院通知分类' },
+    parameters: { category: { description: '研究生院通知分类', options: CATEGORY_OPTIONS } },
     features: {
         antiCrawler: true,
     },
     radar: [{ source: ['grs.ynu.edu.cn/*'] }],
     name: '研究生院其他通知',
     maintainers: ['hzcheney'],
-    description: `| 招生工作 | 研究生培养 | 质量管理 | 学位工作 | 综合办公室 | 相关下载 |
-| -------- | ---------- | -------- | -------- | ---------- | -------- |
-| 1        | 2          | 3        | 4        | 5          | 6        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '研究生院通知分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

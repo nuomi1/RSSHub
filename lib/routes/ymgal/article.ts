@@ -6,7 +6,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'all', label: '全部文章' },
+    { value: 'news', label: '资讯' },
+    { value: 'column', label: '专栏' },
+];
+const TYPE_OPTIONS_DEFAULT = 'all';
 
 const host = 'https://www.ymgal.games';
 const types = {
@@ -39,7 +47,7 @@ export const route: Route = {
     path: '/article/:type?',
     categories: ['anime'],
     example: '/ymgal/article',
-    parameters: { type: '文章类型' },
+    parameters: { type: { description: '文章类型', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -51,12 +59,14 @@ export const route: Route = {
     name: '文章',
     maintainers: ['SunBK201'],
     handler,
-    description: `| 全部文章 | 资讯 | 专栏   |
-| -------- | ---- | ------ |
-| all      | news | column |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '文章类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'all';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (type !== 'all' && !Object.hasOwn(types, type)) {
         throw new InvalidParameterError('Invalid article type: use all, news, or column');
     }

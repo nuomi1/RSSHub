@@ -4,23 +4,33 @@ import type { Context } from 'hono';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { processPages } from '../utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '1', label: '教务科' },
+    { value: '2', label: '学籍科' },
+    { value: '3', label: '教学研究科' },
+    { value: '4', label: '实践科学科' },
+];
 
 export const route: Route = {
     path: '/jwc/:category',
     categories: ['university'],
     example: '/ynu/jwc/1',
-    parameters: { category: '教务处通知分类' },
+    parameters: { category: { description: '教务处通知分类', options: CATEGORY_OPTIONS } },
     features: {
         antiCrawler: true,
     },
     radar: [{ source: ['www.jwc.ynu.edu.cn/*'] }],
     name: '教务处主要通知',
     maintainers: ['hzcheney'],
-    description: `| 教务科 | 学籍科 | 教学研究科 | 实践科学科 |
-| ------ | ------ | ---------- | ---------- |
-| 1      | 2      | 3          | 4          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '教务处通知分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 

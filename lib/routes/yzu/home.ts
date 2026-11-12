@@ -1,9 +1,18 @@
 import type { Context } from 'hono';
 
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { fetchList } from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'xxyw', label: '学校要闻' },
+    { value: 'xyxw', label: '校园新闻' },
+    { value: 'xxgg', label: '信息公告' },
+    { value: 'xshd', label: '学术活动' },
+    { value: 'mtyd', label: '媒体扬大' },
+];
 
 const map = new Map([
     ['xxyw', '学校要闻'],
@@ -17,7 +26,7 @@ export const route: Route = {
     path: '/home/:type',
     categories: ['university'],
     example: '/yzu/home/xxyw',
-    parameters: { type: '分类名' },
+    parameters: { type: { description: '分类名', options: TYPE_OPTIONS } },
     features: {
         requirePuppeteer: true,
         antiCrawler: true,
@@ -31,9 +40,11 @@ export const route: Route = {
     name: '官网消息',
     maintainers: ['LogicJake'],
     handler,
-    description: `| 学校要闻 | 校园新闻 | 信息公告 | 学术活动 | 媒体扬大 |
-| -------- | -------- | -------- | -------- | -------- |
-| xxyw     | xyxw     | xxgg     | xshd     | mtyd     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类名',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

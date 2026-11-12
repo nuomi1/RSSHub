@@ -5,6 +5,15 @@ import type { Route } from '@/types';
 import { ViewType } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const PERIOD_OPTIONS = [
+    { value: '1d', label: '最近 24 小时' },
+    { value: '1w', label: '最近一周' },
+    { value: '1m', label: '最近一月' },
+    { value: '1y', label: '最近一年' },
+];
+const PERIOD_OPTIONS_DEFAULT = '1d';
 
 function parseUnixDate(value?: number) {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
@@ -37,13 +46,8 @@ export const route: Route = {
     parameters: {
         period: {
             description: '展示时间',
-            options: [
-                { value: '1d', label: '最近 24 小时' },
-                { value: '1w', label: '最近一周' },
-                { value: '1m', label: '最近一月' },
-                { value: '1y', label: '最近一年' },
-            ],
-            default: '1d',
+            options: PERIOD_OPTIONS,
+            default: PERIOD_OPTIONS_DEFAULT,
         },
     },
     radar: [
@@ -53,16 +57,18 @@ export const route: Route = {
     ],
     name: 'Popular Recent Posts',
     maintainers: ['magic-akari', 'SettingDust', 'fashioncj', 'NekoAria'],
-    description: `| 最近 24 小时 | 最近一周 | 最近一月 | 最近一年 |
-| ------------ | -------- | -------- | -------- |
-| 1d           | 1w       | 1m       | 1y       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'period',
+        description: '展示时间',
+        options: PERIOD_OPTIONS,
+    }),
     handler,
     features: {
         nsfw: true,
     },
 };
 async function handler(ctx) {
-    const { period = '1d' } = ctx.req.param();
+    const { period = PERIOD_OPTIONS_DEFAULT } = ctx.req.param();
     const response = await got({
         url: 'https://yande.re/post/popular_recent.json',
         searchParams: queryString.stringify({

@@ -4,7 +4,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'info', label: '资讯' },
+    { value: 'talking', label: '访谈' },
+    { value: 'service', label: '服务' },
+    { value: 'comments', label: '游理游据' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'info';
 
 const baseUrl = 'http://news.yxrb.net';
 
@@ -12,7 +21,7 @@ export const route: Route = {
     path: '/:category?',
     categories: ['game'],
     example: '/yxrb/info',
-    parameters: { category: '分类，见下表，预设为 `info`' },
+    parameters: { category: { description: '分类，见下表，预设为 `info`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,13 +39,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 资讯 | 访谈    | 服务    | 游理游据 |
-| ---- | ------- | ------- | -------- |
-| info | talking | service | comments |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'info' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${baseUrl}/${category}/`;
     const response = await got(link);
     const $ = load(response.data);

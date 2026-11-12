@@ -4,13 +4,27 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: 'all', label: 'All Jobs' },
+    { value: 'development', label: 'Development' },
+    { value: 'design', label: 'Design' },
+    { value: 'operation', label: 'Operation' },
+    { value: 'product', label: 'Product' },
+    { value: 'function', label: 'Function' },
+    { value: 'other', label: 'Other' },
+    { value: 'marketing', label: 'Marketing' },
+    { value: 'sales', label: 'Sales' },
+];
+const CATY_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/:caty?',
     categories: ['other'],
     example: '/yuancheng.work/all',
-    parameters: { caty: 'Job category, default to all' },
+    parameters: { caty: { description: 'Job category, default to all', options: CATY_OPTIONS, default: CATY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['yuancheng.work/:caty'],
@@ -19,9 +33,11 @@ export const route: Route = {
     ],
     name: 'Remote.work Job Information',
     maintainers: ['luyuhuang'],
-    description: `| All Jobs | Development | Design | Operation | Product | Function | Other | Marketing | Sales |
-| :------: | :---------: | :----: | :-------: | :-----: | :------: | :---: | :-------: | :---: |
-|    all   | development | design | operation | product | function | other | marketing | sales |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: 'Job category',
+        options: CATY_OPTIONS,
+    }),
     handler,
 };
 const rootUrl = 'https://yuancheng.work/';
@@ -35,7 +51,7 @@ function parseGmtDate(value: string | undefined) {
     }
 }
 async function handler(ctx: Context) {
-    const { caty = 'all' } = ctx.req.param();
+    const { caty = CATY_OPTIONS_DEFAULT } = ctx.req.param();
     const requestedLimit = Number(ctx.req.query('limit') ?? 10);
     const limit = Number.isFinite(requestedLimit) && requestedLimit >= 1 ? Math.min(Math.floor(requestedLimit), 100) : 10;
     let category;

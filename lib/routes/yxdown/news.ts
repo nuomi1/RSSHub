@@ -4,15 +4,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { getCookie, rootUrl } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '资讯首页' },
+    { value: 'dongtai', label: '业界动态' },
+    { value: 'yugao', label: '视频预告' },
+    { value: 'xinzuo', label: '新作发布' },
+    { value: 'zixun', label: '游戏资讯' },
+    { value: 'pingce', label: '游戏评测' },
+    { value: 'wangluo', label: '网络游戏' },
+    { value: 'shouyou', label: '手机游戏' },
+];
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['game'],
     example: '/yxdown/news',
-    parameters: { category: '分类，见下表，默认为资讯首页' },
+    parameters: { category: { description: '分类，见下表，默认为资讯首页', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +36,11 @@ export const route: Route = {
     name: '资讯',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 资讯首页 | 业界动态 | 视频预告 | 新作发布 | 游戏资讯 | 游戏评测 | 网络游戏 | 手机游戏 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-|          | dongtai  | yugao    | xinzuo   | zixun    | pingce   | wangluo  | shouyou  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

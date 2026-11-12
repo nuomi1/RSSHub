@@ -3,14 +3,25 @@ import { load } from 'cheerio';
 import type { DataItem, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate, parseRelativeDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchDataItemCached, getArticleList } from './fetcher';
+
+const CATEGORY_OPTIONS = [
+    { value: 'recommend', label: '推游' },
+    { value: 'history', label: '游戏史' },
+    { value: 'big', label: '大事件' },
+    { value: 'culture', label: '文化' },
+    { value: 'news', label: '趣闻' },
+    { value: 'retro', label: '经典回顾' },
+    { value: 'industry', label: '业界' },
+];
 
 export const route: Route = {
     path: '/category/:category',
     categories: ['game'],
     example: '/yystv/category/recommend',
-    parameters: { category: '专栏类型' },
+    parameters: { category: { description: '专栏类型', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +33,11 @@ export const route: Route = {
     name: '分类文章',
     maintainers: ['betta-cyber', 'dousha'],
     handler,
-    description: `| 推游      | 游戏史  | 大事件 | 文化    | 趣闻 | 经典回顾 | 业界     |
-| --------- | ------- | ------ | ------- | ---- | -------- | -------- |
-| recommend | history | big    | culture | news | retro    | industry |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '专栏类型',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 type ArticleEntry = DataItem & { link: string };

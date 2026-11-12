@@ -4,6 +4,15 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'discount', label: 'Steam 最新折扣' },
+    { value: 'popular', label: 'Steam 热门游戏折扣' },
+    { value: 'popular_cn', label: 'Steam 热门中文游戏折扣' },
+    { value: 'low', label: 'Steam 历史低价' },
+    { value: 'low_cn', label: 'Steam 中文游戏历史低价' },
+];
 
 const host = 'https://www.yxdzqb.com';
 
@@ -19,7 +28,7 @@ export const route: Route = {
     path: '/:type',
     categories: ['game'],
     example: '/yxdzqb/popular_cn',
-    parameters: { type: '折扣类型' },
+    parameters: { type: { description: '折扣类型', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,9 +46,11 @@ export const route: Route = {
     maintainers: ['LogicJake', 'nczitzk'],
     handler,
     url: 'yxdzqb.com/',
-    description: `| Steam 最新折扣 | Steam 热门游戏折扣 | Steam 热门中文游戏折扣 | Steam 历史低价 | Steam 中文游戏历史低价 |
-| -------------- | ------------------ | ---------------------- | -------------- | ---------------------- |
-| discount       | popular            | popular\\_cn            | low            | low\\_cn                |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '折扣类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
