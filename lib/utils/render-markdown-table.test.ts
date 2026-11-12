@@ -84,21 +84,21 @@ const INFO_10000LINK_TABLES = `| 金融科技      | 物流          | 供应链
 
 /** Options recovered from those three tables, i.e. the constant the migration is expected to write. */
 const INFO_10000LINK_OPTIONS = [
-    { label: '金融科技', value: 'newsFinancial' },
-    { label: '物流', value: 'newslogistics' },
-    { label: '供应链金融风控', value: 'newsRisk' },
-    { label: '区块链', value: 'newsBlockChain' },
-    { label: 'B2B', value: 'newsBTwoB' },
-    { label: '跨境电商', value: 'newsCrossborder' },
-    { label: '投融资', value: 'newsInvestment' },
-    { label: '供应链管理', value: 'newsManagement' },
-    { label: '供应链创新', value: 'newsInnovation' },
-    { label: '数据', value: 'newslists/A02' },
-    { label: '政策', value: 'newslists/A03' },
-    { label: '规划', value: 'newslists/A04' },
-    { label: '案例', value: 'newslists/GL03' },
-    { label: '职场', value: 'newslists/ZC' },
-    { label: '供应链票据', value: 'newsBill' },
+    { value: 'newsFinancial', label: '金融科技' },
+    { value: 'newslogistics', label: '物流' },
+    { value: 'newsRisk', label: '供应链金融风控' },
+    { value: 'newsBlockChain', label: '区块链' },
+    { value: 'newsBTwoB', label: 'B2B' },
+    { value: 'newsCrossborder', label: '跨境电商' },
+    { value: 'newsInvestment', label: '投融资' },
+    { value: 'newsManagement', label: '供应链管理' },
+    { value: 'newsInnovation', label: '供应链创新' },
+    { value: 'newslists/A02', label: '数据' },
+    { value: 'newslists/A03', label: '政策' },
+    { value: 'newslists/A04', label: '规划' },
+    { value: 'newslists/GL03', label: '案例' },
+    { value: 'newslists/ZC', label: '职场' },
+    { value: 'newsBill', label: '供应链票据' },
 ];
 
 const INFO_10000LINK_TIP = `::: tip
