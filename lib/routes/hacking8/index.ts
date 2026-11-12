@@ -4,13 +4,22 @@ import { html } from 'hono/html';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'likes', label: '推荐' },
+    { value: 'index', label: '最近更新' },
+    { value: 'vul-poc', label: '漏洞 / PoC 监控' },
+    { value: 'pdf', label: 'PDF' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'index';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['programming'],
     example: '/hacking8',
-    parameters: { category: '分类，见下表，默认为最近更新' },
+    parameters: { category: { description: '分类，见下表，默认为最近更新', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,13 +36,15 @@ export const route: Route = {
     name: '信息流',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 推荐  | 最近更新 | 漏洞 / PoC 监控 | PDF |
-| ----- | -------- | --------------- | --- |
-| likes | index    | vul-poc         | pdf |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'index';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://i.hacking8.com';
     const currentUrl = `${rootUrl}/index/${category}`;

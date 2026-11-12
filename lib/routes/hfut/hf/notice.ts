@@ -1,12 +1,20 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import parseList from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告 (<https://news.hfut.edu.cn/tzgg2.htm>)' },
+    { value: 'jxky', label: '教学科研 (<https://news.hfut.edu.cn/tzgg2/jxky.htm>)' },
+    { value: 'qttz', label: '其他通知 (<https://news.hfut.edu.cn/tzgg2/qttz.htm>)' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 export const route: Route = {
     path: '/hf/notice/:type?',
     categories: ['university'],
     example: '/hfut/hf/notice/tzgg',
-    parameters: { type: '分类，见下表（默认为 `tzgg`)' },
+    parameters: { type: { description: '分类，见下表（默认为 `tzgg`)', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,14 +32,16 @@ export const route: Route = {
     name: '合肥校区通知',
     maintainers: ['batemax'],
     handler,
-    description: `| 通知公告 (<https://news.hfut.edu.cn/tzgg2.htm>) | 教学科研 (<https://news.hfut.edu.cn/tzgg2/jxky.htm>) | 其他通知 (<https://news.hfut.edu.cn/tzgg2/qttz.htm>) |
-| ----------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------- |
-| tzgg                                            | jxky                                                 | qttz                                                 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     // set default router type
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
 
     const { link, title, resultList } = await parseList(ctx, type);
 

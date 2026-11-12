@@ -5,14 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { finishArticleItem } from '@/utils/wechat-mp';
+
+const ID_OPTIONS = [
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'kxyj-kydt', label: '科学研究 / 科研动态' },
+];
 
 export const route: Route = {
     path: '/uae/:id',
     categories: ['university'],
     example: '/hrbeu/uae/xwdt',
-    parameters: { id: '栏目编号，在 `URL` 中获取，如果有多级编号，将 `/` 替换为 `-`。' },
+    parameters: { id: { description: '栏目编号，在 `URL` 中获取，如果有多级编号，将 `/` 替换为 `-`。', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,9 +45,11 @@ export const route: Route = {
     name: '水声工程学院',
     maintainers: ['Derekmini'],
     handler,
-    description: `| 新闻动态 | 通知公告 | 科学研究 / 科研动态 |
-| :------: | :------: | :-----------------: |
-|   xwdt   |   tzgg   |      kxyj-kydt      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '栏目编号',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -6,7 +6,21 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '1287', label: '政策规章' },
+    { value: '1288', label: '资料下载' },
+    { value: '1289', label: '处务公开' },
+    { value: '1291', label: '招标信息' },
+    { value: '1300', label: '岗位职责' },
+    { value: '1301', label: '管理办法' },
+    { value: '1302', label: '物资处理' },
+    { value: '1304', label: '工作动态' },
+    { value: '1305', label: '热点新闻' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '1305';
 
 export const route: Route = {
     path: '/gzc/:category?',
@@ -15,10 +29,12 @@ export const route: Route = {
     maintainers: ['cscnk52'],
     handler,
     example: '/hrbust/gzc',
-    parameters: { category: '栏目标识，默认为 1305（热点新闻）' },
-    description: `| 政策规章 | 资料下载 | 处务公开 | 招标信息 | 岗位职责 | 管理办法 | 物资处理 | 工作动态 | 热点新闻 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| 1287     | 1288     | 1289     | 1291     | 1300     | 1301     | 1302     | 1304     | 1305     |`,
+    parameters: { category: { description: '栏目标识，默认为 1305（热点新闻）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目标识',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['university'],
     features: {
         requireConfig: false,
@@ -44,7 +60,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const rootUrl = 'https://gzc.hrbust.edu.cn/';
-    const { category = 1305 } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const columnUrl = `${rootUrl}${category}/list.htm`;
     const response = await ofetch(columnUrl);
     const $ = load(response);

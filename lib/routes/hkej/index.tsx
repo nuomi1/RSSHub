@@ -7,12 +7,27 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'index', label: '全部新闻' },
+    { value: 'stock', label: '港股直擊' },
+    { value: 'hongkong', label: '香港財經' },
+    { value: 'property', label: '地產新聞' },
+    { value: 'china', label: '中國財經' },
+    { value: 'international', label: '國際財經' },
+    { value: 'current', label: '時事脈搏' },
+    { value: 'market', label: '即巿股評' },
+    { value: 'announcement', label: '重要通告' },
+    { value: 'hkex', label: '港交所通告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'index';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['traditional-media'],
     example: '/hkej/index',
-    parameters: { category: '分類，預設為全部新聞' },
+    parameters: { category: { description: '分類，預設為全部新聞', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +45,7 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'hkej.com/',
-    description: `| index    | stock    | hongkong | property | china    | international | current  | market   | announcement | hkex       |
-| -------- | -------- | -------- | -------- | -------- | ------------- | -------- | -------- | ------------ | ---------- |
-| 全部新闻 | 港股直擊 | 香港財經 | 地產新聞 | 中國財經 | 國際財經      | 時事脈搏 | 即巿股評 | 重要通告     | 港交所通告 |`,
+    description: renderOptionsMarkdownTable({ parameter: 'category', description: '分類', options: CATEGORY_OPTIONS }),
 };
 
 function getArticleLink(href: string | undefined, baseUrl: string) {
@@ -49,10 +62,10 @@ function getArticleLink(href: string | undefined, baseUrl: string) {
 }
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'index';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const baseUrl = 'https://www.hkej.com';
 
-    const link = `${baseUrl}/instantnews${category === 'index' ? '' : `/${category}`}`;
+    const link = `${baseUrl}/instantnews${category === CATEGORY_OPTIONS_DEFAULT ? '' : `/${category}`}`;
     const response = await ofetch.raw(link);
     const cookies = response.headers
         .getSetCookie()

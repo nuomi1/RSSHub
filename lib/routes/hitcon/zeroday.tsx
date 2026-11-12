@@ -7,7 +7,16 @@ import type { Data, DataItem, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const STATUS_OPTIONS = [
+    { value: '', label: '活動中' },
+    { value: 'all', label: '全部' },
+    { value: 'closed', label: '關閉' },
+    { value: 'disclosed', label: '公開' },
+    { value: 'patching', label: '修補中' },
+];
 
 export const route: Route = {
     name: '漏洞',
@@ -15,7 +24,7 @@ export const route: Route = {
     path: '/zeroday/vulnerability/:status?',
     example: '/hitcon/zeroday/vulnerability',
     parameters: {
-        status: '漏洞状态，见下表',
+        status: { description: '漏洞状态，见下表', options: STATUS_OPTIONS },
     },
     maintainers: ['KarasuShin'],
     radar: [
@@ -27,9 +36,11 @@ export const route: Route = {
         requirePuppeteer: true,
     },
     handler,
-    description: `| 缺省   | all  | closed | disclosed | patching |
-| ------ | ---- | ------ | --------- | -------- |
-| 活動中 | 全部 | 關閉   | 公開      | 修補中   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'status',
+        description: '漏洞状态',
+        options: STATUS_OPTIONS,
+    }),
 };
 
 const baseUrl = 'https://zeroday.hitcon.org/vulnerability';

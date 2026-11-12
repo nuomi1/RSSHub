@@ -5,7 +5,14 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'sszs', label: '硕士招生' },
+    { value: 'bszs', label: '博士招生' },
+];
+const TYPE_OPTIONS_DEFAULT = 'sszs';
 
 const map = {
     sszs: 'sszs/',
@@ -16,17 +23,19 @@ export const route: Route = {
     path: '/graduate/:type?',
     categories: ['university'],
     example: '/hnust/graduate/sszs',
-    parameters: { type: '默认为 `sszs`' },
+    parameters: { type: { description: '默认为 `sszs`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '研究生院招生工作',
     maintainers: ['Pretty9'],
-    description: `| 硕士招生 | 博士招生 |
-| -------- | -------- |
-| sszs     | bszs     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { type = 'sszs' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid type: expected sszs or bszs.');
     }

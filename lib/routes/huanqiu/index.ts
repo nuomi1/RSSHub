@@ -6,8 +6,18 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import { isValidHost } from '@/utils/valid-host';
+
+const CATEGORY_OPTIONS = [
+    { value: 'china', label: '国内新闻' },
+    { value: 'world', label: '国际新闻' },
+    { value: 'mil', label: '军事' },
+    { value: 'taiwai', label: '台海' },
+    { value: 'opinion', label: '评论' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'china';
 
 interface ChannelNode {
     children?: Record<string, ChannelNode>;
@@ -30,7 +40,7 @@ export const route: Route = {
     path: '/news/:category?',
     categories: ['traditional-media'],
     example: '/huanqiu/news/china',
-    parameters: { category: '类别，可以使用二级域名作为参数，默认为：china' },
+    parameters: { category: { description: '类别，可以使用二级域名作为参数，默认为：china', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -48,13 +58,15 @@ export const route: Route = {
     maintainers: ['yuxinliu-alex'],
     handler,
     url: 'huanqiu.com/',
-    description: `| 国内新闻 | 国际新闻 | 军事 | 台海   | 评论    |
-| -------- | -------- | ---- | ------ | ------- |
-| china    | world    | mil  | taiwai | opinion |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'china';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     if (!isValidHost(category)) {
         throw new InvalidParameterError('Invalid category');
     }

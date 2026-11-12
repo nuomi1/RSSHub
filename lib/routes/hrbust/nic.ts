@@ -6,7 +6,21 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '3982', label: '服务指南' },
+    { value: '3983', label: '常见问题' },
+    { value: '3988', label: '新闻动态' },
+    { value: '3989', label: '通知公告' },
+    { value: '3990', label: '国家政策法规' },
+    { value: '3991', label: '学校规章制度' },
+    { value: '3992', label: '部门规章制度' },
+    { value: '3993', label: '宣传教育' },
+    { value: '3994', label: '安全法规' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '3988';
 
 export const route: Route = {
     path: '/nic/:category?',
@@ -15,10 +29,12 @@ export const route: Route = {
     maintainers: ['cscnk52'],
     handler,
     example: '/hrbust/nic',
-    parameters: { category: '栏目标识，默认为 3988（新闻动态）' },
-    description: `| 服务指南 | 常见问题 | 新闻动态 | 通知公告 | 国家政策法规 | 学校规章制度 | 部门规章制度 | 宣传教育 | 安全法规 |
-| -------- | -------- | -------- | -------- | ------------ | ------------ | ------------ | -------- | -------- |
-| 3982     | 3983     | 3988     | 3989     | 3990         | 3991         | 3992         | 3993     | 3994     |`,
+    parameters: { category: { description: '栏目标识，默认为 3988（新闻动态）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目标识',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['university'],
     features: {
         requireConfig: false,
@@ -44,7 +60,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const rootUrl = 'https://nic.hrbust.edu.cn/';
-    const { category = 3988 } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const columnUrl = `${rootUrl}${category}/list.htm`;
     const response = await ofetch(columnUrl);
     const $ = load(response);

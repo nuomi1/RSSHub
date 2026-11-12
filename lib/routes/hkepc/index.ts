@@ -4,15 +4,29 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { baseUrl, categoryMap } from './data';
+
+const CATEGORY_OPTIONS = [
+    { value: 'coverStory', label: '专题报导' },
+    { value: 'news', label: '新闻中心' },
+    { value: 'review', label: '新品快递' },
+    { value: 'ocLab', label: '超频领域' },
+    { value: 'digital', label: '流动数码' },
+    { value: 'entertainment', label: '生活娱乐' },
+    { value: 'member', label: '会员消息' },
+    { value: 'price', label: '脑场新闻' },
+    { value: 'press', label: '业界资讯' },
+    { value: 'latest', label: '最新消息' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/hkepc/news',
-    parameters: { category: '分类，见下表，默认为最新消息' },
+    parameters: { category: { description: '分类，见下表，默认为最新消息', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +45,11 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'hkepc.com/',
-    description: `| 专题报导   | 新闻中心 | 新品快递 | 超频领域 | 流动数码 | 生活娱乐      | 会员消息 | 脑场新闻 | 业界资讯 | 最新消息 |
-| ---------- | -------- | -------- | -------- | -------- | ------------- | -------- | -------- | -------- | -------- |
-| coverStory | news     | review   | ocLab    | digital  | entertainment | member   | price    | press    | latest   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

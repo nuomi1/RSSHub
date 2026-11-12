@@ -8,9 +8,22 @@ import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { getTenderFeed } from './tender';
+
+const CATEGORY_OPTIONS = [
+    { value: 'id-116', label: '校区要闻' },
+    { value: 'id-80', label: '媒体报道' },
+    { value: 'id-75', label: '综合新闻' },
+    { value: 'id-77', label: '校园动态' },
+    { value: 'id-78', label: '讲座论坛' },
+    { value: 'id-79', label: '热点专题' },
+    { value: 'id-81', label: '招标信息' },
+    { value: 'id-124', label: '重要关注' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'id-77';
 
 function copyElements<T extends AnyNode>(selection: Cheerio<T>): Cheerio<T> {
     const copy = selection.map((_, element) => cloneNode(element, true));
@@ -25,7 +38,7 @@ export const route: Route = {
     path: '/article/:category?',
     categories: ['university'],
     example: '/hitsz/article/id-77',
-    parameters: { category: '分类名，默认为校园动态' },
+    parameters: { category: { description: '分类名，默认为校园动态', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -37,9 +50,11 @@ export const route: Route = {
     name: '新闻中心',
     maintainers: ['xandery-geek'],
     handler,
-    description: `| 校区要闻 | 媒体报道 | 综合新闻 | 校园动态 | 讲座论坛 | 热点专题 | 招标信息 | 重要关注 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| id-116   | id-80    | id-75    | id-77    | id-78    | id-79    | id-81    | id-124   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 const categories = {
@@ -64,7 +79,7 @@ function parseCalendarDate(value: string) {
 
 async function handler(ctx: Context): Promise<Data> {
     const host = 'https://www.hitsz.edu.cn';
-    const category = ctx.req.param('category') ?? 'id-77';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     if (category === 'id-81') {
         return getTenderFeed();
     }

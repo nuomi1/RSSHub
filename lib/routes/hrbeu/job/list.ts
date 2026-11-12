@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { finishArticleItem } from '@/utils/wechat-mp';
 
@@ -21,11 +22,13 @@ const idMap = {
     },
 };
 
+const ID_OPTIONS = Object.entries(idMap).map(([value, item]) => ({ value, label: item.name }));
+
 export const route: Route = {
     path: '/job/list/:id',
     categories: ['university'],
     example: '/hrbeu/job/list/tzgg',
-    parameters: { id: '栏目，如下表' },
+    parameters: { id: { description: '栏目，如下表', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -36,9 +39,11 @@ export const route: Route = {
     },
     name: '就业服务平台',
     maintainers: ['Derekmini'],
-    description: `| 通知公告 | 热点新闻 |
-| :------: | :------: |
-|   tzgg   |   rdxw   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '栏目',
+        options: ID_OPTIONS,
+    }),
     handler,
 };
 

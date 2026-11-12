@@ -5,12 +5,19 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'tzgg', label: '通知公告' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'xwdt';
 
 export const route: Route = {
     path: '/yjsy/:category?',
     categories: ['university'],
     example: '/hljucm/yjsy',
-    parameters: { category: '分类, 见下表，默认为新闻动态' },
+    parameters: { category: { description: '分类, 见下表，默认为新闻动态', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,13 +29,15 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 新闻动态 | 通知公告 |
-| -------- | -------- |
-| xwdt     | tzgg     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'xwdt';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://yjsy.hljucm.net';
     const currentUrl = `${rootUrl}/index/${category}.htm`;

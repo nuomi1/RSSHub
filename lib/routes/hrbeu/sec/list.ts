@@ -5,7 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: 'xyyw', label: '学院要闻' },
+    { value: 'xshd', label: '学术活动' },
+    { value: '229', label: '通知公告' },
+    { value: 'xkfx', label: '学科方向' },
+];
 
 const rootUrl = 'http://sec.hrbeu.edu.cn';
 
@@ -13,7 +21,7 @@ export const route: Route = {
     path: '/sec/:id',
     categories: ['university'],
     example: '/hrbeu/sec/xshd',
-    parameters: { id: '栏目编号，由 `URL` 中获取。' },
+    parameters: { id: { description: '栏目编号，由 `URL` 中获取。', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +38,11 @@ export const route: Route = {
     name: '船舶工程学院',
     maintainers: ['Chi-hong22'],
     handler,
-    description: `| 学院要闻 | 学术活动 | 通知公告 | 学科方向 |
-| :------: | :------: | :------: | :------: |
-|   xyyw   |   xshd   |    229   |   xkfx   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '栏目编号',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

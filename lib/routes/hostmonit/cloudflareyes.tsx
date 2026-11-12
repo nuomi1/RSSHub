@@ -5,8 +5,15 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Language, Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'v4', label: 'v4' },
+    { value: 'v6', label: 'v6' },
+];
+const TYPE_OPTIONS_DEFAULT = 'v4';
 
 const renderTitle = ({ line, latency, loss, speed, node, ip }) =>
     renderToString(
@@ -57,7 +64,7 @@ export const route: Route = {
     path: '/cloudflareyes/:type?',
     categories: ['other'],
     example: '/hostmonit/cloudflareyes',
-    parameters: { type: '类型，见下表，默认为 v4' },
+    parameters: { type: { description: '类型，见下表，默认为 v4', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -69,13 +76,15 @@ export const route: Route = {
     name: 'CloudFlareYes',
     maintainers: ['nczitzk'],
     handler,
-    description: `| v4 | v6 |
-| -- | -- |
-|    | v6 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { type = 'v4' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!['v4', 'v6'].includes(type)) {
         throw new InvalidParameterError('Invalid type: expected v4 or v6.');
     }

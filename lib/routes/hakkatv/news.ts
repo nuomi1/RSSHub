@@ -4,7 +4,16 @@ import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'hakka', label: '客家焦點' },
+    { value: 'political', label: '政經要聞' },
+    { value: 'medical', label: '民生醫療' },
+    { value: 'local', label: '地方風采' },
+    { value: 'international', label: '國際萬象' },
+];
 
 const typeMap = ['hakka', 'political', 'medical', 'local', 'international'];
 const baseUrl = 'https://www.hakkatv.org.tw';
@@ -14,7 +23,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['traditional-media'],
     example: '/hakkatv/news',
-    parameters: { type: '新聞，見下表，留空為全部' },
+    parameters: { type: { description: '新聞，見下表，留空為全部', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +42,11 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'hakkatv.org.tw/news',
-    description: `| 客家焦點 | 政經要聞  | 民生醫療 | 地方風采 | 國際萬象      |
-| -------- | --------- | -------- | -------- | ------------- |
-| hakka    | political | medical  | local    | international |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '新聞',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

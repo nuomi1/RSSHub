@@ -5,12 +5,21 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xxxw', label: '学校新闻' },
+    { value: 'jjxy', label: '菁菁校园' },
+    { value: 'mtjj', label: '媒体聚焦' },
+    { value: 'rwfc', label: '人物风采' },
+];
 
 export const route: Route = {
     path: '/news/:type',
     categories: ['university'],
     example: '/hbut/news/tzgg',
-    parameters: { type: '分类' },
+    parameters: { type: { description: '分类', options: TYPE_OPTIONS } },
     radar: [
         { title: '通知公告', source: ['www.hbut.edu.cn/index/tzgg.htm'], target: '/news/tzgg' },
         { title: '学校新闻', source: ['news.hbut.edu.cn/xxxw.htm'], target: '/news/xxxw' },
@@ -21,9 +30,11 @@ export const route: Route = {
     name: '新闻中心',
     maintainers: ['LandonLi'],
     handler,
-    description: `| 通知公告 | 学校新闻 | 菁菁校园 | 媒体聚焦 | 人物风采 |
-| -------- | -------- | -------- | -------- | -------- |
-| tzgg     | xxxw     | jjxy     | mtjj     | rwfc     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 const map = {

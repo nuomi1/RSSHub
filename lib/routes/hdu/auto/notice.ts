@@ -1,5 +1,6 @@
 import type { Route } from '@/types';
 import logger from '@/utils/logger';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchAutoNews } from './utils';
 
@@ -22,11 +23,14 @@ const typeMap = {
     },
 };
 
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, item]) => ({ value, label: item.name }));
+const TYPE_OPTIONS_DEFAULT = 'notice';
+
 export const route: Route = {
     path: '/auto/:type?',
     categories: ['university'],
     example: '/hdu/auto',
-    parameters: { type: '分类，见下表，默认为通知公告' },
+    parameters: { type: { description: '分类，见下表，默认为通知公告', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,16 +42,18 @@ export const route: Route = {
     name: '自动化学院',
     maintainers: ['jalenzz'],
     handler: (ctx) => {
-        let type = ctx.req.param('type') || 'notice';
+        let type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
         if (!Object.hasOwn(typeMap, type)) {
             logger.error(`Invalid type: ${type}. Valid types are: ${Object.keys(typeMap).join(', ')}, defaulting to notice`);
             type = 'notice';
         }
         return fetchAutoNews(typeMap[type].path, typeMap[type].name);
     },
-    description: `| 通知公告 | 研究生教育 | 本科教学      | 学生工作 |
-| -------- | ---------- | ------------- | -------- |
-| notice   | graduate   | undergraduate | student  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     radar: [
         {
             source: ['auto.hdu.edu.cn/main.htm', 'auto.hdu.edu.cn/3779/list.htm'],

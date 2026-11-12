@@ -1,12 +1,19 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getContent } from './utils/common';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'jwdt', label: '教务动态' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'tzgg';
 
 export const route: Route = {
     path: '/jwc/:category?',
     categories: ['university'],
     example: '/hunau/jwc',
-    parameters: { category: '页面分类，默认为 `tzgg`' },
+    parameters: { category: { description: '页面分类，默认为 `tzgg`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,15 +40,17 @@ export const route: Route = {
     maintainers: ['lcandy2'],
     handler,
     url: 'jwc.hunau.edu.cn/',
-    description: `| 分类 | 通知公告 | 教务动态 | 其他教务通知... |
-| ---- | -------- | -------- | --------------- |
-| 参数 | tzgg     | jwdt     | 对应 URL        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '页面分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     return await getContent(ctx, {
         baseHost: 'https://jwc.hunau.edu.cn',
-        baseCategory: 'tzgg', // Default: notices
+        baseCategory: CATEGORY_OPTIONS_DEFAULT, // Default: notices
         baseTitle: '湖南农业大学教务处',
         baseDeparment: 'jwc',
         baseClass: 'main .collection .single_one:has(a)',

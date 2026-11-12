@@ -5,6 +5,16 @@ import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const GROUP_OPTIONS = [
+    { value: 'ALL', label: '全部' },
+    { value: 'LATEST', label: '最新' },
+    { value: 'ANNOUNCEMENT', label: '公告' },
+    { value: 'ACTIVITY', label: '活动' },
+    { value: 'NEWS', label: '新闻' },
+];
+const GROUP_OPTIONS_DEFAULT = 'ALL';
 
 type NewsItem = {
     cid: string;
@@ -63,7 +73,7 @@ export const route: Route = {
     path: '/arknights/news/:group?',
     categories: ['game'],
     example: '/hypergryph/arknights/news',
-    parameters: { group: '分组，默认为 `ALL`' },
+    parameters: { group: { description: '分组，默认为 `ALL`', options: GROUP_OPTIONS, default: GROUP_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['ak-conf.hypergryph.com/news'],
@@ -73,13 +83,15 @@ export const route: Route = {
     maintainers: ['Astrian'],
     handler,
     url: 'ak-conf.hypergryph.com/news',
-    description: `| 全部 | 最新   | 公告         | 活动     | 新闻 |
-| ---- | ------ | ------------ | -------- | ---- |
-| ALL  | LATEST | ANNOUNCEMENT | ACTIVITY | NEWS |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'group',
+        description: '分组',
+        options: GROUP_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { group = 'ALL' } = ctx.req.param();
+    const { group = GROUP_OPTIONS_DEFAULT } = ctx.req.param();
 
     const initialData: InitialData = await cache.tryGet(
         'hypergryph:arknights:news',

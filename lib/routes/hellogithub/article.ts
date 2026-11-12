@@ -2,6 +2,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 const sorts = {
@@ -9,11 +10,14 @@ const sorts = {
     last: '最近',
 };
 
+const SORT_OPTIONS = Object.entries(sorts).map(([value, label]) => ({ value, label }));
+const SORT_OPTIONS_DEFAULT = 'last';
+
 export const route: Route = {
     path: '/article/:sort?',
     categories: ['programming'],
     example: '/hellogithub/article',
-    parameters: { sort: '排序方式，见下表，默认为 `last`，即最近' },
+    parameters: { sort: { description: '排序方式，见下表，默认为 `last`，即最近', options: SORT_OPTIONS, default: SORT_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,13 +29,15 @@ export const route: Route = {
     name: '文章',
     maintainers: ['moke8', 'nczitzk', 'CaoMeiYouRen'],
     handler,
-    description: `| 热门 | 最近 |
-| ---- | ---- |
-| hot  | last |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'sort',
+        description: '排序方式',
+        options: SORT_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const sort = ctx.req.param('sort') ?? 'last';
+    const sort = ctx.req.param('sort') ?? SORT_OPTIONS_DEFAULT;
     if (!Object.hasOwn(sorts, sort)) {
         throw new InvalidParameterError(`Invalid sort: ${sort}. Supported sorts: ${Object.keys(sorts).join(', ')}.`);
     }

@@ -5,6 +5,15 @@ import type { Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const GROUP_OPTIONS = [
+    { value: 'ALL', label: '全部' },
+    { value: 'notices', label: '公告' },
+    { value: 'events', label: '活动' },
+    { value: 'news', label: '新闻' },
+];
+const GROUP_OPTIONS_DEFAULT = 'ALL';
 
 type NewsItem = {
     cid: string;
@@ -36,7 +45,7 @@ export const route: Route = {
     path: '/endfield/news/:group?',
     categories: ['game'],
     example: '/hypergryph/endfield/news',
-    parameters: { group: '分组，默认为 `ALL`' },
+    parameters: { group: { description: '分组，默认为 `ALL`', options: GROUP_OPTIONS, default: GROUP_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['endfield.hypergryph.com/news'],
@@ -46,13 +55,15 @@ export const route: Route = {
     maintainers: ['E-larex'],
     handler,
     url: 'endfield.hypergryph.com/news',
-    description: `| 全部 | 公告    | 活动   | 新闻 |
-| ---- | ------- | ------ | ---- |
-| ALL  | notices | events | news |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'group',
+        description: '分组',
+        options: GROUP_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { group = 'ALL' } = ctx.req.param();
+    const { group = GROUP_OPTIONS_DEFAULT } = ctx.req.param();
 
     const normalizedGroup = group.toLowerCase();
     const validTabs = new Set(['notices', 'events', 'news']);

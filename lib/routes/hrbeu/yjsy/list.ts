@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '2981', label: '通知公告' },
+    { value: '2980', label: '新闻动态' },
+    { value: '3009', label: '学籍注册' },
+    { value: '3011', label: '奖助学金' },
+    { value: '...', label: '其他' },
+];
 
 const rootUrl = 'http://yjsy.hrbeu.edu.cn';
 
@@ -13,7 +22,7 @@ export const route: Route = {
     path: '/yjsy/list/:id',
     categories: ['university'],
     example: '/hrbeu/yjsy/list/2981',
-    parameters: { id: '栏目编号，由 `URL` 中获取。' },
+    parameters: { id: { description: '栏目编号，由 `URL` 中获取。', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +39,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['Derekmini'],
     handler,
-    description: `| 通知公告 | 新闻动态 | 学籍注册 | 奖助学金 | 其他 |
-| :------: | :------: | :------: | :------: | :--: |
-|   2981   |   2980   |   3009   |   3011   |  ... |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '栏目编号',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

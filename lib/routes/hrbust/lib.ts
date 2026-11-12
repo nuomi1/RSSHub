@@ -6,7 +6,24 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '3421', label: '公告消息' },
+    { value: '3422', label: '资源动态' },
+    { value: 'ckzx', label: '参考中心' },
+    { value: 'cygj', label: '常用工具' },
+    { value: 'wjfw', label: '外借服务' },
+    { value: 'ytjfw', label: '报告厅及研讨间服务' },
+    { value: 'yw', label: '外文引进数据库' },
+    { value: 'yw_3392', label: '外文电子图书' },
+    { value: 'yw_3395', label: '外文试用数据库' },
+    { value: 'zw', label: '中文引进数据库' },
+    { value: 'zw_3391', label: '中文电子图书' },
+    { value: 'zw_3394', label: '中文试用数据库' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '3421';
 
 export const route: Route = {
     path: '/lib/:category?',
@@ -15,10 +32,12 @@ export const route: Route = {
     maintainers: ['cscnk52'],
     handler,
     example: '/hrbust/lib',
-    parameters: { category: '栏目标识，默认为 3421（公告消息）' },
-    description: `| 公告消息 | 资源动态 | 参考中心 | 常用工具 | 外借服务 | 报告厅及研讨间服务 | 外文引进数据库 | 外文电子图书 | 外文试用数据库 | 中文引进数据库 | 中文电子图书 | 中文试用数据库 |
-| -------- | -------- | -------- | -------- | -------- | ------------------ | -------------- | ------------ | -------------- | -------------- | ------------ | -------------- |
-| 3421     | 3422     | ckzx     | cygj     | wjfw     | ytjfw              | yw             | yw\\_3392     | yw\\_3395       | zw             | zw\\_3391     | zw\\_3394       |`,
+    parameters: { category: { description: '栏目标识，默认为 3421（公告消息）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目标识',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['university'],
     features: {
         requireConfig: false,
@@ -44,7 +63,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const rootUrl = 'https://lib.hrbust.edu.cn/';
-    const { category = 3421 } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const columnUrl = `${rootUrl}${category}/list.htm`;
     const response = await ofetch(columnUrl);
     const $ = load(response);

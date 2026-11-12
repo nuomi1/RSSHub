@@ -6,7 +6,30 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'lgyw', label: '理工要闻' },
+    { value: 'xwdd', label: '新闻导读' },
+    { value: 'twbd', label: '图文报道' },
+    { value: 'zhenew', label: '综合新闻' },
+    { value: 'jxky', label: '教学科研' },
+    { value: 'ycdt', label: '院处动态' },
+    { value: 'xskc', label: '学术科创' },
+    { value: 'jlhz', label: '交流合作' },
+    { value: 'xstd', label: '学生天地' },
+    { value: 'zsjy', label: '招生就业' },
+    { value: 'djsz', label: '党建思政' },
+    { value: 'zxbf', label: '在线播放' },
+    { value: 'lgrw', label: '理工人物' },
+    { value: 'lgxb', label: '理工校报' },
+    { value: 'mtlg', label: '媒体理工' },
+    { value: 'jzlt', label: '讲座论坛' },
+    { value: 'rczp', label: '人才招聘' },
+    { value: 'xkjs', label: '学科建设' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'lgyw';
 
 export const route: Route = {
     path: '/news/:category?',
@@ -15,10 +38,12 @@ export const route: Route = {
     maintainers: ['cscnk52'],
     handler,
     example: '/hrbust/news',
-    parameters: { category: '栏目标识，默认为 lgyw（理工要闻）' },
-    description: `| 理工要闻 | 新闻导读 | 图文报道 | 综合新闻 | 教学科研 | 院处动态 | 学术科创 | 交流合作 | 学生天地 | 招生就业 | 党建思政 | 在线播放 | 理工人物 | 理工校报 | 媒体理工 | 讲座论坛 | 人才招聘 | 学科建设 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| lgyw     | xwdd     | twbd     | zhenew   | jxky     | ycdt     | xskc     | jlhz     | xstd     | zsjy     | djsz     | zxbf     | lgrw     | lgxb     | mtlg     | jzlt     | rczp     | xkjs     |`,
+    parameters: { category: { description: '栏目标识，默认为 lgyw（理工要闻）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目标识',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['university'],
     features: {
         requireConfig: false,
@@ -112,7 +137,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const rootUrl = 'https://news.hrbust.edu.cn/';
-    const { category = 'lgyw' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const columnUrl = `${rootUrl}${category}.htm`;
     const response = await ofetch(columnUrl);
     const $ = load(response);
