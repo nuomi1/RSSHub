@@ -4,22 +4,31 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const OS_OPTIONS = [
+    { value: 'mac', label: 'Mac OS' },
+    { value: 'windows', label: 'Windows' },
+];
+const OS_OPTIONS_DEFAULT = 'mac';
 
 export const route: Route = {
     path: '/release-notes/:os?',
     categories: ['program-update'],
     example: '/rescuetime/release-notes',
-    parameters: { os: 'OS id, see below' },
+    parameters: { os: { description: 'OS id, see below', options: OS_OPTIONS, default: OS_OPTIONS_DEFAULT } },
     name: 'Release Notes',
     maintainers: ['nczitzk'],
-    description: `| Mac OS | Windows |
-| ------ | ------- |
-| mac    | windows |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'os',
+        description: 'OS id',
+        options: OS_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { os = 'mac' } = ctx.req.param();
+    const { os = OS_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://www.rescuetime.com/release-notes';
     const currentUrl = `${rootUrl}/${os}`;

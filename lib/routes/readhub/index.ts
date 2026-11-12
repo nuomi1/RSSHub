@@ -3,16 +3,24 @@ import { load } from 'cheerio';
 import type { Language, Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDescription } from './templates/description';
 import { apiTopicUrl, processItems, rootUrl } from './util';
 
+const CATEGORY_OPTIONS = [
+    { value: '', label: '热门话题' },
+    { value: 'news', label: '科技动态' },
+    { value: 'medical', label: '医疗产业' },
+    { value: 'financial_express', label: '财经快讯' },
+];
+
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/readhub',
-    parameters: { category: '分类，见下表，默认为热门话题' },
+    parameters: { category: { description: '分类，见下表，默认为热门话题', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -24,9 +32,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['WhiteWorld', 'nczitzk', 'Fatpandac'],
     handler,
-    description: `| 热门话题 | 科技动态 | 医疗产业 | 财经快讯           |
-| -------- | -------- | -------- | ------------------ |
-|          | news     | medical  | financial\\_express |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

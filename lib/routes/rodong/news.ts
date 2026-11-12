@@ -4,6 +4,14 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const LANGUAGE_OPTIONS = [
+    { value: 'ko', label: '조선어' },
+    { value: 'en', label: 'English' },
+    { value: 'cn', label: '中文' },
+];
+const LANGUAGE_OPTIONS_DEFAULT = 'ko';
 
 const host = 'http://www.rodong.rep.kp';
 const languages = { cn: 'zh-CN', en: 'en', ko: 'ko' } satisfies Record<string, Language>;
@@ -12,7 +20,7 @@ export const route: Route = {
     path: '/news/:language?',
     categories: ['traditional-media'],
     example: '/rodong/news',
-    parameters: { language: 'Language, see below, `ko` by default' },
+    parameters: { language: { description: 'Language, see below, `ko` by default', options: LANGUAGE_OPTIONS, default: LANGUAGE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,13 +38,15 @@ export const route: Route = {
     maintainers: ['TonyRL'],
     handler,
     url: 'rodong.rep.kp/cn/index.php',
-    description: `| 조선어 | English | 中文 |
-| ------ | ------- | ---- |
-| ko     | en      | cn   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: 'Language',
+        options: LANGUAGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { language = 'ko' } = ctx.req.param();
+    const { language = LANGUAGE_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${host}/${language}/index.php?MUBAMkAxQA==`;
     const { data: response } = await got(link);
 

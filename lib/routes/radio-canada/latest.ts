@@ -5,12 +5,25 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const LANGUAGE_OPTIONS = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Español' },
+    { value: 'zh-hans', label: '简体中文' },
+    { value: 'zh-hant', label: '繁體中文' },
+    { value: 'ar', label: 'العربية' },
+    { value: 'pa', label: 'ਪੰਜਾਬੀ' },
+    { value: 'tl', label: 'Tagalog' },
+];
+const LANGUAGE_OPTIONS_DEFAULT = 'en';
 
 export const route: Route = {
     path: '/latest/:language?',
     categories: ['new-media'],
     example: '/radio-canada/latest',
-    parameters: { language: 'Language, see below, English by default' },
+    parameters: { language: { description: 'Language, see below, English by default', options: LANGUAGE_OPTIONS, default: LANGUAGE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,13 +41,15 @@ export const route: Route = {
     name: 'Latest News',
     maintainers: ['nczitzk'],
     handler,
-    description: `| Français | English | Español | 简体中文 | 繁體中文 | العربية | ਪੰਜਾਬੀ | Tagalog |
-| -------- | ------- | ------- | -------- | -------- | ------- | --- | ------- |
-| fr       | en      | es      | zh-hans  | zh-hant  | ar      | pa  | tl      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'language',
+        description: 'Language',
+        options: LANGUAGE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const language = ctx.req.param('language') ?? 'en';
+    const language = ctx.req.param('language') ?? LANGUAGE_OPTIONS_DEFAULT;
 
     const feedLanguages = { en: 'en', fr: 'fr', es: 'es', 'zh-hans': 'zh-CN', 'zh-hant': 'zh-TW' } satisfies Record<string, Language | undefined>;
     const rootUrl = 'https://ici.radio-canada.ca';
