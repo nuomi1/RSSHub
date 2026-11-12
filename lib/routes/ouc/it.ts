@@ -6,13 +6,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '0', label: '学院要闻' },
+    { value: '1', label: '学院公告' },
+    { value: '2', label: '学院活动' },
+];
+const TYPE_OPTIONS_DEFAULT = '0';
 
 export const route: Route = {
     path: '/it/:type?',
     categories: ['university'],
     example: '/ouc/it/0',
-    parameters: { type: '默认为 `0`' },
+    parameters: { type: { description: '默认为 `0`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -31,9 +39,11 @@ export const route: Route = {
     maintainers: ['GeoffreyChen777', '3401797899'],
     handler,
     url: 'it.ouc.edu.cn/',
-    description: `| 学院要闻 | 学院公告 | 学院活动 |
-| -------- | -------- | -------- |
-| 0        | 1        | 2        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -8,9 +8,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import { renderDescription } from './templates/money18';
+
+const ID_OPTIONS = [
+    { value: 'exp', label: '新聞總覽' },
+    { value: 'fov', label: '全日焦點' },
+    { value: 'industry', label: '板塊新聞' },
+    { value: 'int', label: '國際金融' },
+    { value: 'recagent', label: '大行報告' },
+    { value: 'ntlgroup', label: 'A 股新聞' },
+    { value: 'pro', label: '地產新聞' },
+    { value: 'weainvest', label: '投資理財' },
+    { value: 'ipo', label: '新股 IPO' },
+    { value: 'tech', label: '科技財情' },
+];
+const ID_OPTIONS_DEFAULT = 'exp';
 
 dayjs.extend(utc);
 
@@ -31,7 +46,7 @@ export const route: Route = {
     path: '/money18/:id?',
     categories: ['traditional-media'],
     example: '/oncc/money18/exp',
-    parameters: { id: '栏目 id，可在对应栏目页 URL 中找到，默认为 exp，即新聞總覽' },
+    parameters: { id: { description: '栏目 id，可在对应栏目页 URL 中找到，默认为 exp，即新聞總覽', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -43,13 +58,15 @@ export const route: Route = {
     name: 'Money18',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 新聞總覽 | 全日焦點 | 板塊新聞 | 國際金融 | 大行報告 | A 股新聞 | 地產新聞 | 投資理財  | 新股 IPO | 科技財情 |
-| -------- | -------- | -------- | -------- | -------- | -------- | -------- | --------- | -------- | -------- |
-| exp      | fov      | industry | int      | recagent | ntlgroup | pro      | weainvest | ipo      | tech     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '栏目 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? 'exp';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     // oxlint-disable-next-line unicorn/prefer-number-coercion -- Preserve decimal-prefix semantics shared with RSSHub's common limit parser.
     const parsedLimit = Number.parseInt(ctx.req.query('limit') ?? '', 10);
     const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 30;

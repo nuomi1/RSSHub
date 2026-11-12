@@ -3,6 +3,22 @@ import { renderToString } from 'hono/jsx/dom/server';
 
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const LANG_OPTIONS = [
+    { value: 'zh-cn', label: '简体' },
+    { value: 'zh', label: '繁體' },
+    { value: 'en', label: 'EN' },
+];
+const LANG_OPTIONS_DEFAULT = 'zh';
+
+const CATEGORY_OPTIONS = [
+    { value: 'most-bookmarked', label: '最多收藏' },
+    { value: 'best-rating', label: '每周最高评分' },
+    { value: 'most-popular', label: '最高浏览' },
+    { value: 'best-dessert', label: '最佳甜品餐厅' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'most-bookmarked';
 
 const baseUrl = 'https://www.openrice.com';
 
@@ -12,20 +28,27 @@ export const route: Route = {
     handler,
     categories: ['shopping'],
     example: '/openrice/zh/hongkong/explore/chart/most-bookmarked',
-    parameters: { lang: '语言，缺省为 zh', category: '类别，缺省为 most-bookmarked' },
+    parameters: {
+        lang: { description: '语言，缺省为 zh', options: LANG_OPTIONS, default: LANG_OPTIONS_DEFAULT },
+        category: { description: '类别，缺省为 most-bookmarked', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT },
+    },
     name: '香港餐廳排行榜',
-    description: `| 简体  | 繁體 | EN |
-| ----- | ---- | -- |
-| zh-cn | zh   | en |
+    description: `${renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: '语言',
+        options: LANG_OPTIONS,
+    })}
 
-| 最多收藏        | 每周最高评分 | 最高浏览     | 最佳甜品餐厅 |
-| --------------- | ------------ | ------------ | ------------ |
-| most-bookmarked | best-rating  | most-popular | best-dessert |`,
+${renderOptionsMarkdownTable({
+    parameter: 'category',
+    description: '类别',
+    options: CATEGORY_OPTIONS,
+})}`,
 };
 
 async function handler(ctx) {
-    const lang = ctx.req.param('lang') ?? 'zh';
-    const category = ctx.req.param('category') ?? 'most-bookmarked';
+    const lang = ctx.req.param('lang') ?? LANG_OPTIONS_DEFAULT;
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const urlPath = `/${lang}/hongkong/explore/chart/${category}`;
     const response = await ofetch(baseUrl + urlPath);

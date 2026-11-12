@@ -1,7 +1,15 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { renderDescription } from './templates/description';
+
+const LANG_OPTIONS = [
+    { value: 'zh-cn', label: '简体' },
+    { value: 'zh', label: '繁體' },
+    { value: 'en', label: 'EN' },
+];
+const LANG_OPTIONS_DEFAULT = 'zh';
 
 const baseUrl = 'https://www.openrice.com';
 
@@ -11,15 +19,17 @@ export const route: Route = {
     handler,
     categories: ['shopping'],
     example: '/openrice/zh/hongkong/offers',
-    parameters: { lang: '语言，缺省为 zh' },
+    parameters: { lang: { description: '语言，缺省为 zh', options: LANG_OPTIONS, default: LANG_OPTIONS_DEFAULT } },
     name: '香港餐廳精選優惠券',
-    description: `| 简体  | 繁體 | EN |
-| ----- | ---- | -- |
-| zh-cn | zh   | en |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: '语言',
+        options: LANG_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const lang = ctx.req.param('lang') ?? 'zh';
+    const lang = ctx.req.param('lang') ?? LANG_OPTIONS_DEFAULT;
 
     const apiPath = '/api/offers';
     let urlPath: string;

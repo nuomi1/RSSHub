@@ -5,13 +5,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: 'xwdt', label: '新闻动态' },
+    { value: 'tzgg', label: '学院活动' },
+    { value: '21758', label: '奖助工作获奖情况' },
+];
+const ID_OPTIONS_DEFAULT = 'xwdt';
 
 export const route: Route = {
     path: '/it/tx/:id?',
     categories: ['university'],
     example: '/ouc/it/tx/xwdt',
-    parameters: { id: '默认为 `xwdt`，id过多，这里只举几个例' },
+    parameters: { id: { description: '默认为 `xwdt`，id过多，这里只举几个例', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,14 +38,16 @@ export const route: Route = {
     maintainers: ['3401797899'],
     handler,
     url: 'it.ouc.edu.cn/',
-    description: `| 新闻动态 | 学院活动 | 奖助工作获奖情况 |
-| -------- | -------- | ---------------- |
-| xwdt     | tzgg     | 21758            |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '编号',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const host = 'https://it.ouc.edu.cn';
-    const id = ctx.req.param('id') || 'xwdt';
+    const id = ctx.req.param('id') || ID_OPTIONS_DEFAULT;
     const link = `${host}/tx/${id}/list.htm`;
     const response = await got(link);
     const $ = load(response.data);
