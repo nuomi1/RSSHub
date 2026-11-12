@@ -6,23 +6,36 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATY_OPTIONS = [
+    { value: '1', label: '新闻动态' },
+    { value: '2', label: '协会动态' },
+    { value: '3', label: '通知公告' },
+    { value: '5', label: '会员风采' },
+    { value: '14', label: '政策法规' },
+    { value: '18', label: '电商资讯' },
+];
+const CATY_OPTIONS_DEFAULT = '1';
 
 export const route: Route = {
     path: '/:caty?',
     categories: ['government'],
     example: '/qzcea',
-    parameters: { caty: '分类 id，默认为 `1`' },
+    parameters: { caty: { description: '分类 id，默认为 `1`', options: CATY_OPTIONS, default: CATY_OPTIONS_DEFAULT } },
     name: '新闻动态',
     maintainers: ['nczitzk'],
-    description: `| 新闻动态 | 协会动态 | 通知公告 | 会员风采 | 政策法规 | 电商资讯 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| 1        | 2        | 3        | 5        | 14       | 18       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '分类 id',
+        options: CATY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { caty = '1' } = ctx.req.param();
+    const { caty = CATY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'http://www.qzcea.org';
     const currentUrl = `${rootUrl}/usernewscatname_nc${caty}`;

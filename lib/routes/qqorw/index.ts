@@ -6,14 +6,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { isValidHost } from '@/utils/valid-host';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '首页' },
+    { value: 'mrzb', label: '每日早报' },
+    { value: 'zbapp', label: '国际早报' },
+    { value: 'zbzzd', label: '生活冷知识' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/qqorw',
-    parameters: { category: '分类，见下表，默认为首页' },
+    parameters: { category: { description: '分类，见下表，默认为首页', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +38,11 @@ export const route: Route = {
     name: '每日早报',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 首页 | 每日早报 | 国际早报 | 生活冷知识 |
-| ---- | -------- | -------- | ---------- |
-|      | mrzb     | zbapp    | zbzzd      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

@@ -3,14 +3,20 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fixImg, newsUrl, siteIcon } from './utils';
+
+const LANG_OPTIONS = [
+    { value: '', label: '中文' },
+    { value: 'en', label: 'English' },
+];
 
 export const route: Route = {
     path: '/news/:lang?',
     categories: ['anime'],
     example: '/qoo-app/news/en',
-    parameters: { lang: 'Language, see the table below, empty means `中文`' },
+    parameters: { lang: { description: 'Language, see the table below, empty means `中文`', options: LANG_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +28,11 @@ export const route: Route = {
     name: 'News',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 中文 | English |
-| ---- | ------- |
-|      | en      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'lang',
+        description: '语言',
+        options: LANG_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

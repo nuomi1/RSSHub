@@ -6,13 +6,22 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import parser from '@/utils/rss-parser';
+
+const CATEGORY_OPTIONS = [
+    { value: '资讯', label: '资讯' },
+    { value: 'ebandeng', label: '数码' },
+    { value: 'auto', label: '智能车' },
+    { value: 'zhiku', label: '智库' },
+    { value: 'huodong', label: '活动' },
+];
 
 export const route: Route = {
     path: '/category/:category',
     categories: ['new-media'],
     example: '/qbitai/category/资讯',
-    parameters: { category: '分类名，见下表' },
+    parameters: { category: { description: '分类名，见下表', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,9 +38,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['FuryMartin', 'Geraldxm'],
     handler,
-    description: `| 资讯 | 数码     | 智能车 | 智库  | 活动    |
-| ---- | -------- | ------ | ----- | ------- |
-| 资讯 | ebandeng | auto   | zhiku | huodong |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 export async function getItems(feed: Awaited<ReturnType<typeof parser.parseURL>>) {

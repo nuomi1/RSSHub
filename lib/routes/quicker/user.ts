@@ -4,14 +4,21 @@ import pMap from 'p-map';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseDateText } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'Actions', label: '动作' },
+    { value: 'SubPrograms', label: '子程序' },
+    { value: 'ActionLists', label: '动作单' },
+];
 
 export const route: Route = {
     path: '/user/:category/:id',
     categories: ['programming'],
     example: '/quicker/user/Actions/3-CL',
-    parameters: { category: '分类，见下表', id: '用户 id，可在对应用户页 URL 中找到' },
+    parameters: { category: { description: '分类，见下表', options: CATEGORY_OPTIONS }, id: '用户 id，可在对应用户页 URL 中找到' },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,9 +30,11 @@ export const route: Route = {
     name: '用户更新',
     maintainers: ['Cesaryuan', 'nczitzk'],
     handler,
-    description: `| 动作    | 子程序      | 动作单      |
-| ------- | ----------- | ----------- |
-| Actions | SubPrograms | ActionLists |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

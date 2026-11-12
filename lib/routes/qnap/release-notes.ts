@@ -7,17 +7,33 @@ import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
 import { getPlaywrightPage, type Page } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [
+    { value: 'qts', label: 'QTS' },
+    { value: 'quts_hero', label: 'QuTS hero' },
+    { value: 'qutscloud', label: 'QuTScloud' },
+    { value: 'qss', label: 'QSS' },
+    { value: 'quwan_orchestrator', label: 'QuWAN Orchestrator' },
+    { value: 'qes', label: 'QES' },
+    { value: 'qvp', label: 'QVP' },
+    { value: 'qurouter', label: 'QuRouter' },
+    { value: 'tas', label: 'TAS' },
+    { value: 'afobot', label: 'AfoBot' },
+];
 
 export const route: Route = {
     path: '/release-notes/:id',
     categories: ['program-update'],
     example: '/qnap/release-notes/qts',
-    parameters: { id: 'OS id, see below' },
+    parameters: { id: { description: 'OS id, see below', options: ID_OPTIONS } },
     name: 'Release Notes',
     maintainers: ['nczitzk'],
-    description: `| QTS | QuTS hero  | QuTScloud | QSS | QuWAN Orchestrator  | QES | QVP | QuRouter | TAS | AfoBot |
-| --- | ---------- | --------- | --- | ------------------- | --- | --- | -------- | --- | ------ |
-| qts | quts\\_hero | qutscloud | qss | quwan\\_orchestrator | qes | qvp | qurouter | tas | afobot |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: 'OS id',
+        options: ID_OPTIONS,
+    }),
     handler,
     features: { requirePuppeteer: true },
 };

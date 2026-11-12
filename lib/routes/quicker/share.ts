@@ -4,14 +4,26 @@ import pMap from 'p-map';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseDateText } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'Recent', label: '动作库最新更新' },
+    { value: 'Recommended', label: '动作库最多赞' },
+    { value: 'NewActions', label: '动作库新动作' },
+    { value: 'RecentLiked', label: '动作库最近赞' },
+    { value: 'SubPrograms', label: '子程序' },
+    { value: 'PowerKeys', label: '扩展热键' },
+    { value: 'TextCommands', label: '文本指令' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'Recent';
 
 export const route: Route = {
     path: '/share/:category?',
     categories: ['programming'],
     example: '/quicker/share/Recent',
-    parameters: { category: '分类，见下表，默认为动作库最新更新' },
+    parameters: { category: { description: '分类，见下表，默认为动作库最新更新', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -28,19 +40,17 @@ export const route: Route = {
     name: '动作分享',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 动作库最新更新 | 动作库最多赞 | 动作库新动作 | 动作库最近赞 |
-| -------------- | ------------ | ------------ | ------------ |
-| Recent         | Recommended  | NewActions   | RecentLiked  |
-
-| 子程序      | 扩展热键  | 文本指令     |
-| ----------- | --------- | ------------ |
-| SubPrograms | PowerKeys | TextCommands |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const requestedLimit = Number(ctx.req.query('limit'));
     const limit = Number.isSafeInteger(requestedLimit) && requestedLimit > 0 ? requestedLimit : 25;
-    const category = ctx.req.param('category') ?? 'Recent';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://getquicker.net';
     const currentUrl = `${rootUrl}/Share/${category}`;

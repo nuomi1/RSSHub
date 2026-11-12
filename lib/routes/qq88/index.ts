@@ -5,12 +5,20 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '首页' },
+    { value: '10', label: 'オトナの土ドラ' },
+    { value: '5', label: '日剧' },
+    { value: '11', label: '日剧 SP' },
+];
 
 export const route: Route = {
     path: '/:category?',
     categories: ['multimedia'],
     example: '/qq88',
-    parameters: { category: '分类 id，见下表，默认为首页' },
+    parameters: { category: { description: '分类 id，见下表，默认为首页', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +30,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 首页 | オトナの土ドラ | 日剧 | 日剧 SP |
-| ---- | -------------- | ---- | ------- |
-|      | 10             | 5    | 11      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类 id',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

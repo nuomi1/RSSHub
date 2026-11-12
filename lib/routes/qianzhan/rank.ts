@@ -5,13 +5,19 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'week', label: '周排行' },
+    { value: 'month', label: '月排行' },
+];
 
 export const route: Route = {
     path: '/analyst/rank/:type?',
     categories: ['finance'],
     example: '/qianzhan/analyst/rank/week',
-    parameters: { type: '分类，见下表' },
+    parameters: { type: { description: '分类，见下表', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -30,9 +36,11 @@ export const route: Route = {
     maintainers: ['moke8'],
     handler,
     url: 'qianzhan.com/analyst',
-    description: `| 周排行 | 月排行 |
-| ------ | ------ |
-| week   | month  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

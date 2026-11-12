@@ -5,13 +5,28 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'jdxw', label: '健康焦点' },
+    { value: 'hydt', label: '行业动态' },
+    { value: 'yxqy', label: '医学前沿' },
+    { value: 'fgdt', label: '法规动态' },
+    { value: 'spaq', label: '食品安全' },
+    { value: 'ylsg', label: '医疗事故' },
+    { value: 'yyhz', label: '医药会展' },
+    { value: 'yyxx', label: '医药信息' },
+    { value: 'zhuanti', label: '新闻专题' },
+    { value: 'xyxw', label: '行业新闻' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'jdxw';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['new-media'],
     example: '/qm120/news',
-    parameters: { category: '分类，见下表，默认为健康焦点' },
+    parameters: { category: { description: '分类，见下表，默认为健康焦点', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,21 +44,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'qm120.com/',
-    description: `| 健康焦点 | 行业动态 | 医学前沿 | 法规动态 |
-| -------- | -------- | -------- | -------- |
-| jdxw     | hydt     | yxqy     | fgdt     |
-
-| 食品安全 | 医疗事故 | 医药会展 | 医药信息 |
-| -------- | -------- | -------- | -------- |
-| spaq     | ylsg     | yyhz     | yyxx     |
-
-| 新闻专题 | 行业新闻 |
-| -------- | -------- |
-| zhuanti  | xyxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? 'jdxw';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://www.qm120.com';
     const currentUrl = `${rootUrl}/news/${category}`;

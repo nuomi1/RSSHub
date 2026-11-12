@@ -3,7 +3,15 @@ import { load } from 'cheerio';
 import type { Data, DataItem, Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CHANNEL_OPTIONS = [
+    { value: '1', label: '国内召回新闻' },
+    { value: '2', label: '国内召回公告' },
+    { value: '3', label: '国外召回新闻' },
+    { value: '4', label: '国外召回公告' },
+];
 
 const baseUrl = 'https://www.qiche365.org.cn';
 
@@ -11,10 +19,12 @@ export const route: Route = {
     path: '/recall/:channel',
     name: '汽车召回',
     example: '/qiche365/recall/1',
-    parameters: { channel: '频道，见下表' },
-    description: `| 国内召回新闻 | 国内召回公告 | 国外召回新闻 | 国外召回公告 |
-| ------------ | ------------ | ------------ | ------------ |
-| 1            | 2            | 3            | 4            |`,
+    parameters: { channel: { description: '频道，见下表', options: CHANNEL_OPTIONS } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '频道',
+        options: CHANNEL_OPTIONS,
+    }),
     categories: ['government'],
     features: {
         antiCrawler: true,

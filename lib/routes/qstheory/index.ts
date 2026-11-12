@@ -4,8 +4,29 @@ import pMap from 'p-map';
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl as rootUrl, getItem } from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'toutiao', label: '头条' },
+    { value: 'qswp', label: '网评' },
+    { value: 'qssp', label: '视频' },
+    { value: 'qslgxd', label: '原创' },
+    { value: 'economy', label: '经济' },
+    { value: 'politics', label: '政治' },
+    { value: 'culture', label: '文化' },
+    { value: 'society', label: '社会' },
+    { value: 'cpc', label: '党建' },
+    { value: 'science', label: '科教' },
+    { value: 'zoology', label: '生态' },
+    { value: 'defense', label: '国防' },
+    { value: 'international', label: '国际' },
+    { value: 'books', label: '图书' },
+    { value: 'xxbj', label: '学习笔记' },
+    { value: 'llwx', label: '理论文选' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'toutiao';
 
 const config = {
     toutiao: {
@@ -78,7 +99,7 @@ export const route: Route = {
     path: '/:category?',
     categories: ['traditional-media'],
     example: '/qstheory',
-    parameters: { category: '分类，见下表' },
+    parameters: { category: { description: '分类，见下表', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     radar: [
         {
             source: ['www.qstheory.cn/v9zhuanqu/:category/index.htm', 'www.qstheory.cn/qszq/:category/index.htm', 'www.qstheory.cn/:category/index.htm'],
@@ -87,13 +108,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 头条    | 网评 | 视频 | 原创   | 经济    | 政治     | 文化    | 社会    | 党建 | 科教    | 生态    | 国防    | 国际          | 图书  | 学习笔记 | 理论文选 |
-| ------- | ---- | ---- | ------ | ------- | -------- | ------- | ------- | ---- | ------- | ------- | ------- | ------------- | ----- | -------- | -------- |
-| toutiao | qswp | qssp | qslgxd | economy | politics | culture | society | cpc  | science | zoology | defense | international | books | xxbj     | llwx     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = 'toutiao' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const requestedLimit = Number(ctx.req.query('limit'));
     const limit = Number.isSafeInteger(requestedLimit) && requestedLimit > 0 ? requestedLimit : 50;
 
