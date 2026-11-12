@@ -5,6 +5,7 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
@@ -18,15 +19,18 @@ const titles = {
     '07': '图片新闻',
     '08': '视频中心',
     '09': '港澳研究',
-    10: '最新书讯',
-    11: '研究资讯',
+    '10': '最新书讯',
+    '11': '研究资讯',
 };
+
+const CATEGORY_OPTIONS = Object.entries(titles).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = '03';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/cahkms',
-    parameters: { category: '分类，见下表，默认为重要新闻' },
+    parameters: { category: { description: '分类，见下表，默认为重要新闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -44,17 +48,15 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'cahkms.org/',
-    description: `| 关于我们 | 港澳新闻 | 重要新闻 | 顾问点评、会员观点 | 专题汇总 |
-| -------- | -------- | -------- | ------------------ | -------- |
-| 01       | 02       | 03       | 04                 | 05       |
-
-| 港澳时评 | 图片新闻 | 视频中心 | 港澳研究 | 最新书讯 | 研究资讯 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| 06       | 07       | 08       | 09       | 10       | 11       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? '03';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://www.cahkms.org';
     const webpageUrl = `${rootUrl}/HKMAC/webView/mc/AboutUs_1.html`;

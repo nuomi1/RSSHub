@@ -4,8 +4,26 @@ import type { Data, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'real', label: '即時' },
+    { value: 'weather', label: '氣象' },
+    { value: 'politics', label: '政治' },
+    { value: 'international', label: '國際' },
+    { value: 'society', label: '社會' },
+    { value: 'sports', label: '運動' },
+    { value: 'life', label: '生活' },
+    { value: 'money', label: '財經' },
+    { value: 'taiwanese', label: '台語' },
+    { value: 'local', label: '地方' },
+    { value: 'pr', label: '產業' },
+    { value: 'general', label: '綜合' },
+    { value: 'arts', label: '藝文' },
+    { value: 'entertain', label: '娛樂' },
+];
 
 type NewsArticle = {
     title: string;
@@ -31,7 +49,7 @@ export const route: Route = {
     path: '/:category',
     categories: ['traditional-media'],
     example: '/cts/real',
-    parameters: { category: '类别' },
+    parameters: { category: { description: '类别', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -56,9 +74,11 @@ export const route: Route = {
     name: '新聞',
     maintainers: ['miles170'],
     handler,
-    description: `| 即時 | 氣象    | 政治     | 國際          | 社會    | 運動   | 生活 | 財經  | 台語      | 地方  | 產業 | 綜合    | 藝文 | 娛樂      |
-| ---- | ------- | -------- | ------------- | ------- | ------ | ---- | ----- | --------- | ----- | ---- | ------- | ---- | --------- |
-| real | weather | politics | international | society | sports | life | money | taiwanese | local | pr   | general | arts | entertain |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx): Promise<Data> {

@@ -2,7 +2,18 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const CATEGORY_OPTIONS = [
+    { value: '0', label: '全部' },
+    { value: '1', label: '要闻' },
+    { value: '2', label: '商业' },
+    { value: '3', label: '快讯' },
+    { value: '8', label: '财富' },
+    { value: '6', label: '生活' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '0';
 
 // Reason: preserve original category numbers for backward compatibility.
 // WordPress category ids from REST API (GET /wp-json/wp/v2/categories).
@@ -21,7 +32,7 @@ export const route: Route = {
     path: '/:category?',
     categories: ['new-media'],
     example: '/caus',
-    parameters: { category: '分类，见下表，默认为全部' },
+    parameters: { category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +44,11 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk', 'pseudoyu'],
     handler,
-    description: `| 全部 | 要闻 | 商业 | 快讯 | 财富 | 生活 |
-| ---- | ---- | ---- | ---- | ---- | ---- |
-| 0    | 1    | 2    | 3    | 8    | 6    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 interface PostsQuery {
@@ -45,7 +58,7 @@ interface PostsQuery {
 }
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') || '0';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
     if (!Object.hasOwn(categories, category)) {
         throw new InvalidParameterError(`Unknown category "${category}". Supported categories are ${Object.keys(categories).join(', ')}.`);
     }

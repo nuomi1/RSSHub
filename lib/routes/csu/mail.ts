@@ -4,7 +4,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: '01', label: '校长信箱' },
+    { value: '02', label: '党委信箱' },
+];
+const TYPE_OPTIONS_DEFAULT = '01';
 
 async function fetch(address) {
     const res = await got(address);
@@ -17,7 +24,7 @@ export const route: Route = {
     path: '/mail/:type?',
     categories: ['university'],
     example: '/csu/mail',
-    parameters: { type: '类型' },
+    parameters: { type: { description: '类型', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -29,14 +36,16 @@ export const route: Route = {
     name: '校长信箱',
     maintainers: ['j1g5awi'],
     handler,
-    description: `| 类型 | 校长信箱 | 党委信箱 |
-| ---- | -------- | -------- |
-| 参数 | 01       | 02       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const baseUrl = 'https://oa.csu.edu.cn';
-    const { type = '01' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     const link = `${baseUrl}/mailbox/NoAuth/MailList_Pub?tp=${type}`;
 
     const response = await got.post(`${baseUrl}/mailbox/NoAuth/Get_MailList_Pub`, {

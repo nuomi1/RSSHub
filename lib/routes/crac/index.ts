@@ -4,12 +4,24 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const TYPE_OPTIONS = [
+    { value: '1', label: '新闻动态' },
+    { value: '2', label: '通知公告' },
+    { value: '3', label: '政策法规' },
+    { value: '5', label: '常见问题' },
+    { value: '6', label: '资料下载' },
+    { value: '7', label: 'English' },
+    { value: '8', label: '业余中继台' },
+    { value: '9', label: '科普专栏' },
+];
 
 export const route: Route = {
     path: '/:type?',
     categories: ['government'],
     example: '/crac/2',
-    parameters: { type: '类型，见下表，默认为全部' },
+    parameters: { type: { description: '类型，见下表，默认为全部', options: TYPE_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,9 +33,11 @@ export const route: Route = {
     name: '最新资讯',
     maintainers: ['Misaka13514'],
     handler,
-    description: `| 新闻动态 | 通知公告 | 政策法规 | 常见问题 | 资料下载 | English | 业余中继台 | 科普专栏 |
-| -------- | -------- | -------- | -------- | -------- | ------- | ---------- | -------- |
-| 1        | 2        | 3        | 5        | 6        | 7       | 8          | 9        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     radar: [
         {
             source: ['www.crac.org.cn/', 'www.crac.org.cn/News/*'],

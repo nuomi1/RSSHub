@@ -5,23 +5,42 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: 'bwzq', label: '本网专区' },
+    { value: 'newsyw', label: '要闻' },
+    { value: 'domestic', label: '国内' },
+    { value: 'internal', label: '国际' },
+    { value: 'company', label: '企业' },
+    { value: 'brand', label: '品牌' },
+    { value: 'trade', label: '外贸' },
+    { value: 'policy', label: '政策' },
+    { value: 'Technology', label: '科技' },
+    { value: 'fashion', label: '流行' },
+    { value: 'apparel', label: '服装' },
+    { value: 'hometex', label: '家纺' },
+];
+const ID_OPTIONS_DEFAULT = 'bwzq';
 
 export const route: Route = {
     path: '/news/:id?',
     categories: ['new-media'],
     example: '/ctei/news/bwzq',
-    parameters: { id: '分类 id，可在分类页的 URL 中找到，默认为本网专区' },
+    parameters: { id: { description: '分类 id，可在分类页的 URL 中找到，默认为本网专区', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     name: '资讯',
     maintainers: ['nczitzk'],
-    description: `| 要闻   | 国内     | 国际     | 企业    | 品牌  | 外贸  | 政策   | 科技       | 流行    | 服装    | 家纺    |
-| ------ | -------- | -------- | ------- | ----- | ----- | ------ | ---------- | ------- | ------- | ------- |
-| newsyw | domestic | internal | company | brand | trade | policy | Technology | fashion | apparel | hometex |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { id = 'bwzq' } = ctx.req.param();
+    const { id = ID_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'http://news.ctei.cn';
     const currentUrl = `${rootUrl}/${id}/`;

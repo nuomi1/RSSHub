@@ -5,7 +5,14 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notify', label: '通知公告' },
+    { value: 'academiceve', label: '学术活动公告' },
+];
+const TYPE_OPTIONS_DEFAULT = 'academiceve';
 
 const host = 'https://www.cqwu.edu.cn';
 const map = {
@@ -21,7 +28,7 @@ export const route: Route = {
     path: '/news/:type?',
     categories: ['university'],
     example: '/cqwu/news/academiceve',
-    parameters: { type: '可选，默认为 academiceve ' },
+    parameters: { type: { description: '可选，默认为 academiceve ', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,13 +40,15 @@ export const route: Route = {
     name: '通知公告',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 通知公告 | 学术活动公告 |
-| -------- | ------------ |
-| notify   | academiceve  |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'academiceve';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid type. Use notify or academiceve.');
     }

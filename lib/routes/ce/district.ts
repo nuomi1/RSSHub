@@ -7,7 +7,18 @@ import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'roll', label: '即时新闻' },
+    { value: 'jjdt', label: '经济动态' },
+    { value: 'poll', label: '独家视角' },
+    { value: 'ch', label: '专题' },
+    { value: 'ssdf', label: '数说地方' },
+    { value: 'dfbb', label: '地方播报' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'roll';
 
 export const route: Route = {
     path: '/district/:category?',
@@ -16,10 +27,12 @@ export const route: Route = {
     maintainers: ['cscnk52'],
     handler,
     example: '/ce/district',
-    parameters: { category: '栏目标识，默认为 roll（即时新闻）' },
-    description: `| 即时新闻 | 经济动态 | 独家视角 | 专题 | 数说地方 | 地方播报 |
-| -------- | -------- | -------- | ---- | -------- | -------- |
-| roll     | jjdt     | poll     | ch   | ssdf     | dfbb     |`,
+    parameters: { category: { description: '栏目标识，默认为 roll（即时新闻）', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '栏目标识',
+        options: CATEGORY_OPTIONS,
+    }),
     categories: ['traditional-media'],
     features: {
         requireConfig: false,
@@ -49,7 +62,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const rootUrl = 'http://district.ce.cn/';
-    const { category = 'roll' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     if (category === 'zg' || category === 'gat') {
         throw new NotFoundError('This district category has been retired. Choose roll, jjdt, poll, ch, ssdf or dfbb.');
     }

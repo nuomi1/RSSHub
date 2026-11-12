@@ -6,8 +6,14 @@ import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATE_OPTIONS = [
+    { value: 'jstz', label: '教师通知' },
+    { value: 'yjstz', label: '研究生通知' },
+];
 
 const host = 'https://yjsy.cjlu.edu.cn/';
 
@@ -62,9 +68,11 @@ export const route: Route = {
     name: '研究生院',
     maintainers: ['chrisis58'],
     handler,
-    description: `| 研究生通知 | 教师通知 |
-| ---------- | -------- |
-| yjstz      | jstz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'cate',
+        description: '订阅的类型',
+        options: CATE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

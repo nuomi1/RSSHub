@@ -3,14 +3,26 @@ import { load } from 'cheerio';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const PROGRAM_OPTIONS = [
+    { value: 'ysjsl', label: '有色金属类' },
+    { value: 'hsjsl', label: '黑色金属类' },
+    { value: 'nyhgl', label: '能源化工类' },
+    { value: 'gjsl', label: '贵金属类' },
+    { value: 'ncpl', label: '农产品类' },
+    { value: 'jrl', label: '金融类' },
+    { value: 'zsl', label: '指数类' },
+];
+const PROGRAM_OPTIONS_DEFAULT = '分析师园地';
 
 export const route: Route = {
     path: '/servicesupport/analygarden/:program?',
     categories: ['other'],
     example: '/cfachina/servicesupport/analygarden',
-    parameters: { program: '分类，见下表，留空为全部' },
+    parameters: { program: { description: '分类，见下表，留空为全部', options: PROGRAM_OPTIONS, default: PROGRAM_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -27,18 +39,20 @@ export const route: Route = {
     name: '分析师园地',
     maintainers: ['TonyRL'],
     handler,
-    description: `| 有色金属类 | 黑色金属类 | 能源化工类 | 贵金属类 | 农产品类 | 金融类 | 指数类 |
-| ---------- | ---------- | ---------- | -------- | -------- | ------ | ------ |
-| ysjsl      | hsjsl      | nyhgl      | gjsl     | ncpl     | jrl    | zsl    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'program',
+        description: '分类',
+        options: PROGRAM_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    let { program = '分析师园地' } = ctx.req.param();
+    let { program = PROGRAM_OPTIONS_DEFAULT } = ctx.req.param();
     const baseUrl = 'https://www.cfachina.org';
     let pageData,
         pageUrl = `${baseUrl}/servicesupport/analygarden/`;
 
-    if (program !== '分析师园地') {
+    if (program !== PROGRAM_OPTIONS_DEFAULT) {
         pageUrl += `${program}/`;
 
         const response = await got(pageUrl);
@@ -82,7 +96,7 @@ async function handler(ctx) {
     });
 
     return {
-        title: `${pageData?.category.toReversed().join(' - ') ?? '分析师园地'} - 中国期货业协会`,
+        title: `${pageData?.category.toReversed().join(' - ') ?? PROGRAM_OPTIONS_DEFAULT} - 中国期货业协会`,
         link: pageUrl,
         item: items,
     };

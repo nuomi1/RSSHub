@@ -5,7 +5,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'xsqy', label: '学术前沿' },
+    { value: 'rdzw', label: '热点征文' },
+    { value: 'xshy', label: '学术会议' },
+];
 
 const rootUrl = 'https://tc.ccf.org.cn';
 
@@ -21,7 +28,7 @@ export const route: Route = {
     path: '/ccfcv/:channel/:category',
     categories: ['study'],
     example: '/ccf/ccfcv/xsdt/xsqy',
-    parameters: { channel: '频道，仅支持 `xsdt`', category: '分类，见下表，亦可在网站 url 里找到' },
+    parameters: { channel: '频道，仅支持 `xsdt`', category: { description: '分类，见下表，亦可在网站 url 里找到', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -33,9 +40,11 @@ export const route: Route = {
     name: '计算机视觉专委会 - 学术动态 - 分类',
     maintainers: ['elxy'],
     handler,
-    description: `| 学术前沿 | 热点征文 | 学术会议 |
-| -------- | -------- | -------- |
-| xsqy     | rdzw     | xshy     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

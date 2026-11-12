@@ -6,13 +6,21 @@ import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzdt', label: '通知动态' },
+    { value: 'yxfc', label: '院系风采' },
+    { value: 'xxgs', label: '信息公示' },
+    { value: 'wjzz', label: '文件转载' },
+];
 
 export const route: Route = {
     path: '/youth/:category',
     categories: ['university'],
     example: '/cqu/youth/tzdt',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requirePuppeteer: true,
         antiCrawler: true,
@@ -20,9 +28,11 @@ export const route: Route = {
     name: '校团委',
     maintainers: ['Hagb'],
     handler,
-    description: `| 通知动态 | 院系风采 | 信息公示 | 文件转载 |
-| -------- | -------- | -------- | -------- |
-| tzdt     | yxfc     | xxgs     | wjzz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

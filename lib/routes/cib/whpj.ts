@@ -9,13 +9,24 @@ import cache from '@/utils/cache';
 import got from '@/utils/got';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const FORMAT_OPTIONS = [
+    { value: 'short', label: '短格式' },
+    { value: 'xh', label: '现汇买卖' },
+    { value: 'xc', label: '现钞买卖' },
+    { value: 'xhmr', label: '现汇买入' },
+    { value: 'xhmc', label: '现汇卖出' },
+    { value: 'xcmr', label: '现钞买入' },
+    { value: 'xcmc', label: '现钞卖出' },
+];
 
 export const route: Route = {
     path: '/whpj/:format?',
     categories: ['other'],
     example: '/cib/whpj/xh?filter_title=USD',
-    parameters: { format: '输出的标题格式，默认为标题 + 所有价格。短格式仅包含货币名称。' },
+    parameters: { format: { description: '输出的标题格式，默认为标题 + 所有价格。短格式仅包含货币名称。', options: FORMAT_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -38,9 +49,11 @@ export const route: Route = {
     maintainers: ['Qixingchen'],
     handler,
     url: 'cib.com.cn/',
-    description: `| 短格式 | 现汇买卖 | 现钞买卖 | 现汇买入 | 现汇卖出 | 现钞买入 | 现钞卖出 |
-| ------ | -------- | -------- | -------- | -------- | -------- | -------- |
-| short  | xh       | xc       | xhmr     | xhmc     | xcmr     | xcmc     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'format',
+        description: '输出的标题格式',
+        options: FORMAT_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

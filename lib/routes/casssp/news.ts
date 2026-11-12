@@ -4,14 +4,23 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '3', label: '通知公告' },
+    { value: '2', label: '新闻动态' },
+    { value: '92', label: '信息公开' },
+    { value: '93', label: '时政要闻' },
+];
+const CATEGORY_OPTIONS_DEFAULT = '3';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['government'],
     example: '/casssp/news/3',
-    parameters: { category: '分类，见下表，默认为通知公告' },
+    parameters: { category: { description: '分类，见下表，默认为通知公告', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +32,15 @@ export const route: Route = {
     name: '研究会动态',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 通知公告 | 新闻动态 | 信息公开 | 时政要闻 |
-| -------- | -------- | -------- | -------- |
-| 3        | 2        | 92       | 93       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { category = '3' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 15);
 
     const rootUrl = 'http://www.casssp.org.cn';

@@ -4,13 +4,22 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '全部' },
+    { value: '76', label: '現代中國' },
+    { value: '479', label: '今日香港' },
+    { value: '480', label: '全球化' },
+    { value: '379', label: '一周時事通識' },
+];
 
 export const route: Route = {
     path: '/topic/:category?',
     categories: ['new-media'],
     example: '/chiculture/topic',
-    parameters: { category: '分类，见下表，默认为全部' },
+    parameters: { category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -22,9 +31,11 @@ export const route: Route = {
     name: '議題熱話',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 全部 | 現代中國 | 今日香港 | 全球化 | 一周時事通識 |
-| ---- | -------- | -------- | ------ | ------------ |
-|      | 76       | 479      | 480    | 379          |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

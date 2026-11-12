@@ -4,8 +4,22 @@ import type { DataItem, Language, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '', label: '推荐' },
+    { value: '78', label: '商业深度' },
+    { value: '80', label: '资本市场' },
+    { value: '83', label: '5G' },
+    { value: '111', label: '健康' },
+    { value: '110', label: '教育' },
+    { value: '112', label: '地产' },
+    { value: '113', label: '金融' },
+    { value: '114', label: '硬科技' },
+    { value: '116', label: '新消费' },
+];
 
 const rootUrl = 'https://www.chinaventure.com.cn';
 
@@ -25,7 +39,7 @@ export const route: Route = {
     path: '/news/:id?',
     categories: ['new-media'],
     example: '/chinaventure/news/78',
-    parameters: { id: '分类，见下表，默认为推荐' },
+    parameters: { id: { description: '分类，见下表，默认为推荐', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -44,9 +58,11 @@ export const route: Route = {
     maintainers: ['yuxinliu-alex'],
     handler,
     url: 'www.chinaventure.com.cn/',
-    description: `| 推荐 | 商业深度 | 资本市场 | 5G | 健康 | 教育 | 地产 | 金融 | 硬科技 | 新消费 |
-| ---- | -------- | -------- | -- | ---- | ---- | ---- | ---- | ------ | ------ |
-|      | 78       | 80       | 83 | 111  | 110  | 112  | 113  | 114    | 116    |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

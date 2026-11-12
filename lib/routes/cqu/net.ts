@@ -6,13 +6,20 @@ import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'dwdt', label: '单位动态' },
+    { value: 'yywz', label: '语言文字' },
+];
 
 export const route: Route = {
     path: '/net/:category',
     categories: ['university'],
     example: '/cqu/net/tzgg',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requirePuppeteer: true,
         antiCrawler: true,
@@ -20,9 +27,11 @@ export const route: Route = {
     name: '信息化办公室',
     maintainers: ['Hagb'],
     handler,
-    description: `| 通知公告 | 单位动态 | 语言文字 |
-| -------- | -------- | -------- |
-| tzgg     | dwdt     | yywz     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

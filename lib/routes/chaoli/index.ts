@@ -5,26 +5,43 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const CHANNEL_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'math', label: '数学' },
+    { value: 'physics', label: '物理' },
+    { value: 'chem', label: '化学' },
+    { value: 'biology', label: '生物' },
+    { value: 'astro', label: '天文' },
+    { value: 'tech', label: '技术' },
+    { value: 'admin', label: '管理' },
+    { value: 'announ', label: '公告' },
+    { value: 'others', label: '其他' },
+    { value: 'lang', label: '语言' },
+    { value: 'socsci', label: '社科' },
+    { value: 'sci-fi', label: '科幻' },
+    { value: 'collections', label: '辑录' },
+];
+const CHANNEL_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/:channel?',
     categories: ['bbs'],
     example: '/chaoli',
-    parameters: { channel: '板块，见下表，默认为全部' },
+    parameters: { channel: { description: '板块，见下表，默认为全部', options: CHANNEL_OPTIONS, default: CHANNEL_OPTIONS_DEFAULT } },
     name: '板块',
     maintainers: ['nczitzk'],
-    description: `| 数学 | 物理    | 化学 | 生物    | 天文  | 技术 | 管理  | 公告   |
-| ---- | ------- | ---- | ------- | ----- | ---- | ----- | ------ |
-| math | physics | chem | biology | astro | tech | admin | announ |
-
-| 其他   | 语言 | 社科   | 科幻   | 辑录        |
-| ------ | ---- | ------ | ------ | ----------- |
-| others | lang | socsci | sci-fi | collections |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'channel',
+        description: '板块',
+        options: CHANNEL_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { channel = 'all' } = ctx.req.param();
+    const { channel = CHANNEL_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://chaoli.club';
     const currentUrl = `${rootUrl}/index.php/conversations/${channel}`;

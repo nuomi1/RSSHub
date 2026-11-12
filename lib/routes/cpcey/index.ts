@@ -5,7 +5,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xwg', label: '新闻稿' },
+    { value: 'xfzx', label: '消费资讯' },
+];
+const TYPE_OPTIONS_DEFAULT = 'xwg';
 
 const rootUrl = 'https://cpc.ey.gov.tw';
 
@@ -24,7 +31,7 @@ export const route: Route = {
     path: '/:type?',
     categories: ['government'],
     example: '/cpcey/xwg',
-    parameters: { type: '默认为 `xwg`' },
+    parameters: { type: { description: '默认为 `xwg`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -36,13 +43,15 @@ export const route: Route = {
     name: '消费资讯',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| 新闻稿 | 消费资讯 |
-| :----: | :------: |
-|   xwg  |   xfzx   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') ?? 'xwg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     if (!Object.hasOwn(typeMap, type)) {
         throw new InvalidParameterError('Invalid type. Use xwg or xfzx.');
     }

@@ -3,6 +3,7 @@ import type { Context } from 'hono';
 
 import type { Route } from '@/types';
 import cache from '@/utils/cache';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { cnuFetch, parseContent } from './utils';
 
@@ -12,24 +13,29 @@ const types = {
     recent: '最新',
 };
 
+const TYPE_OPTIONS = Object.entries(types).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = 'hot';
+
 export const route: Route = {
     path: '/discovery/:type?/:category?',
     categories: ['picture'],
     example: '/cnu.cc/discovery/hot',
     parameters: {
-        type: '板块类型, 默认为`热门`, 具体参见下表',
+        type: { description: '板块类型, 默认为`热门`, 具体参见下表', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT },
         category: '图片类别, 默认为`0`代表全部, 可参见[这里](http://www.cnu.cc/discoveryPage/hot-0)',
     },
     name: '发现',
     maintainers: ['hoilc'],
-    description: `| 热门 | 推荐      | 最新   |
-| ---- | --------- | ------ |
-| hot  | recommend | recent |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '板块类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { type = 'hot', category = '0' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT, category = '0' } = ctx.req.param();
 
     const url = `http://www.cnu.cc/discoveryPage/${type}-${encodeURIComponent(category)}`;
 

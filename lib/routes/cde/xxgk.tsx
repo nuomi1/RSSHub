@@ -4,9 +4,16 @@ import NotFoundError from '@/errors/types/not-found';
 import type { Route } from '@/types';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
 import utils from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'priorityApproval', label: '优先审评公示' },
+    { value: 'breakthroughCure', label: '突破性治疗公示' },
+    { value: 'cliniCal', label: '临床试验默示许可' },
+];
 
 const baseUrl = 'https://www.cde.org.cn';
 const xxgkMap = {
@@ -57,7 +64,7 @@ export const route: Route = {
     path: '/xxgk/:category',
     categories: ['government'],
     example: '/cde/xxgk/priorityApproval',
-    parameters: { category: '类别，见下表' },
+    parameters: { category: { description: '类别，见下表', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -69,9 +76,11 @@ export const route: Route = {
     name: '信息公开',
     maintainers: ['TonyRL'],
     handler,
-    description: `|   优先审评公示   |  突破性治疗公示  | 临床试验默示许可 |
-| :--------------: | :--------------: | :--------------: |
-| priorityApproval | breakthroughCure |     cliniCal     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

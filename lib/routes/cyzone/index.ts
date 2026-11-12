@@ -1,13 +1,33 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { apiRootUrl, getInfo, processItems, rootUrl } from './util';
+
+const ID_OPTIONS = [
+    { value: 'news', label: '最新' },
+    { value: '5', label: '快鲤鱼' },
+    { value: '14', label: '创投' },
+    { value: '13', label: '科创板' },
+    { value: '8', label: '汽车' },
+    { value: '10', label: '海外' },
+    { value: '9', label: '消费' },
+    { value: '7', label: '科技' },
+    { value: '27', label: '医疗' },
+    { value: '11', label: '文娱' },
+    { value: '16', label: '城市' },
+    { value: '15', label: '政策' },
+    { value: '6', label: '特写' },
+    { value: '12', label: '干货' },
+    { value: '33', label: '科技股' },
+];
+const ID_OPTIONS_DEFAULT = 'news';
 
 export const route: Route = {
     path: '/:id?',
     categories: ['new-media'],
     example: '/cyzone',
-    parameters: { id: '频道 id，可在对应频道页 URL 中找到，默认为 news，即最新资讯' },
+    parameters: { id: { description: '频道 id，可在对应频道页 URL 中找到，默认为 news，即最新资讯', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,21 +45,15 @@ export const route: Route = {
     name: '资讯',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 最新 | 快鲤鱼 | 创投 | 科创板 | 汽车 |
-| ---- | ------ | ---- | ------ | ---- |
-| news | 5      | 14   | 13     | 8    |
-
-| 海外 | 消费 | 科技 | 医疗 | 文娱 |
-| ---- | ---- | ---- | ---- | ---- |
-| 10   | 9    | 7    | 27   | 11   |
-
-| 城市 | 政策 | 特写 | 干货 | 科技股 |
-| ---- | ---- | ---- | ---- | ------ |
-| 16   | 15   | 6    | 12   | 33     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '频道 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const { id = 'news' } = ctx.req.param();
+    const { id = ID_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 5);
 
     const apiUrl = new URL(`v2/content/channel/${id === 'news' ? 'getArticle' : 'detail'}`, apiRootUrl).href;

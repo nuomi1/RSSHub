@@ -5,18 +5,27 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'notify', label: '通知公告' },
+    { value: 'news', label: '教务快讯' },
+];
+const TYPE_OPTIONS_DEFAULT = 'notify';
 
 export const route: Route = {
     path: '/jw/:type?',
     categories: ['university'],
     example: '/cqust/jw/notify',
-    parameters: { type: '可选，默认为 `notify`' },
+    parameters: { type: { description: '可选，默认为 `notify`', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     name: '教务处公告',
     maintainers: ['binarization'],
-    description: `| 通知公告 | 教务快讯 |
-| -------- | -------- |
-| notify   | news     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 
@@ -27,7 +36,7 @@ const map = {
 };
 
 async function handler(ctx: Context) {
-    const { type = 'notify' } = ctx.req.param();
+    const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();
     if (!Object.hasOwn(map, type)) {
         throw new InvalidParameterError('Invalid type. Use notify or news.');
     }

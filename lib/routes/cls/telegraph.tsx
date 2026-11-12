@@ -5,6 +5,7 @@ import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { getSearchParams, rootUrl } from './utils';
@@ -18,6 +19,7 @@ const categories = {
     hk: '港股',
     hk_us: '港美股',
 };
+const CATEGORY_OPTIONS = Object.entries(categories).map(([value, label]) => ({ value, label }));
 
 const renderTelegraphDescription = (item) =>
     renderToString(
@@ -38,7 +40,7 @@ export const route: Route = {
     path: '/telegraph/:category?',
     categories: ['finance'],
     example: '/cls/telegraph',
-    parameters: { category: '分类，见下表，默认为全部' },
+    parameters: { category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -57,9 +59,11 @@ export const route: Route = {
     maintainers: ['nczitzk'],
     handler,
     url: 'cls.cn/telegraph',
-    description: `| 看盘  | 公司         | 加红 | 提醒   | 基金 | 港美股 |
-| ----- | ------------ | ---- | ------ | ---- | ------ |
-| watch | announcement | red  | remind | fund | hk\\_us |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx: Context) {

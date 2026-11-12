@@ -4,14 +4,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '16', label: '通知公告' },
+    { value: '18', label: '学会新闻' },
+    { value: '19', label: '科协简讯' },
+    { value: '20', label: '学科动态' },
+    { value: '21', label: '往事钩沉' },
+];
+const ID_OPTIONS_DEFAULT = '16';
 
 export const route: Route = {
     path: '/:id?',
     categories: ['study'],
     example: '/cste',
-    parameters: { id: '分类，见下表，默认为 16，即通知公告' },
+    parameters: { id: { description: '分类，见下表，默认为 16，即通知公告', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +33,15 @@ export const route: Route = {
     name: '栏目',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 通知公告 | 学会新闻 | 科协简讯 | 学科动态 | 往事钩沉 |
-| -------- | -------- | -------- | -------- | -------- |
-| 16       | 18       | 19       | 20       | 21       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '16';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 10);
 
     const rootUrl = 'https://www.cste.org.cn';

@@ -3,13 +3,20 @@ import { load } from 'cheerio';
 import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
+
+const ID_OPTIONS = [
+    { value: '1', label: '新闻' },
+    { value: '2', label: '通告栏' },
+];
+const ID_OPTIONS_DEFAULT = '1';
 
 export const route: Route = {
     path: '/:id?',
     categories: ['study'],
     example: '/camchina',
-    parameters: { id: '分类，见下表，默认为 1，即新闻' },
+    parameters: { id: { description: '分类，见下表，默认为 1，即新闻', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,13 +33,15 @@ export const route: Route = {
     name: '栏目',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 新闻 | 通告栏 |
-| ---- | ------ |
-| 1    | 2      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '1';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 50);
 
     const rootUrl = 'http://www.camchina.org.cn';

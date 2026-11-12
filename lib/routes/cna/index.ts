@@ -2,16 +2,35 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
 import { getFullText } from './utils';
 
+const ID_OPTIONS = [
+    { value: 'headlines', label: '聚焦' },
+    { value: 'aall', label: '即時' },
+    { value: 'aipl', label: '政治' },
+    { value: 'aopl', label: '國際' },
+    { value: 'acn', label: '兩岸' },
+    { value: 'aie', label: '產經' },
+    { value: 'asc', label: '證券' },
+    { value: 'ait', label: '科技' },
+    { value: 'ahel', label: '生活' },
+    { value: 'asoc', label: '社會' },
+    { value: 'aloc', label: '地方' },
+    { value: 'acul', label: '文化' },
+    { value: 'aspt', label: '運動' },
+    { value: 'amov', label: '娛樂' },
+];
+const ID_OPTIONS_DEFAULT = 'aall';
+
 export const route: Route = {
     path: '/:id?',
     categories: ['traditional-media'],
     example: '/cna/aall',
-    parameters: { id: '分类 id 或新闻专题 id。分类 id 见下表，新闻专题 id 為 https://www.cna.com.tw/list/newstopic.aspx 中，連結的數字部份。此參數默认为 aall' },
+    parameters: { id: { description: '分类 id 或新闻专题 id。分类 id 见下表，新闻专题 id 為 https://www.cna.com.tw/list/newstopic.aspx 中，連結的數字部份。此參數默认为 aall', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +42,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 聚焦      | 即時 | 政治 | 國際 | 兩岸 | 產經 | 證券 | 科技 | 生活 | 社會 | 地方 | 文化 | 運動 | 娛樂 |
-| --------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| headlines | aall | aipl | aopl | acn  | aie  | asc  | ait  | ahel | asoc | aloc | acul | aspt | amov |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '编号',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') || 'aall';
+    const id = ctx.req.param('id') || ID_OPTIONS_DEFAULT;
     const isTopic = /^\d+$/.test(id);
     const limit = getRouteLimit(ctx, 20);
 

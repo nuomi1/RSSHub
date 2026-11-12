@@ -6,6 +6,13 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const ID_OPTIONS = [
+    { value: '102', label: '樊纲观点' },
+    { value: '150', label: '综研观察' },
+    { value: '154', label: '综研视点' },
+];
 
 const categories = {
     '102': 'fggd',
@@ -27,7 +34,7 @@ export const route: Route = {
     path: '/:id',
     categories: ['new-media'],
     example: '/cdi/150',
-    parameters: { id: '分类（必填），见下表' },
+    parameters: { id: { description: '分类（必填），见下表', options: ID_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,9 +46,11 @@ export const route: Route = {
     name: '栏目',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 樊纲观点 | 综研观察 | 综研视点 |
-| -------- | -------- | -------- |
-| 102      | 150      | 154      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

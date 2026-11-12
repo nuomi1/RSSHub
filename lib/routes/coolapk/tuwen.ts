@@ -1,14 +1,22 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import utils from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'type', label: '参数名称' },
+    { value: 'hot', label: '编辑精选' },
+    { value: 'latest', label: '最新' },
+];
+const TYPE_OPTIONS_DEFAULT = 'hot';
 
 export const route: Route = {
     path: '/tuwen/:type?',
     categories: ['social-media'],
     example: '/coolapk/tuwen',
-    parameters: { type: '默认为hot' },
+    parameters: { type: { description: '默认为hot', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: [
             {
@@ -26,13 +34,15 @@ export const route: Route = {
     name: '图文',
     maintainers: ['xizeyoupan'],
     handler,
-    description: `| 参数名称 | 编辑精选 | 最新   |
-| -------- | -------- | ------ |
-| type     | hot      | latest |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'hot';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!['hot', 'latest'].includes(type)) {
         throw new InvalidParameterError('Invalid article type. Use hot or latest.');
     }

@@ -5,13 +5,24 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const ID_OPTIONS = [
+    { value: '1', label: '社会动态' },
+    { value: '5', label: '院内新闻' },
+    { value: '3', label: '学术观点' },
+    { value: '4', label: '文献书籍' },
+    { value: '6', label: '工作论文' },
+    { value: '8', label: '专题讨论' },
+];
+const ID_OPTIONS_DEFAULT = '1';
 
 export const route: Route = {
     path: '/:id?',
     categories: ['new-media'],
     example: '/ciidbnu',
-    parameters: { id: '分类 id，可在分类页地址栏 URL 中找到' },
+    parameters: { id: { description: '分类 id，可在分类页地址栏 URL 中找到', options: ID_OPTIONS, default: ID_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -23,13 +34,15 @@ export const route: Route = {
     name: '分类',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 社会动态 | 院内新闻 | 学术观点 | 文献书籍 | 工作论文 | 专题讨论 |
-| -------- | -------- | -------- | -------- | -------- | -------- |
-| 1        | 5        | 3        | 4        | 6        | 8        |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'id',
+        description: '分类 id',
+        options: ID_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const id = ctx.req.param('id') ?? '1';
+    const id = ctx.req.param('id') ?? ID_OPTIONS_DEFAULT;
 
     const rootUrl = 'http://www.ciidbnu.org';
     const currentUrl = `${rootUrl}/new1.asp?pagetype=${id}`;

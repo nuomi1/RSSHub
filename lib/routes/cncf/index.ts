@@ -5,7 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATE_OPTIONS = [
+    { value: 'blog', label: 'Blog' },
+    { value: 'news', label: 'News' },
+    { value: 'announcements', label: 'Announcements' },
+    { value: 'reports', label: 'Reports' },
+];
+const CATE_OPTIONS_DEFAULT = 'blog';
 
 const rootURL = 'https://www.cncf.io';
 
@@ -13,7 +22,7 @@ export const route: Route = {
     path: '/:cate?',
     categories: ['programming'],
     example: '/cncf',
-    parameters: { cate: 'blog by default' },
+    parameters: { cate: { description: 'blog by default', options: CATE_OPTIONS, default: CATE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -25,13 +34,15 @@ export const route: Route = {
     name: 'Category',
     maintainers: ['Fatpandac'],
     handler,
-    description: `| Blog | News | Announcements | Reports |
-| ---- | ---- | ------------- | ------- |
-| blog | news | announcements | reports |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'cate',
+        description: '说明',
+        options: CATE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const cate = ctx.req.param('cate') ?? 'blog';
+    const cate = ctx.req.param('cate') ?? CATE_OPTIONS_DEFAULT;
     const url = `${rootURL}/${cate}/`;
 
     const response = await got(url);

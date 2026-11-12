@@ -1,15 +1,30 @@
 import type { Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getMzzlbg } from './utils/mzzlbg';
 import { getNews } from './utils/news';
 import { xinwen1j1 } from './utils/xinwen1j1';
 import getXWLB from './xwlb';
 
+const CATEGORY_OPTIONS = [
+    { value: 'news', label: '新闻' },
+    { value: 'china', label: '国内' },
+    { value: 'world', label: '国际' },
+    { value: 'society', label: '社会' },
+    { value: 'law', label: '法治' },
+    { value: 'ent', label: '文娱' },
+    { value: 'tech', label: '科技' },
+    { value: 'life', label: '生活' },
+    { value: 'edu', label: '教育' },
+    { value: 'mzzlbg', label: '每周质量报告' },
+    { value: 'xinwen1j1', label: '新闻 1+1' },
+];
+
 export const route: Route = {
     path: '/:category',
     categories: ['traditional-media'],
     example: '/cctv/world',
-    parameters: { category: '分类名' },
+    parameters: { category: { description: '分类名', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -26,9 +41,11 @@ export const route: Route = {
     name: '专题',
     maintainers: ['idealclover', 'xyqfer'],
     handler,
-    description: `| 新闻 | 国内  | 国际  | 社会    | 法治 | 文娱 | 科技 | 生活 | 教育 | 每周质量报告 | 新闻 1+1  |
-| ---- | ----- | ----- | ------- | ---- | ---- | ---- | ---- | ---- | ------------ | --------- |
-| news | china | world | society | law  | ent  | tech | life | edu  | mzzlbg       | xinwen1j1 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类名',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

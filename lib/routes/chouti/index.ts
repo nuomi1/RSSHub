@@ -3,24 +3,37 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
+
+const SUBJECT_OPTIONS = [
+    { value: 'hot', label: '热榜' },
+    { value: 'news', label: '42 区' },
+    { value: 'scoff', label: '段子' },
+    { value: 'pic', label: '图片' },
+    { value: 'tec', label: '挨踢 1024' },
+    { value: 'ask', label: '你问我答' },
+];
+const SUBJECT_OPTIONS_DEFAULT = 'hot';
 
 export const route: Route = {
     path: '/:subject?',
     categories: ['new-media'],
     example: '/chouti/hot',
     parameters: {
-        subject: '主题名称',
+        subject: { description: '主题名称', options: SUBJECT_OPTIONS, default: SUBJECT_OPTIONS_DEFAULT },
     },
     name: '最新',
     maintainers: ['xyqfer'],
-    description: `| 热榜 | 42 区 | 段子  | 图片 | 挨踢 1024 | 你问我答 |
-| ---- | ----- | ----- | ---- | --------- | -------- |
-| hot  | news  | scoff | pic  | tec       | ask      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'subject',
+        description: '主题名称',
+        options: SUBJECT_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { subject = 'hot' } = ctx.req.param();
+    const { subject = SUBJECT_OPTIONS_DEFAULT } = ctx.req.param();
     const host = 'https://m.ichouti.cn';
     let api = `${host}/api/m/zone/${subject}?afterTime=0`;
     let pageUrl = `https://m.ichouti.cn/zone/${subject}`;

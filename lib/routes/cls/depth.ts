@@ -5,6 +5,7 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
 import { renderDepthDescription } from './templates/depth';
@@ -28,11 +29,14 @@ const categories = {
     1176: '投教',
 };
 
+const CATEGORY_OPTIONS = Object.entries(categories).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS_DEFAULT = '1000';
+
 export const route: Route = {
     path: '/depth/:category?',
     categories: ['finance'],
     example: '/cls/depth/1000',
-    parameters: { category: '分类代码，可在首页导航栏的目标网址 URL 中找到' },
+    parameters: { category: { description: '分类代码，可在首页导航栏的目标网址 URL 中找到', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -44,13 +48,15 @@ export const route: Route = {
     name: '深度',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 头条 | 股市 | 港股 | 环球 | 公司 | 券商 | 基金 | 地产 | 金融 | 汽车 | 科创 | 创业版 | 品见 | 期货 | 投教 |
-| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ------ | ---- | ---- | ---- |
-| 1000 | 1003 | 1135 | 1007 | 1005 | 1118 | 1110 | 1006 | 1032 | 1119 | 1111 | 1127   | 1160 | 1124 | 1176 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类代码',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') ?? '1000';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const limit = getRouteLimit(ctx, 50);
 
     const title = categories[category];

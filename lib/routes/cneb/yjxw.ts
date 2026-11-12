@@ -5,8 +5,15 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: '', label: '全部' },
+    { value: 'gnxw', label: '国内新闻' },
+    { value: 'gjxw', label: '国际新闻' },
+];
 
 const indexs = {
     gnxw: 0,
@@ -24,7 +31,7 @@ export const route: Route = {
     path: '/yjxw/:category?',
     categories: ['forecast'],
     example: '/cneb/yjxw',
-    parameters: { category: '分类，见下表，默认为全部' },
+    parameters: { category: { description: '分类，见下表，默认为全部', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -41,9 +48,11 @@ export const route: Route = {
     name: '应急新闻',
     maintainers: ['nczitzk'],
     handler,
-    description: `| 全部 | 国内新闻 | 国际新闻 |
-| ---- | -------- | -------- |
-|      | gnxw     | gjxw     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

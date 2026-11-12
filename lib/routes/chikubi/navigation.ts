@@ -1,14 +1,24 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Data, Route } from '@/types';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import parser from '@/utils/rss-parser';
 
 import { getBySlug, getPostsBy, processItems } from './utils';
+
+const KEYWORD_OPTIONS = [
+    { value: 'best', label: '殿堂' },
+    { value: 'video', label: '動畫' },
+    { value: 'vr', label: 'VR' },
+    { value: 'comic', label: '漫畫' },
+    { value: 'voice', label: '音聲' },
+    { value: 'cg', label: 'CG・イラスト' },
+];
 
 export const route: Route = {
     path: '/:keyword',
     categories: ['multimedia'],
     example: '/chikubi',
-    parameters: { keyword: '導覽列，見下表，默認爲最新' },
+    parameters: { keyword: { description: '導覽列，見下表，默認爲最新', options: KEYWORD_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -21,9 +31,11 @@ export const route: Route = {
     name: 'Navigation',
     maintainers: ['Tsuyumi25'],
     handler,
-    description: `| 殿堂 | 動畫  | VR | 漫畫  | 音聲  | CG・イラスト |
-| ---- | ----- | -- | ----- | ----- | ------------ |
-| best | video | vr | comic | voice | cg           |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'keyword',
+        description: '導覽列',
+        options: KEYWORD_OPTIONS,
+    }),
 };
 
 const navigationItems = {

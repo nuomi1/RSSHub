@@ -6,14 +6,36 @@ import logger from '@/utils/logger';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import playwright from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'realtimenews', label: '即時' },
+    { value: 'hotnews', label: '熱門' },
+    { value: 'politic', label: '政治' },
+    { value: 'life', label: '生活' },
+    { value: 'star', label: '娛樂' },
+    { value: 'money', label: '財經' },
+    { value: 'world', label: '國際' },
+    { value: 'opinion', label: '言論' },
+    { value: 'chinese', label: '兩岸' },
+    { value: 'armament', label: '軍事' },
+    { value: 'society', label: '社會' },
+    { value: 'health', label: '健康' },
+    { value: 'sports', label: '體育' },
+    { value: 'technologynews', label: '科技' },
+    { value: 'fortune', label: '運勢' },
+    { value: 'tube', label: '有影' },
+    { value: 'taiwan', label: '寶島' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'realtimenews';
 
 export const route: Route = {
     path: '/:category?',
     categories: ['traditional-media'],
     example: '/chinatimes/realtimenews',
-    parameters: { category: '分類，見下表，留空為 `realtimenews`' },
+    parameters: { category: { description: '分類，見下表，留空為 `realtimenews`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: true,
@@ -31,15 +53,17 @@ export const route: Route = {
     maintainers: ['KingJem'],
     handler,
     url: 'www.chinatimes.com/',
-    description: `|     即時     |   熱門  |   政治  | 生活 | 娛樂 |  財經 |  國際 |   言論  |   兩岸  |   軍事   |   社會  |  健康  |  體育  |      科技      |   運勢  | 有影 |  寶島  |
-| :----------: | :-----: | :-----: | :--: | :--: | :---: | :---: | :-----: | :-----: | :------: | :-----: | :----: | :----: | :------------: | :-----: | :--: | :----: |
-| realtimenews | hotnews | politic | life | star | money | world | opinion | chinese | armament | society | health | sports | technologynews | fortune | tube | taiwan |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分類',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const baseUrl = 'https://www.chinatimes.com';
 
-    const category = ctx.req.param('category') ?? 'realtimenews';
+    const category = ctx.req.param('category') ?? CATEGORY_OPTIONS_DEFAULT;
     const link = `${baseUrl}/${category}/?chdtv`;
 
     const response = await ofetch(link);

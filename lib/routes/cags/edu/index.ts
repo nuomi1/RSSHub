@@ -1,7 +1,16 @@
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'ywjx', label: '要闻简讯' },
+    { value: 'zs_bss', label: '博士生招生' },
+    { value: 'zs_sss', label: '硕士生招生' },
+    { value: 'zs_dxsxly', label: '大学生夏令营' },
+];
 
 const host = 'https://edu.cags.ac.cn';
 
@@ -18,7 +27,7 @@ export const route: Route = {
     categories: ['university'],
     example: '/cags/edu/tzgg',
     parameters: {
-        category: '通知频道，可选 tzgg/ywjx/zs_bss/zs_sss/zs_dxsxly',
+        category: { description: '通知频道，可选 tzgg/ywjx/zs_bss/zs_sss/zs_dxsxly', options: CATEGORY_OPTIONS },
     },
     features: {
         antiCrawler: false,
@@ -38,9 +47,11 @@ export const route: Route = {
         },
     ],
     handler,
-    description: `| 通知公告 | 要闻简讯 | 博士生招生 | 硕士生招生 | 大学生夏令营 |
-| -------- | -------- | ---------- | ---------- | ------------ |
-| tzgg     | ywjx     | zs\\_bss    | zs\\_sss    | zs\\_dxsxly   |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '通知频道',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

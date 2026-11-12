@@ -4,13 +4,21 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'Media_list', label: 'CCF 新闻' },
+    { value: 'Focus', label: 'CCF 聚焦' },
+    { value: 'ACM_News', label: 'ACM 信息' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'Media_list';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['study'],
     example: '/ccf/news',
-    parameters: { category: '分类，见下表，默认为 CCF 新闻' },
+    parameters: { category: { description: '分类，见下表，默认为 CCF 新闻', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -32,13 +40,15 @@ export const route: Route = {
     name: '新闻',
     maintainers: ['nczitzk'],
     handler,
-    description: `| CCF 新闻    | CCF 聚焦 | ACM 信息  |
-| ----------- | -------- | --------- |
-| Media\\_list | Focus    | ACM\\_News |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const category = ctx.req.param('category') || 'Media_list';
+    const category = ctx.req.param('category') || CATEGORY_OPTIONS_DEFAULT;
 
     const rootUrl = 'https://www.ccf.org.cn';
     const currentUrl = `${rootUrl}/${category}/`;

@@ -5,10 +5,16 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
 import utils from './utils';
+
+const CATEGORY_OPTIONS = [
+    { value: 'domesticGuide', label: '发布通告' },
+    { value: 'opinionList', label: '征求意见' },
+];
 
 const baseUrl = 'https://www.cde.org.cn';
 const zdyzMap = {
@@ -47,7 +53,7 @@ export const route: Route = {
     path: '/zdyz/:category',
     categories: ['government'],
     example: '/cde/zdyz/domesticGuide',
-    parameters: { category: '类别，见下表' },
+    parameters: { category: { description: '类别，见下表', options: CATEGORY_OPTIONS } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -59,9 +65,11 @@ export const route: Route = {
     name: '指导原则专栏',
     maintainers: ['TonyRL'],
     handler,
-    description: `|    发布通告   |   征求意见  |
-| :-----------: | :---------: |
-| domesticGuide | opinionList |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '类别',
+        options: CATEGORY_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {

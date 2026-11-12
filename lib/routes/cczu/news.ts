@@ -4,18 +4,33 @@ import type { Context } from 'hono';
 import type { Route } from '@/types';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: '6620', label: '常大要闻' },
+    { value: '6621', label: '校园快讯' },
+    { value: '6687', label: '媒体常大' },
+    { value: '6628', label: '时事热点' },
+    { value: '6629', label: '高教动态' },
+    { value: '6640', label: '网上橱窗' },
+    { value: '6645', label: '新媒常大' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/news/:category?',
     categories: ['university'],
     example: '/cczu/news/6620',
-    parameters: { category: '可选，默认为 `all`' },
+    parameters: { category: { description: '可选，默认为 `all`', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '新闻网',
     maintainers: ['stdrc'],
-    description: `| 全部 | 常大要闻 | 校园快讯 | 媒体常大 | 时事热点 | 高教动态 | 网上橱窗 | 新媒常大 |
-| ---- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| all  | 6620     | 6621     | 6687     | 6628     | 6629     | 6640     | 6645     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '可选',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
@@ -24,7 +39,7 @@ const baseUrl = 'https://news.cczu.edu.cn';
 const entryUrlRegex = /^\/(20\d{2})\/(\d{2})(\d{2})\/.*$/;
 
 async function handler(ctx: Context) {
-    const { category = 'all' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
     const pageUrl = baseUrl + (category === 'all' ? '/' : `/${category}/list.htm`);
 
     const response = await ofetch(pageUrl);

@@ -1,14 +1,22 @@
 import InvalidParameterError from '@/errors/types/invalid-parameter';
 import type { Route } from '@/types';
 import got from '@/utils/got';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import utils from './utils';
+
+const TYPE_OPTIONS = [
+    { value: 'type', label: '参数名称' },
+    { value: 'history', label: '历史头条' },
+    { value: 'latest', label: '最新' },
+];
+const TYPE_OPTIONS_DEFAULT = 'history';
 
 export const route: Route = {
     path: '/toutiao/:type?',
     categories: ['social-media'],
     example: '/coolapk/toutiao',
-    parameters: { type: '默认为history' },
+    parameters: { type: { description: '默认为history', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: [
             {
@@ -26,13 +34,15 @@ export const route: Route = {
     name: '头条',
     maintainers: ['xizeyoupan'],
     handler,
-    description: `| 参数名称 | 历史头条 | 最新   |
-| -------- | -------- | ------ |
-| type     | history  | latest |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
-    const type = ctx.req.param('type') || 'history';
+    const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     if (!['history', 'latest'].includes(type)) {
         throw new InvalidParameterError('Invalid headline type. Use history or latest.');
     }

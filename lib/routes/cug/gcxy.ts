@@ -5,7 +5,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'djxw', label: '党建新闻' },
+    { value: 'xsdt', label: '学术动态' },
+    { value: 'bkspy', label: '本科生培养' },
+    { value: 'yjsjy', label: '研究生教育' },
+];
 
 const articleHosts = new Set(['gcxy.cug.edu.cn', 'wenming.cug.edu.cn']);
 
@@ -13,12 +23,14 @@ export const route: Route = {
     path: '/gcxy/:type?',
     categories: ['university'],
     example: '/cug/gcxy/xyxw',
-    parameters: { type: '分类，见下表，默认为所有' },
+    parameters: { type: { description: '分类，见下表，默认为所有', options: TYPE_OPTIONS } },
     name: '工程学院',
     maintainers: ['Doradx'],
-    description: `| 学院新闻 | 通知公告 | 党建新闻 | 学术动态 | 本科生培养 | 研究生教育 |
-| -------- | -------- | -------- | -------- | ---------- | ---------- |
-| xyxw     | tzgg     | djxw     | xsdt     | bkspy      | yjsjy      |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '分类',
+        options: TYPE_OPTIONS,
+    }),
     handler,
 };
 

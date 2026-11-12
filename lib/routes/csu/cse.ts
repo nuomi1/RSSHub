@@ -4,7 +4,17 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const TYPE_OPTIONS = [
+    { value: 'xyxw', label: '学院新闻' },
+    { value: 'tzgg', label: '通知公告' },
+    { value: 'xsxx', label: '学术信息' },
+    { value: 'xgdt', label: '学工动态' },
+    { value: 'kydt', label: '科研动态' },
+];
+const TYPE_OPTIONS_DEFAULT = 'tzgg';
 
 async function fetch(address) {
     const res = await got(address);
@@ -27,7 +37,7 @@ export const route: Route = {
     path: '/cse/:type?',
     categories: ['university'],
     example: '/csu/cse',
-    parameters: { type: '类型' },
+    parameters: { type: { description: '类型', options: TYPE_OPTIONS, default: TYPE_OPTIONS_DEFAULT } },
     features: {
         requireConfig: false,
         requirePuppeteer: false,
@@ -39,14 +49,16 @@ export const route: Route = {
     name: '计算机学院',
     maintainers: ['j1g5awi'],
     handler,
-    description: `| 类型 | 学院新闻 | 通知公告 | 学术信息 | 学工动态 | 科研动态 |
-| ---- | -------- | -------- | -------- | -------- | -------- |
-| 参数 | xyxw     | tzgg     | xsxx     | xgdt     | kydt     |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'type',
+        description: '类型',
+        options: TYPE_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
     const url = 'https://cse.csu.edu.cn/index/';
-    const type = ctx.req.param('type') ?? 'tzgg';
+    const type = ctx.req.param('type') ?? TYPE_OPTIONS_DEFAULT;
     const link = url + type + '.htm';
     const response = await got.get(link);
     const $ = load(response.data);

@@ -5,27 +5,37 @@ import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import { parseDate } from '@/utils/parse-date';
 import { getPlaywrightPage } from '@/utils/playwright';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
+
+const CATEGORY_OPTIONS = [
+    { value: 'dnzszc', label: '招生政策' },
+    { value: 'zdgg', label: '深化考试招生制度改革' },
+    { value: 'jyflfg', label: '教育法律法规' },
+];
+const CATEGORY_OPTIONS_DEFAULT = 'dnzszc';
 
 export const route: Route = {
     path: '/zszcgd/:category?',
     categories: ['study'],
     example: '/chsi/zszcgd',
-    parameters: { category: '分类，默认为招生政策' },
+    parameters: { category: { description: '分类，默认为招生政策', options: CATEGORY_OPTIONS, default: CATEGORY_OPTIONS_DEFAULT } },
     name: '教育部阳光高考信息公开平台招生政策规定',
     maintainers: ['nczitzk'],
     features: {
         requirePuppeteer: true,
     },
-    description: `| 招生政策 | 深化考试招生制度改革 | 教育法律法规 |
-| -------- | -------------------- | ------------ |
-| dnzszc   | zdgg                 | jyflfg       |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'category',
+        description: '分类',
+        options: CATEGORY_OPTIONS,
+    }),
     handler,
 };
 
 async function handler(ctx: Context) {
-    const { category = 'dnzszc' } = ctx.req.param();
+    const { category = CATEGORY_OPTIONS_DEFAULT } = ctx.req.param();
 
     const rootUrl = 'https://gaokao.chsi.com.cn';
     const currentUrl = `${rootUrl}/gkxx/zszcgd/${category}`;

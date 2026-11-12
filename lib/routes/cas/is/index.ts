@@ -4,7 +4,14 @@ import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
+
+const PATH_OPTIONS = [
+    { value: 'xwdt2016/tzgg2016', label: '通知公告' },
+    { value: 'xwdt2016/kjdt2016', label: '科技动态' },
+    { value: 'kxcb2016/kpdt2016', label: '科普动态' },
+];
 
 const baseUrl = 'https://is.cas.cn';
 const baseHostname = new URL(baseUrl).hostname;
@@ -18,13 +25,15 @@ export const route: Route = {
     path: '/is/:path{.+}',
     categories: ['university'],
     example: '/cas/is/xwdt2016/tzgg2016',
-    parameters: { path: '路径，可在 URL 找到' },
+    parameters: { path: { description: '路径，可在 URL 找到', options: PATH_OPTIONS } },
     name: '软件研究所',
     maintainers: ['Misaka13514'],
     handler,
-    description: `| 通知公告          | 科技动态          | 科普动态          |
-| ----------------- | ----------------- | ----------------- |
-| xwdt2016/tzgg2016 | xwdt2016/kjdt2016 | kxcb2016/kpdt2016 |`,
+    description: renderOptionsMarkdownTable({
+        parameter: 'path',
+        description: '路径',
+        options: PATH_OPTIONS,
+    }),
 };
 
 async function handler(ctx) {
