@@ -8,17 +8,6 @@ import got from '@/utils/got';
 import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
-const CATEGORY_OPTIONS = [
-    { value: 'gwxx', label: '公务信息' },
-    { value: 'djgz', label: '党建工作' },
-    { value: 'rsgz', label: '人事工作' },
-    { value: 'xsgz', label: '学生工作' },
-    { value: 'kysys', label: '科研实验室' },
-    { value: 'bksjw', label: '本科生教务' },
-    { value: 'yjsjw', label: '研究生教务' },
-];
-const CATEGORY_OPTIONS_DEFAULT = 'yjsjw';
-
 const categoryMap = {
     gwxx: { title: '公务信息', tag: '20616' },
     djgz: { title: '党建工作', tag: '20617' },
@@ -28,6 +17,8 @@ const categoryMap = {
     bksjw: { title: '本科生教务', tag: '20619' },
     yjsjw: { title: '研究生教务', tag: '20620' },
 };
+const CATEGORY_OPTIONS = Object.entries(categoryMap).map(([value, item]) => ({ value, label: item.title }));
+const CATEGORY_OPTIONS_DEFAULT = 'yjsjw';
 
 export const route: Route = {
     path: '/smae/:category?',

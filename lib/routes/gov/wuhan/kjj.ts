@@ -9,10 +9,17 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATY_OPTIONS = [
-    { value: 'tzgg', label: '通知公告' },
-    { value: 'gsxx', label: '公示信息' },
-];
+const config = {
+    tzgg: {
+        link: '/wmfw/tzgg/tzgg_18371/',
+        title: '通知公告',
+    },
+    gsxx: {
+        link: '/wmfw/tzgg/gsxx/',
+        title: '公示信息',
+    },
+};
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/kjj/:caty',
@@ -32,17 +39,6 @@ export const route: Route = {
 };
 
 const rootUrl = 'https://kjj.wuhan.gov.cn/';
-
-const config = {
-    tzgg: {
-        link: '/wmfw/tzgg/tzgg_18371/',
-        title: '通知公告',
-    },
-    gsxx: {
-        link: '/wmfw/tzgg/gsxx/',
-        title: '公示信息',
-    },
-};
 
 async function handler(ctx: Context) {
     const { caty } = ctx.req.param();

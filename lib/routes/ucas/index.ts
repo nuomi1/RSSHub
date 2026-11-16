@@ -9,14 +9,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'bsh', label: '博士后' },
-    { value: 'ktxmpy', label: '课题项目聘用' },
-    { value: 'glzcrc', label: '管理支撑人才' },
-    { value: 'jxkyrc', label: '教学科研人才' },
-];
-const TYPE_OPTIONS_DEFAULT = 'bsh';
-
 const rootUrl = 'https://zhaopin.ucas.ac.cn';
 
 const idMap = {
@@ -32,6 +24,8 @@ const titleMap = {
     ktxmpy: '课题项目聘用',
     bsh: '博士后',
 };
+const TYPE_OPTIONS = Object.entries(titleMap).map(([value, label]) => ({ value, label }));
+const TYPE_OPTIONS_DEFAULT = 'bsh';
 
 export const route: Route = {
     path: '/job/:type?',

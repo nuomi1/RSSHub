@@ -6,21 +6,22 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { ProcessFeed, ProcessForm } from './utils';
 
-const TAG_ID_OPTIONS = [
-    { value: '17', label: '炉石传说' },
-    { value: '18', label: '万智牌' },
-    { value: '16', label: '游戏王' },
-    { value: '19', label: '昆特牌' },
-    { value: '20', label: '影之诗' },
-    { value: '329', label: '符文之地传奇' },
-    { value: '221', label: '阴阳师百闻牌' },
-    { value: '112', label: '英雄联盟' },
-    { value: '389', label: '电子游戏' },
-    { value: '24', label: '桌面游戏' },
-    { value: '102', label: '卡牌游戏' },
-    { value: '23', label: '玩家杂谈' },
-    { value: '117', label: '二次元' },
-];
+const tagList = {
+    17: '炉石传说',
+    18: '万智牌',
+    16: '游戏王',
+    19: '昆特牌',
+    20: '影之诗',
+    329: '符文之地传奇',
+    221: '阴阳师百闻牌',
+    112: '英雄联盟',
+    389: '电子游戏',
+    24: '桌面游戏',
+    102: '卡牌游戏',
+    23: '玩家杂谈',
+    117: '二次元',
+};
+const TAG_ID_OPTIONS = Object.entries(tagList).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/tag/:tagId?',
@@ -46,21 +47,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const tagId = ctx.req.param('tagId');
-    const tagList = {
-        17: '炉石传说',
-        18: '万智牌',
-        16: '游戏王',
-        19: '昆特牌',
-        20: '影之诗',
-        329: '符文之地传奇',
-        221: '阴阳师百闻牌',
-        112: '英雄联盟',
-        389: '电子游戏',
-        24: '桌面游戏',
-        102: '卡牌游戏',
-        23: '玩家杂谈',
-        117: '二次元',
-    };
+
     const tagName = tagList[tagId];
     const rootUrl = 'https://www.iyingdi.com';
     const tagUrl = 'https://api.iyingdi.com/web/feed/tag-content-list';

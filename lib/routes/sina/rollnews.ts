@@ -6,19 +6,20 @@ import { getRouteLimit } from '@/utils/route-limit';
 
 import { getRollNewsList, parseArticle, parseRollNewsList } from './utils';
 
-const LID_OPTIONS = [
-    { value: '2509', label: '全部' },
-    { value: '2510', label: '国内' },
-    { value: '2511', label: '国际' },
-    { value: '2669', label: '社会' },
-    { value: '2512', label: '体育' },
-    { value: '2513', label: '娱乐' },
-    { value: '2514', label: '军事' },
-    { value: '2515', label: '科技' },
-    { value: '2516', label: '财经' },
-    { value: '2517', label: '股市' },
-    { value: '2518', label: '美股' },
-];
+const map = {
+    2509: '全部',
+    2510: '国内',
+    2511: '国际',
+    2669: '社会',
+    2512: '体育',
+    2513: '娱乐',
+    2514: '军事',
+    2515: '科技',
+    2516: '财经',
+    2517: '股市',
+    2518: '美股',
+};
+const LID_OPTIONS = Object.entries(map).map(([value, label]) => ({ value, label }));
 const LID_OPTIONS_DEFAULT = '2509';
 
 export const route: Route = {
@@ -45,20 +46,6 @@ export const route: Route = {
 };
 
 async function handler(ctx) {
-    const map = {
-        2509: '全部',
-        2510: '国内',
-        2511: '国际',
-        2669: '社会',
-        2512: '体育',
-        2513: '娱乐',
-        2514: '军事',
-        2515: '科技',
-        2516: '财经',
-        2517: '股市',
-        2518: '美股',
-    };
-
     const pageid = '153';
     const { lid = LID_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 50);

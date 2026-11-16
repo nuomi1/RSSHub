@@ -6,11 +6,12 @@ import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
-const TYPE_OPTIONS = [
-    { value: 'xxfb', label: '信息发布' },
-    { value: 'jylgw', label: '教研类岗位' },
-    { value: 'gllgw', label: '管理岗位及其他' },
-];
+const title_dict = {
+    xxfb: { title: '信息发布', channelid: '9531,9532,9533,9534,9535,9419' },
+    jylgw: { title: '教研类岗位', channelid: '9420,9421,9422,9423' },
+    gllgw: { title: '管理岗位及其他', channelid: '9424,9425,9426' },
+};
+const TYPE_OPTIONS = Object.entries(title_dict).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/rczp/:type',
@@ -42,11 +43,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const type = ctx.req.param('type');
-    const title_dict = {
-        xxfb: { title: '信息发布', channelid: '9531,9532,9533,9534,9535,9419' },
-        jylgw: { title: '教研类岗位', channelid: '9420,9421,9422,9423' },
-        gllgw: { title: '管理岗位及其他', channelid: '9424,9425,9426' },
-    };
+
     if (!Object.hasOwn(title_dict, type)) {
         throw new InvalidParameterError('Unsupported type. Use xxfb, jylgw, or gllgw.');
     }

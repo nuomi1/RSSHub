@@ -7,14 +7,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'latest', label: '最新' },
-    { value: 'news', label: '新闻' },
-    { value: 'notice', label: '公告' },
-    { value: 'activity', label: '活动' },
-    { value: 'info', label: '资讯' },
-];
-
 const config = {
     latest: {
         id: '693',
@@ -37,6 +29,7 @@ const config = {
         title: '资讯',
     },
 };
+const TYPE_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/bh3/:type',

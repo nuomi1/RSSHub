@@ -8,26 +8,6 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { baseUrl as rootUrl, getItem } from './utils';
 
-const CATEGORY_OPTIONS = [
-    { value: 'toutiao', label: '头条' },
-    { value: 'qswp', label: '网评' },
-    { value: 'qssp', label: '视频' },
-    { value: 'qslgxd', label: '原创' },
-    { value: 'economy', label: '经济' },
-    { value: 'politics', label: '政治' },
-    { value: 'culture', label: '文化' },
-    { value: 'society', label: '社会' },
-    { value: 'cpc', label: '党建' },
-    { value: 'science', label: '科教' },
-    { value: 'zoology', label: '生态' },
-    { value: 'defense', label: '国防' },
-    { value: 'international', label: '国际' },
-    { value: 'books', label: '图书' },
-    { value: 'xxbj', label: '学习笔记' },
-    { value: 'llwx', label: '理论文选' },
-];
-const CATEGORY_OPTIONS_DEFAULT = 'toutiao';
-
 const config = {
     toutiao: {
         title: '头条',
@@ -94,6 +74,8 @@ const config = {
         url: `${rootUrl}/qszq/llwx/index.htm`,
     },
 };
+const CATEGORY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
+const CATEGORY_OPTIONS_DEFAULT = 'toutiao';
 
 export const route: Route = {
     path: '/:category?',

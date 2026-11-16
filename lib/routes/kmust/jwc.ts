@@ -8,10 +8,17 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'notify', label: '教务通知' },
-    { value: 'news', label: '教务新闻' },
-];
+const typeProps = {
+    notify: {
+        url: '/jwtz/jwtz.htm',
+        title: '教务通知',
+    },
+    news: {
+        url: '/jwxw/jwxw.htm',
+        title: '教务新闻',
+    },
+};
+const TYPE_OPTIONS = Object.entries(typeProps).map(([value, item]) => ({ value, label: item.title }));
 const TYPE_OPTIONS_DEFAULT = 'notify';
 
 export const route: Route = {
@@ -30,16 +37,6 @@ export const route: Route = {
 };
 
 const baseUrl = 'https://jwc.kmust.edu.cn';
-const typeProps = {
-    notify: {
-        url: '/jwtz/jwtz.htm',
-        title: '教务通知',
-    },
-    news: {
-        url: '/jwxw/jwxw.htm',
-        title: '教务新闻',
-    },
-};
 
 async function handler(ctx: Context): Promise<Data> {
     const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();

@@ -8,13 +8,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATY_OPTIONS = [
-    { value: 'tzgg', label: '通知公告' },
-    { value: 'zfcg', label: '政府采购' },
-    { value: 'zjxx', label: '资金信息' },
-    { value: 'zdxm', label: '重大项目' },
-];
-
 const rootUrl = 'http://www.sz.gov.cn/cn/xxgk/zfxxgj/';
 
 const config = {
@@ -35,6 +28,7 @@ const config = {
         title: '重大项目',
     },
 };
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/xxgk/zfxxgj/:caty',

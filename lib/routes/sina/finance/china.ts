@@ -6,14 +6,15 @@ import { getRouteLimit } from '@/utils/route-limit';
 
 import { getRollNewsList, parseArticle, parseRollNewsList } from '../utils';
 
-const LID_OPTIONS = [
-    { value: '1686', label: '国内滚动' },
-    { value: '1687', label: '宏观经济' },
-    { value: '1690', label: '金融新闻' },
-    { value: '1688', label: '地方经济' },
-    { value: '1689', label: '部委动态' },
-    { value: '3231', label: '今日财经 TOP10' },
-];
+const map = {
+    1686: '国内滚动',
+    1687: '宏观经济',
+    1690: '金融新闻',
+    1688: '地方经济',
+    1689: '部委动态',
+    3231: '今日财经 TOP10',
+};
+const LID_OPTIONS = Object.entries(map).map(([value, label]) => ({ value, label }));
 const LID_OPTIONS_DEFAULT = '1686';
 
 export const route: Route = {
@@ -47,14 +48,6 @@ export const route: Route = {
 };
 
 async function handler(ctx) {
-    const map = {
-        1686: '国内滚动',
-        1687: '宏观经济',
-        1690: '金融新闻',
-        1688: '地方经济',
-        1689: '部委动态',
-        3231: '今日财经 TOP10',
-    };
     const pageid = '155';
     const { lid = LID_OPTIONS_DEFAULT } = ctx.req.param();
     const limit = getRouteLimit(ctx, 50);

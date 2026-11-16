@@ -9,18 +9,6 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { parseSourceDate } from './utils';
 
-const CATY_OPTIONS = [
-    { value: 'it', label: 'IT 资讯' },
-    { value: 'soft', label: '软件之家' },
-    { value: 'win10', label: 'win10 之家' },
-    { value: 'win11', label: 'win11 之家' },
-    { value: 'iphone', label: 'iphone 之家' },
-    { value: 'ipad', label: 'ipad 之家' },
-    { value: 'android', label: 'android 之家' },
-    { value: 'digi', label: '数码之家' },
-    { value: 'next', label: '智能时代' },
-];
-
 const getUrl = (caty) => `https://${caty}.ithome.com/`;
 
 const config = {
@@ -52,6 +40,7 @@ const config = {
         title: '智能时代',
     },
 };
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/:caty',

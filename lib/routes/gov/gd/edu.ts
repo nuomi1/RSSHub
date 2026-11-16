@@ -10,35 +10,6 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 import { fixArticleContent } from '@/utils/wechat-mp';
 
-const CATY_OPTIONS = [
-    { value: 'szyw', label: '时政要闻' },
-    { value: 'gdjyxw', label: '广东教育新闻' },
-    { value: 'tpxw', label: '图片新闻' },
-    { value: 'zxlb', label: '战线联播' },
-    { value: 'gsgg', label: '公示公告' },
-    { value: 'jyzcfg', label: '教育政策法规' },
-    { value: 'zcjd', label: '政策解读' },
-];
-
-export const route: Route = {
-    path: '/edu/:caty',
-    categories: ['government'],
-    example: '/gov/gd/edu/gdjyxw',
-    parameters: {
-        caty: { description: '资讯类别', options: CATY_OPTIONS },
-    },
-    name: '省教育厅',
-    maintainers: ['nczitzk'],
-    handler,
-    description: renderOptionsMarkdownTable({
-        parameter: 'caty',
-        description: '资讯类别',
-        options: CATY_OPTIONS,
-    }),
-};
-
-const rootUrl = 'https://edu.gd.gov.cn/';
-
 const config = {
     szyw: {
         link: '/jyzxnew/szyw/index.html',
@@ -69,6 +40,26 @@ const config = {
         title: '政策解读',
     },
 };
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
+
+export const route: Route = {
+    path: '/edu/:caty',
+    categories: ['government'],
+    example: '/gov/gd/edu/gdjyxw',
+    parameters: {
+        caty: { description: '资讯类别', options: CATY_OPTIONS },
+    },
+    name: '省教育厅',
+    maintainers: ['nczitzk'],
+    handler,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '资讯类别',
+        options: CATY_OPTIONS,
+    }),
+};
+
+const rootUrl = 'https://edu.gd.gov.cn/';
 
 async function handler(ctx: Context) {
     const { caty } = ctx.req.param();

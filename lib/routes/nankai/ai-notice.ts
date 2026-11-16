@@ -8,18 +8,19 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'zxdt', label: '最新动态' },
-    { value: 'xygg', label: '学院公告' },
-    { value: 'xszc', label: '学生之窗' },
-    { value: 'kyxx', label: '科研信息' },
-    { value: 'bksjx', label: '本科生教学' },
-    { value: 'dtyd', label: '党团园地' },
-    { value: 'yjszs', label: '研究生招生' },
-    { value: 'yjsjx', label: '研究生教学' },
-    { value: 'jyxx', label: '就业信息' },
-    { value: 'gjjl', label: '国际交流' },
-];
+const categoryMap = {
+    zxdt: '最新动态',
+    xygg: '学院公告',
+    xszc: '学生之窗',
+    kyxx: '科研信息',
+    bksjx: '本科生教学',
+    dtyd: '党团园地',
+    yjszs: '研究生招生',
+    yjsjx: '研究生教学',
+    jyxx: '就业信息',
+    gjjl: '国际交流',
+};
+const TYPE_OPTIONS = Object.entries(categoryMap).map(([value, label]) => ({ value, label }));
 const TYPE_OPTIONS_DEFAULT = 'zxdt';
 
 export const route: Route = {
@@ -57,18 +58,6 @@ export const route: Route = {
         const $ = load(response);
 
         // Map the category identifier to its name.
-        const categoryMap = {
-            zxdt: '最新动态',
-            xygg: '学院公告',
-            xszc: '学生之窗',
-            kyxx: '科研信息',
-            bksjx: '本科生教学',
-            dtyd: '党团园地',
-            yjszs: '研究生招生',
-            yjsjx: '研究生教学',
-            jyxx: '就业信息',
-            gjjl: '国际交流',
-        };
 
         const categoryName = categoryMap[type] || '最新动态';
 

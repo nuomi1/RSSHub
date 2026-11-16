@@ -7,15 +7,16 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { getArticle, getNotifByPage } from './_utils';
 
-const TYPE_OPTIONS = [
-    { value: 'notice', label: '学院通知' },
-    { value: 'enrollment', label: '招生通知' },
-    { value: 'academic-paper', label: '学术观点' },
-    { value: 'news', label: '新闻' },
-    { value: 'events', label: '活动' },
-    { value: 'focus', label: '视点' },
-    { value: 'collegerecruitment', label: '教师与行政人员招聘' },
-];
+const subtypeName = {
+    notice: '学院通知',
+    enrollment: '招生通知',
+    'academic-paper': '学术观点',
+    news: '新闻',
+    events: '活动',
+    focus: '视点',
+    collegerecruitment: '教师与行政人员招聘',
+};
+const TYPE_OPTIONS = Object.entries(subtypeName).map(([value, label]) => ({ value, label }));
 const TYPE_OPTIONS_DEFAULT = 'notice';
 
 export const route: Route = {
@@ -45,15 +46,6 @@ export const route: Route = {
 async function handler(ctx) {
     const type = ctx.req.param('type') || TYPE_OPTIONS_DEFAULT;
     const subtype = new Set(['enrollment', 'academic-paper', 'news', 'events', 'focus', 'collegerecruitment']);
-    const subtypeName = {
-        notice: '学院通知',
-        enrollment: '招生通知',
-        'academic-paper': '学术观点',
-        news: '新闻',
-        events: '活动',
-        focus: '视点',
-        collegerecruitment: '教师与行政人员招聘',
-    };
 
     const url = `https://sem.tongji.edu.cn/semch/category/frontpage/${subtype.has(type) ? type : 'notice'}`;
 

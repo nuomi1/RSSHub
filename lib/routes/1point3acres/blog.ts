@@ -6,14 +6,33 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 
-const CATEGORY_OPTIONS = [
-    { value: 'studyinusa', label: '留学申请' },
-    { value: 'career', label: '找工求职' },
-    { value: 'lifestyle', label: '生活攻略' },
-    { value: 'invest', label: '投资理财' },
-    { value: 'visa', label: '签证移民' },
-    { value: 'news', label: '时政要闻' },
-];
+const categoryMap = {
+    studyinusa: {
+        title: '留学申请',
+        id: 18,
+    },
+    career: {
+        title: '找工求职',
+        id: 200,
+    },
+    lifestyle: {
+        title: '生活攻略',
+        id: 370,
+    },
+    invest: {
+        title: '投资理财',
+        id: 371,
+    },
+    visa: {
+        title: '签证移民',
+        id: 194,
+    },
+    news: {
+        title: '时政要闻',
+        id: 366,
+    },
+};
+const CATEGORY_OPTIONS = Object.entries(categoryMap).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/blog/:category?',
@@ -44,33 +63,6 @@ export const route: Route = {
 };
 
 async function handler(ctx) {
-    const categoryMap = {
-        studyinusa: {
-            title: '留学申请',
-            id: 18,
-        },
-        career: {
-            title: '找工求职',
-            id: 200,
-        },
-        lifestyle: {
-            title: '生活攻略',
-            id: 370,
-        },
-        invest: {
-            title: '投资理财',
-            id: 371,
-        },
-        visa: {
-            title: '签证移民',
-            id: 194,
-        },
-        news: {
-            title: '时政要闻',
-            id: 366,
-        },
-    };
-
     const category = ctx.req.param('category');
 
     const rootUrl = 'https://blog.1point3acres.com';

@@ -8,13 +8,8 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATEGORY_OPTIONS = [
-    { value: 'xxxw', label: '学校新闻' },
-    { value: 'dzys', label: '砥志研思' },
-    { value: 'ldsr', label: '立德树人' },
-    { value: 'cdsy', label: '传道授业' },
-    { value: 'xwzz', label: '校闻周知' },
-];
+const categoryTitles = { xxxw: '学校新闻', dzys: '砥志研思', ldsr: '立德树人', cdsy: '传道授业', xwzz: '校闻周知' };
+const CATEGORY_OPTIONS = Object.entries(categoryTitles).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/index/:category?',
@@ -48,7 +43,7 @@ async function fetchDescription(link: string): Promise<DataItem['description']> 
 async function handler(ctx) {
     let category = ctx.req.param('category');
     const categoryPaths = { xxxw: 'xxxw.htm', dzys: 'dzys.htm', ldsr: 'ldsr.htm', cdsy: 'cdsy.htm', xwzz: 'xwzz.htm' };
-    const categoryTitles = { xxxw: '学校新闻', dzys: '砥志研思', ldsr: '立德树人', cdsy: '传道授业', xwzz: '校闻周知' };
+
     if (categoryTitles[category] === undefined) {
         category = 'xxxw';
     }

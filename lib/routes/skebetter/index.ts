@@ -5,12 +5,13 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
 import { fetchData, processItems } from './utils';
 
-const TYPE_OPTIONS = [
-    { value: 'hot', label: '急上昇' },
-    { value: 'week', label: '週間' },
-    { value: 'month', label: '月間' },
-    { value: 'latest', label: '新着' },
-];
+const typeMap = {
+    hot: '急上昇',
+    week: '週間',
+    month: '月間',
+    latest: '新着',
+};
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/:type',
@@ -61,12 +62,7 @@ export const route: Route = {
 async function handler(ctx): Promise<Data> {
     const type = ctx.req.param('type');
     const baseUrl = 'https://api.twieromanga.com/api/hotv2';
-    const typeMap = {
-        hot: '急上昇',
-        week: '週間',
-        month: '月間',
-        latest: '新着',
-    };
+
     const linkMap = {
         hot: '',
         week: '?term=week',

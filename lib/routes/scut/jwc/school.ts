@@ -6,14 +6,6 @@ import got from '@/utils/got';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATEGORY_OPTIONS = [
-    { value: 'all', label: '全部' },
-    { value: 'course', label: '选课' },
-    { value: 'exam', label: '考试' },
-    { value: 'info', label: '信息' },
-];
-const CATEGORY_OPTIONS_DEFAULT = 'all';
-
 const baseUrl = 'http://jw.scut.edu.cn';
 const refererUrl = baseUrl + '/dist/';
 
@@ -23,13 +15,6 @@ const articleApiUrl = baseUrl + '/zhinan/jw/api/v2/getArticleInfo.do';
 
 const getArticleUrlById = (id) => `${baseUrl}/zhinan/cms/article/view.do?type=posts&id=${id}`;
 const getArticleMobileUrlById = (id) => `${baseUrl}/dist/#/detail/index?id=${id}&type=notice`;
-
-const categoryMap = {
-    all: { title: '全部', tag: '0' },
-    course: { title: '选课', tag: '1' },
-    exam: { title: '考试', tag: '2' },
-    info: { title: '信息', tag: '6' },
-};
 
 const generateArticlePubDate = (createDateStr) => {
     const date = new Date(createDateStr);
@@ -54,6 +39,15 @@ const apiSuccessAssert = (data) => {
 const generateArticleLink = (id) => `<p>链接：<a href="${getArticleUrlById(id)}">电脑版</a>&nbsp;|&nbsp;<a href="${getArticleMobileUrlById(id)}">手机版</a></p>`;
 
 const generateArticleFullText = (data) => resolveRelativeUrl(data.content) + generateArticleLink(data.id);
+
+const categoryMap = {
+    all: { title: '全部', tag: '0' },
+    course: { title: '选课', tag: '1' },
+    exam: { title: '考试', tag: '2' },
+    info: { title: '信息', tag: '6' },
+};
+const CATEGORY_OPTIONS = Object.entries(categoryMap).map(([value, item]) => ({ value, label: item.title }));
+const CATEGORY_OPTIONS_DEFAULT = 'all';
 
 export const route: Route = {
     path: '/jwc/school/:category?',

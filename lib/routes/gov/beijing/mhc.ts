@@ -9,30 +9,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const CATY_OPTIONS = [
-    { value: 'wnxw', label: '委内新闻' },
-    { value: 'jcdt', label: '基层动态' },
-    { value: 'mtjj', label: '媒体聚焦' },
-    { value: 'rdxws', label: '热点新闻' },
-];
-
-export const route: Route = {
-    path: '/mhc/:caty',
-    categories: ['government'],
-    example: '/gov/beijing/mhc/wnxw',
-    parameters: { caty: { description: '类别', options: CATY_OPTIONS } },
-    name: '卫生健康委员会 - 新闻中心',
-    maintainers: ['luyuhuang'],
-    handler,
-    description: renderOptionsMarkdownTable({
-        parameter: 'caty',
-        description: '类别',
-        options: CATY_OPTIONS,
-    }),
-};
-
-const rootUrl = 'https://wjw.beijing.gov.cn/';
-
 const config = {
     wnxw: {
         link: '/xwzx_20031/wnxw/',
@@ -51,6 +27,24 @@ const config = {
         title: '热点新闻',
     },
 };
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
+
+export const route: Route = {
+    path: '/mhc/:caty',
+    categories: ['government'],
+    example: '/gov/beijing/mhc/wnxw',
+    parameters: { caty: { description: '类别', options: CATY_OPTIONS } },
+    name: '卫生健康委员会 - 新闻中心',
+    maintainers: ['luyuhuang'],
+    handler,
+    description: renderOptionsMarkdownTable({
+        parameter: 'caty',
+        description: '类别',
+        options: CATY_OPTIONS,
+    }),
+};
+
+const rootUrl = 'https://wjw.beijing.gov.cn/';
 
 async function handler(ctx: Context) {
     const { caty } = ctx.req.param();

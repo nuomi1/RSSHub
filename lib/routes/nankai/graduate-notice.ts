@@ -8,15 +8,16 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'zxdt', label: '最新动态' },
-    { value: '82', label: '综合信息' },
-    { value: '83', label: '招生工作' },
-    { value: '72', label: '培养管理' },
-    { value: '73', label: '国际交流' },
-    { value: 'xkjs', label: '学科建设' },
-    { value: 'xwgl', label: '学位管理' },
-];
+const categoryMap = {
+    zxdt: '最新动态',
+    '82': '综合信息',
+    '83': '招生工作',
+    '72': '培养管理',
+    '73': '国际交流',
+    xkjs: '学科建设',
+    xwgl: '学位管理',
+};
+const TYPE_OPTIONS = Object.entries(categoryMap).map(([value, label]) => ({ value, label }));
 const TYPE_OPTIONS_DEFAULT = 'zxdt';
 
 export const route: Route = {
@@ -54,15 +55,6 @@ export const route: Route = {
         const $ = load(response);
 
         // Map the category identifier to its name.
-        const categoryMap = {
-            zxdt: '最新动态',
-            '82': '综合信息',
-            '83': '招生工作',
-            '72': '培养管理',
-            '73': '国际交流',
-            xkjs: '学科建设',
-            xwgl: '学位管理',
-        };
 
         const categoryName = categoryMap[type] || '最新动态';
 

@@ -9,11 +9,6 @@ import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 
-const CATY_OPTIONS = [
-    { value: 'latest', label: '最新' },
-    { value: 'hot', label: '热门' },
-];
-
 const config = {
     latest: {
         link: 'article!2',
@@ -24,6 +19,7 @@ const config = {
         title: '热门',
     },
 };
+const CATY_OPTIONS = Object.entries(config).map(([value, item]) => ({ value, label: item.title }));
 
 export const route: Route = {
     path: '/article/:caty',

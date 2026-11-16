@@ -11,10 +11,21 @@ import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { getRouteLimit } from '@/utils/route-limit';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: '2', label: '新闻资讯' },
-    { value: '3', label: '通知公告' },
-];
+const map = {
+    2: {
+        title: '新闻资讯',
+        appId: '2215611',
+        engineInstanceId: '3033675',
+        typeId: '7219415',
+    },
+    3: {
+        title: '通知公告',
+        appId: '2215609',
+        engineInstanceId: '3033673',
+        typeId: '6484827',
+    },
+};
+const TYPE_OPTIONS = Object.entries(map).map(([value, item]) => ({ value, label: item.title }));
 const TYPE_OPTIONS_DEFAULT = '2';
 
 export const route: Route = {
@@ -35,21 +46,6 @@ export const route: Route = {
 const baseUrl = 'https://jwc.dlpu.edu.cn';
 const pageId = '439771';
 const articleRootPattern = /el:\s*"#(?:graphic|text)-detail-vue"/;
-
-const map = {
-    2: {
-        title: '新闻资讯',
-        appId: '2215611',
-        engineInstanceId: '3033675',
-        typeId: '7219415',
-    },
-    3: {
-        title: '通知公告',
-        appId: '2215609',
-        engineInstanceId: '3033673',
-        typeId: '6484827',
-    },
-};
 
 async function handler(ctx: Context) {
     const { type = TYPE_OPTIONS_DEFAULT } = ctx.req.param();

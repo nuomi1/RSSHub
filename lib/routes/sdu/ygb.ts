@@ -8,13 +8,6 @@ import { parseDateInTimezone } from '@/utils/parse-date-in-timezone';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import { finishArticleItem } from '@/utils/wechat-mp';
 
-const TYPE_OPTIONS = [
-    { value: 'zytz', label: '重要通知' },
-    { value: 'glfw', label: '管理服务' },
-    { value: 'cxsj', label: '创新实践' },
-];
-const TYPE_OPTIONS_DEFAULT = 'zytz';
-
 const host = 'https://www.ygb.sdu.edu.cn/';
 
 const typeMap = {
@@ -31,6 +24,8 @@ const typeMap = {
         url: 'cxsj.htm',
     },
 };
+const TYPE_OPTIONS = Object.entries(typeMap).map(([value, item]) => ({ value, label: item.title }));
+const TYPE_OPTIONS_DEFAULT = 'zytz';
 
 export const route: Route = {
     path: '/ygb/:type?',

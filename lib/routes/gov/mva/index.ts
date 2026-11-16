@@ -9,11 +9,6 @@ import { parseDate } from '@/utils/parse-date';
 import { renderOptionsMarkdownTable } from '@/utils/render-markdown-table';
 import timezone from '@/utils/timezone';
 
-const TYPE_OPTIONS = [
-    { value: 'bnxx', label: '部内信息' },
-    { value: 'zcjd', label: '政策解读' },
-];
-
 function extractPublicationText(value: string): string | undefined {
     for (const marker of value.matchAll(/时间：/g)) {
         const tail = value.slice(marker.index + marker[0].length).trimStart();
@@ -24,6 +19,12 @@ function extractPublicationText(value: string): string | undefined {
         }
     }
 }
+
+const checkType = {
+    bnxx: '部内信息',
+    zcjd: '政策解读',
+};
+const TYPE_OPTIONS = Object.entries(checkType).map(([value, label]) => ({ value, label }));
 
 export const route: Route = {
     path: '/:type',
@@ -71,10 +72,7 @@ async function handler(ctx: Context) {
     if (!Object.hasOwn(pages, type)) {
         throw new InvalidParameterError('Invalid category. Use bnxx for ministry news or zcjd for policy interpretations.');
     }
-    const checkType = {
-        bnxx: '部内信息',
-        zcjd: '政策解读',
-    };
+
     const page = pages[type];
     const response = await ofetch(page);
 
